@@ -214,10 +214,10 @@ export function seedDatabase() {
     insert<GrammarQuestion>('grammar_questions', {
       language: 'en',
       level: 'beginner',
-      question: q[0],
-      options: q[1],
+      question: String(q[0]),
+      options: String(q[1]),
       correct_answer: q[2] as number,
-      explanation: q[3],
+      explanation: String(q[3]),
     });
   }
 
@@ -238,10 +238,10 @@ export function seedDatabase() {
     insert<GrammarQuestion>('grammar_questions', {
       language: 'ja',
       level: 'beginner',
-      question: q[0],
-      options: q[1],
+      question: String(q[0]),
+      options: String(q[1]),
       correct_answer: q[2] as number,
-      explanation: q[3],
+      explanation: String(q[3]),
     });
   }
 
@@ -262,10 +262,10 @@ export function seedDatabase() {
     insert<GrammarQuestion>('grammar_questions', {
       language: 'ko',
       level: 'beginner',
-      question: q[0],
-      options: q[1],
+      question: String(q[0]),
+      options: String(q[1]),
       correct_answer: q[2] as number,
-      explanation: q[3],
+      explanation: String(q[3]),
     });
   }
 
