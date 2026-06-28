@@ -1,0 +1,2262 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "demo",
+      "email": "demo@linguaverse.com",
+      "password_hash": "$2b$10$RNjVyYNrAkae10G4VNyCHOJOy5c8B/EhUmOe64FNyS1D48/akNC6u",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=demo",
+      "target_language": "en",
+      "level": "intermediate",
+      "daily_goal": 30,
+      "streak": 7,
+      "total_words": 156,
+      "total_minutes": 480,
+      "created_at": "2026-06-28T05:44:38.551Z",
+      "updated_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 2,
+      "username": "sakura",
+      "email": "sakura@linguaverse.com",
+      "password_hash": "$2b$10$RNjVyYNrAkae10G4VNyCHOJOy5c8B/EhUmOe64FNyS1D48/akNC6u",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sakura",
+      "target_language": "ja",
+      "level": "beginner",
+      "daily_goal": 45,
+      "streak": 12,
+      "total_words": 203,
+      "total_minutes": 720,
+      "created_at": "2026-06-28T05:44:38.551Z",
+      "updated_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 3,
+      "username": "minjun",
+      "email": "minjun@linguaverse.com",
+      "password_hash": "$2b$10$RNjVyYNrAkae10G4VNyCHOJOy5c8B/EhUmOe64FNyS1D48/akNC6u",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=minjun",
+      "target_language": "ko",
+      "level": "beginner",
+      "daily_goal": 20,
+      "streak": 3,
+      "total_words": 89,
+      "total_minutes": 210,
+      "created_at": "2026-06-28T05:44:38.551Z",
+      "updated_at": "2026-06-28T05:44:38.551Z"
+    }
+  ],
+  "courses": [
+    {
+      "id": 1,
+      "language": "en",
+      "level": "beginner",
+      "title": "英语入门：零基础直达日常对话",
+      "description": "从最基础的音标和词汇开始，循序渐进掌握日常英语交流能力。适合完全零基础或基础薄弱的学习者。",
+      "image": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 2,
+      "language": "en",
+      "level": "intermediate",
+      "title": "英语进阶：语法强化与听说提升",
+      "description": "系统学习英语语法体系，通过丰富的听说训练全面提升语言运用能力。适合有一定基础的学习者。",
+      "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 3,
+      "language": "en",
+      "level": "advanced",
+      "title": "英语高级：商务与学术英语精通",
+      "description": "深入学习商务英语和学术写作，掌握高级词汇和复杂句式，助力职业发展。",
+      "image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 4,
+      "language": "ja",
+      "level": "beginner",
+      "title": "日语入门：五十音图与基础会话",
+      "description": "从零开始学习日语五十音图，掌握基础词汇和日常寒暄，开启日语学习之旅。",
+      "image": "https://images.unsplash.com/photo-1528164344705-47542687000d?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 5,
+      "language": "ja",
+      "level": "intermediate",
+      "title": "日语进阶：语法体系与能力考N3",
+      "description": "系统学习日语中级语法，备战JLPT N3考试，全面提升听说读写能力。",
+      "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 6,
+      "language": "ja",
+      "level": "advanced",
+      "title": "日语高级：商务日语与文化理解",
+      "description": "学习商务日语表达和日本商务文化，掌握敬语体系和高级词汇。",
+      "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 7,
+      "language": "ko",
+      "level": "beginner",
+      "title": "韩语入门：韩文字母与基础表达",
+      "description": "轻松掌握韩文字母读写，学习基础词汇和日常用语，感受韩语魅力。",
+      "image": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 8,
+      "language": "ko",
+      "level": "intermediate",
+      "title": "韩语进阶：语法强化与TOPIK中级",
+      "description": "系统学习韩语中级语法，备战TOPIK中级考试，提升韩语综合能力。",
+      "image": "https://images.unsplash.com/photo-1538485399081-7191377e8241?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 9,
+      "language": "ko",
+      "level": "advanced",
+      "title": "韩语高级：新闻韩语与职场应用",
+      "description": "学习高级韩语词汇和语法，听懂新闻看懂韩剧，掌握职场韩语技能。",
+      "image": "https://images.unsplash.com/photo-1506816561089-5cc37b3aa9b0?w=600",
+      "created_at": "2026-06-28T05:44:38.551Z"
+    }
+  ],
+  "chapters": [
+    {
+      "id": 1,
+      "course_id": 1,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 17,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 2,
+      "course_id": 1,
+      "title": "第2章 基础发音与音标",
+      "duration": 41,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 3,
+      "course_id": 1,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 43,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 4,
+      "course_id": 1,
+      "title": "第4章 数字与时间表达",
+      "duration": 27,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 5,
+      "course_id": 1,
+      "title": "第5章 日常购物与点餐",
+      "duration": 40,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 6,
+      "course_id": 1,
+      "title": "第6章 问路与交通出行",
+      "duration": 27,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 7,
+      "course_id": 1,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 19,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 8,
+      "course_id": 1,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 37,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 9,
+      "course_id": 1,
+      "title": "第9章 工作与职业描述",
+      "duration": 32,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 10,
+      "course_id": 1,
+      "title": "第10章 天气与季节",
+      "duration": 19,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 11,
+      "course_id": 1,
+      "title": "第11章 健康与运动",
+      "duration": 44,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 12,
+      "course_id": 1,
+      "title": "第12章 旅行与度假",
+      "duration": 29,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 13,
+      "course_id": 2,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 44,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 14,
+      "course_id": 2,
+      "title": "第2章 基础发音与音标",
+      "duration": 44,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 15,
+      "course_id": 2,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 31,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 16,
+      "course_id": 2,
+      "title": "第4章 数字与时间表达",
+      "duration": 35,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 17,
+      "course_id": 2,
+      "title": "第5章 日常购物与点餐",
+      "duration": 23,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 18,
+      "course_id": 2,
+      "title": "第6章 问路与交通出行",
+      "duration": 26,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 19,
+      "course_id": 2,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 19,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 20,
+      "course_id": 2,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 36,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 21,
+      "course_id": 2,
+      "title": "第9章 工作与职业描述",
+      "duration": 22,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 22,
+      "course_id": 2,
+      "title": "第10章 天气与季节",
+      "duration": 42,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 23,
+      "course_id": 2,
+      "title": "第11章 健康与运动",
+      "duration": 41,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 24,
+      "course_id": 2,
+      "title": "第12章 旅行与度假",
+      "duration": 22,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 25,
+      "course_id": 3,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 28,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 26,
+      "course_id": 3,
+      "title": "第2章 基础发音与音标",
+      "duration": 33,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 27,
+      "course_id": 3,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 24,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 28,
+      "course_id": 3,
+      "title": "第4章 数字与时间表达",
+      "duration": 20,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 29,
+      "course_id": 3,
+      "title": "第5章 日常购物与点餐",
+      "duration": 27,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 30,
+      "course_id": 3,
+      "title": "第6章 问路与交通出行",
+      "duration": 39,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 31,
+      "course_id": 3,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 22,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 32,
+      "course_id": 3,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 29,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 33,
+      "course_id": 3,
+      "title": "第9章 工作与职业描述",
+      "duration": 35,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 34,
+      "course_id": 3,
+      "title": "第10章 天气与季节",
+      "duration": 25,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 35,
+      "course_id": 3,
+      "title": "第11章 健康与运动",
+      "duration": 17,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 36,
+      "course_id": 3,
+      "title": "第12章 旅行与度假",
+      "duration": 42,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 37,
+      "course_id": 4,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 29,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 38,
+      "course_id": 4,
+      "title": "第2章 基础发音与音标",
+      "duration": 30,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 39,
+      "course_id": 4,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 15,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 40,
+      "course_id": 4,
+      "title": "第4章 数字与时间表达",
+      "duration": 27,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 41,
+      "course_id": 4,
+      "title": "第5章 日常购物与点餐",
+      "duration": 44,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 42,
+      "course_id": 4,
+      "title": "第6章 问路与交通出行",
+      "duration": 41,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 43,
+      "course_id": 4,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 29,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 44,
+      "course_id": 4,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 31,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 45,
+      "course_id": 4,
+      "title": "第9章 工作与职业描述",
+      "duration": 19,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 46,
+      "course_id": 4,
+      "title": "第10章 天气与季节",
+      "duration": 36,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 47,
+      "course_id": 4,
+      "title": "第11章 健康与运动",
+      "duration": 44,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 48,
+      "course_id": 4,
+      "title": "第12章 旅行与度假",
+      "duration": 40,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 49,
+      "course_id": 5,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 44,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 50,
+      "course_id": 5,
+      "title": "第2章 基础发音与音标",
+      "duration": 43,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 51,
+      "course_id": 5,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 16,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 52,
+      "course_id": 5,
+      "title": "第4章 数字与时间表达",
+      "duration": 24,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 53,
+      "course_id": 5,
+      "title": "第5章 日常购物与点餐",
+      "duration": 34,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 54,
+      "course_id": 5,
+      "title": "第6章 问路与交通出行",
+      "duration": 36,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 55,
+      "course_id": 5,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 20,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 56,
+      "course_id": 5,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 22,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 57,
+      "course_id": 5,
+      "title": "第9章 工作与职业描述",
+      "duration": 39,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 58,
+      "course_id": 5,
+      "title": "第10章 天气与季节",
+      "duration": 32,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 59,
+      "course_id": 5,
+      "title": "第11章 健康与运动",
+      "duration": 24,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 60,
+      "course_id": 5,
+      "title": "第12章 旅行与度假",
+      "duration": 29,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 61,
+      "course_id": 6,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 31,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 62,
+      "course_id": 6,
+      "title": "第2章 基础发音与音标",
+      "duration": 32,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 63,
+      "course_id": 6,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 21,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 64,
+      "course_id": 6,
+      "title": "第4章 数字与时间表达",
+      "duration": 30,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 65,
+      "course_id": 6,
+      "title": "第5章 日常购物与点餐",
+      "duration": 34,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 66,
+      "course_id": 6,
+      "title": "第6章 问路与交通出行",
+      "duration": 16,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 67,
+      "course_id": 6,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 21,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 68,
+      "course_id": 6,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 15,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 69,
+      "course_id": 6,
+      "title": "第9章 工作与职业描述",
+      "duration": 28,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 70,
+      "course_id": 6,
+      "title": "第10章 天气与季节",
+      "duration": 35,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 71,
+      "course_id": 6,
+      "title": "第11章 健康与运动",
+      "duration": 27,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 72,
+      "course_id": 6,
+      "title": "第12章 旅行与度假",
+      "duration": 32,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 73,
+      "course_id": 7,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 34,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 74,
+      "course_id": 7,
+      "title": "第2章 基础发音与音标",
+      "duration": 41,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 75,
+      "course_id": 7,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 21,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 76,
+      "course_id": 7,
+      "title": "第4章 数字与时间表达",
+      "duration": 19,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 77,
+      "course_id": 7,
+      "title": "第5章 日常购物与点餐",
+      "duration": 28,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 78,
+      "course_id": 7,
+      "title": "第6章 问路与交通出行",
+      "duration": 44,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 79,
+      "course_id": 7,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 31,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 80,
+      "course_id": 7,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 16,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 81,
+      "course_id": 7,
+      "title": "第9章 工作与职业描述",
+      "duration": 16,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 82,
+      "course_id": 7,
+      "title": "第10章 天气与季节",
+      "duration": 35,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 83,
+      "course_id": 7,
+      "title": "第11章 健康与运动",
+      "duration": 27,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 84,
+      "course_id": 7,
+      "title": "第12章 旅行与度假",
+      "duration": 24,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 85,
+      "course_id": 8,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 29,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 86,
+      "course_id": 8,
+      "title": "第2章 基础发音与音标",
+      "duration": 17,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 87,
+      "course_id": 8,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 27,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 88,
+      "course_id": 8,
+      "title": "第4章 数字与时间表达",
+      "duration": 42,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 89,
+      "course_id": 8,
+      "title": "第5章 日常购物与点餐",
+      "duration": 17,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 90,
+      "course_id": 8,
+      "title": "第6章 问路与交通出行",
+      "duration": 28,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 91,
+      "course_id": 8,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 43,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 92,
+      "course_id": 8,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 44,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 93,
+      "course_id": 8,
+      "title": "第9章 工作与职业描述",
+      "duration": 19,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 94,
+      "course_id": 8,
+      "title": "第10章 天气与季节",
+      "duration": 41,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 95,
+      "course_id": 8,
+      "title": "第11章 健康与运动",
+      "duration": 42,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 96,
+      "course_id": 8,
+      "title": "第12章 旅行与度假",
+      "duration": 32,
+      "content": "",
+      "sort_order": 11
+    },
+    {
+      "id": 97,
+      "course_id": 9,
+      "title": "第1章 课程介绍与学习方法",
+      "duration": 32,
+      "content": "",
+      "sort_order": 0
+    },
+    {
+      "id": 98,
+      "course_id": 9,
+      "title": "第2章 基础发音与音标",
+      "duration": 18,
+      "content": "",
+      "sort_order": 1
+    },
+    {
+      "id": 99,
+      "course_id": 9,
+      "title": "第3章 常用问候与自我介绍",
+      "duration": 31,
+      "content": "",
+      "sort_order": 2
+    },
+    {
+      "id": 100,
+      "course_id": 9,
+      "title": "第4章 数字与时间表达",
+      "duration": 31,
+      "content": "",
+      "sort_order": 3
+    },
+    {
+      "id": 101,
+      "course_id": 9,
+      "title": "第5章 日常购物与点餐",
+      "duration": 19,
+      "content": "",
+      "sort_order": 4
+    },
+    {
+      "id": 102,
+      "course_id": 9,
+      "title": "第6章 问路与交通出行",
+      "duration": 32,
+      "content": "",
+      "sort_order": 5
+    },
+    {
+      "id": 103,
+      "course_id": 9,
+      "title": "第7章 兴趣爱好话题",
+      "duration": 20,
+      "content": "",
+      "sort_order": 6
+    },
+    {
+      "id": 104,
+      "course_id": 9,
+      "title": "第8章 家庭与朋友介绍",
+      "duration": 26,
+      "content": "",
+      "sort_order": 7
+    },
+    {
+      "id": 105,
+      "course_id": 9,
+      "title": "第9章 工作与职业描述",
+      "duration": 19,
+      "content": "",
+      "sort_order": 8
+    },
+    {
+      "id": 106,
+      "course_id": 9,
+      "title": "第10章 天气与季节",
+      "duration": 27,
+      "content": "",
+      "sort_order": 9
+    },
+    {
+      "id": 107,
+      "course_id": 9,
+      "title": "第11章 健康与运动",
+      "duration": 38,
+      "content": "",
+      "sort_order": 10
+    },
+    {
+      "id": 108,
+      "course_id": 9,
+      "title": "第12章 旅行与度假",
+      "duration": 38,
+      "content": "",
+      "sort_order": 11
+    }
+  ],
+  "vocabulary": [
+    {
+      "id": 1,
+      "language": "en",
+      "level": "beginner",
+      "word": "hello",
+      "meaning": "你好",
+      "pronunciation": "/həˈloʊ/",
+      "example": "Hello, nice to meet you!",
+      "example_translation": "你好，很高兴认识你！"
+    },
+    {
+      "id": 2,
+      "language": "en",
+      "level": "beginner",
+      "word": "thank you",
+      "meaning": "谢谢",
+      "pronunciation": "/θæŋk juː/",
+      "example": "Thank you for your help.",
+      "example_translation": "谢谢你的帮助。"
+    },
+    {
+      "id": 3,
+      "language": "en",
+      "level": "beginner",
+      "word": "goodbye",
+      "meaning": "再见",
+      "pronunciation": "/ˌɡʊdˈbaɪ/",
+      "example": "Goodbye, see you tomorrow!",
+      "example_translation": "再见，明天见！"
+    },
+    {
+      "id": 4,
+      "language": "en",
+      "level": "beginner",
+      "word": "please",
+      "meaning": "请",
+      "pronunciation": "/pliːz/",
+      "example": "Please wait a moment.",
+      "example_translation": "请稍等。"
+    },
+    {
+      "id": 5,
+      "language": "en",
+      "level": "beginner",
+      "word": "sorry",
+      "meaning": "对不起",
+      "pronunciation": "/ˈsɑːri/",
+      "example": "I'm sorry for being late.",
+      "example_translation": "对不起我迟到了。"
+    },
+    {
+      "id": 6,
+      "language": "en",
+      "level": "beginner",
+      "word": "water",
+      "meaning": "水",
+      "pronunciation": "/ˈwɔːtər/",
+      "example": "Can I have some water?",
+      "example_translation": "能给我一些水吗？"
+    },
+    {
+      "id": 7,
+      "language": "en",
+      "level": "beginner",
+      "word": "book",
+      "meaning": "书",
+      "pronunciation": "/bʊk/",
+      "example": "I'm reading a book.",
+      "example_translation": "我正在读一本书。"
+    },
+    {
+      "id": 8,
+      "language": "en",
+      "level": "beginner",
+      "word": "friend",
+      "meaning": "朋友",
+      "pronunciation": "/frend/",
+      "example": "She is my best friend.",
+      "example_translation": "她是我最好的朋友。"
+    },
+    {
+      "id": 9,
+      "language": "en",
+      "level": "beginner",
+      "word": "family",
+      "meaning": "家庭",
+      "pronunciation": "/ˈfæməli/",
+      "example": "I love my family.",
+      "example_translation": "我爱我的家庭。"
+    },
+    {
+      "id": 10,
+      "language": "en",
+      "level": "beginner",
+      "word": "happy",
+      "meaning": "快乐的",
+      "pronunciation": "/ˈhæpi/",
+      "example": "I feel very happy today.",
+      "example_translation": "我今天感到非常开心。"
+    },
+    {
+      "id": 11,
+      "language": "en",
+      "level": "beginner",
+      "word": "beautiful",
+      "meaning": "美丽的",
+      "pronunciation": "/ˈbjuːtɪfl/",
+      "example": "What a beautiful day!",
+      "example_translation": "多么美好的一天！"
+    },
+    {
+      "id": 12,
+      "language": "en",
+      "level": "beginner",
+      "word": "learn",
+      "meaning": "学习",
+      "pronunciation": "/lɜːrn/",
+      "example": "I want to learn English.",
+      "example_translation": "我想学习英语。"
+    },
+    {
+      "id": 13,
+      "language": "en",
+      "level": "beginner",
+      "word": "work",
+      "meaning": "工作",
+      "pronunciation": "/wɜːrk/",
+      "example": "I work in a company.",
+      "example_translation": "我在一家公司工作。"
+    },
+    {
+      "id": 14,
+      "language": "en",
+      "level": "beginner",
+      "word": "food",
+      "meaning": "食物",
+      "pronunciation": "/fuːd/",
+      "example": "The food is delicious.",
+      "example_translation": "食物很美味。"
+    },
+    {
+      "id": 15,
+      "language": "en",
+      "level": "beginner",
+      "word": "time",
+      "meaning": "时间",
+      "pronunciation": "/taɪm/",
+      "example": "What time is it?",
+      "example_translation": "现在几点了？"
+    },
+    {
+      "id": 16,
+      "language": "en",
+      "level": "beginner",
+      "word": "morning",
+      "meaning": "早晨",
+      "pronunciation": "/ˈmɔːrnɪŋ/",
+      "example": "Good morning!",
+      "example_translation": "早上好！"
+    },
+    {
+      "id": 17,
+      "language": "en",
+      "level": "beginner",
+      "word": "night",
+      "meaning": "夜晚",
+      "pronunciation": "/naɪt/",
+      "example": "Good night, sweet dreams.",
+      "example_translation": "晚安，好梦。"
+    },
+    {
+      "id": 18,
+      "language": "en",
+      "level": "beginner",
+      "word": "music",
+      "meaning": "音乐",
+      "pronunciation": "/ˈmjuːzɪk/",
+      "example": "I love listening to music.",
+      "example_translation": "我喜欢听音乐。"
+    },
+    {
+      "id": 19,
+      "language": "en",
+      "level": "beginner",
+      "word": "movie",
+      "meaning": "电影",
+      "pronunciation": "/ˈmuːvi/",
+      "example": "Let's watch a movie tonight.",
+      "example_translation": "今晚去看电影吧。"
+    },
+    {
+      "id": 20,
+      "language": "en",
+      "level": "beginner",
+      "word": "travel",
+      "meaning": "旅行",
+      "pronunciation": "/ˈtrævl/",
+      "example": "I want to travel around the world.",
+      "example_translation": "我想环游世界。"
+    },
+    {
+      "id": 21,
+      "language": "ja",
+      "level": "beginner",
+      "word": "こんにちは",
+      "meaning": "你好",
+      "pronunciation": "konnichiwa",
+      "example": "こんにちは、はじめまして。",
+      "example_translation": "你好，初次见面。"
+    },
+    {
+      "id": 22,
+      "language": "ja",
+      "level": "beginner",
+      "word": "ありがとう",
+      "meaning": "谢谢",
+      "pronunciation": "arigatou",
+      "example": "ありがとうございます。",
+      "example_translation": "非常感谢。"
+    },
+    {
+      "id": 23,
+      "language": "ja",
+      "level": "beginner",
+      "word": "さようなら",
+      "meaning": "再见",
+      "pronunciation": "sayounara",
+      "example": "さようなら、また明日。",
+      "example_translation": "再见，明天见。"
+    },
+    {
+      "id": 24,
+      "language": "ja",
+      "level": "beginner",
+      "word": "すみません",
+      "meaning": "对不起",
+      "pronunciation": "sumimasen",
+      "example": "すみません、遅れました。",
+      "example_translation": "对不起，我迟到了。"
+    },
+    {
+      "id": 25,
+      "language": "ja",
+      "level": "beginner",
+      "word": "はい",
+      "meaning": "是",
+      "pronunciation": "hai",
+      "example": "はい、わかりました。",
+      "example_translation": "是的，我明白了。"
+    },
+    {
+      "id": 26,
+      "language": "ja",
+      "level": "beginner",
+      "word": "いいえ",
+      "meaning": "不是",
+      "pronunciation": "iie",
+      "example": "いいえ、違います。",
+      "example_translation": "不，不是的。"
+    },
+    {
+      "id": 27,
+      "language": "ja",
+      "level": "beginner",
+      "word": "水",
+      "meaning": "水",
+      "pronunciation": "mizu",
+      "example": "水をください。",
+      "example_translation": "请给我水。"
+    },
+    {
+      "id": 28,
+      "language": "ja",
+      "level": "beginner",
+      "word": "本",
+      "meaning": "书",
+      "pronunciation": "hon",
+      "example": "本を読んでいます。",
+      "example_translation": "我正在读书。"
+    },
+    {
+      "id": 29,
+      "language": "ja",
+      "level": "beginner",
+      "word": "友達",
+      "meaning": "朋友",
+      "pronunciation": "tomodachi",
+      "example": "彼は私の友達です。",
+      "example_translation": "他是我的朋友。"
+    },
+    {
+      "id": 30,
+      "language": "ja",
+      "level": "beginner",
+      "word": "家族",
+      "meaning": "家庭",
+      "pronunciation": "kazoku",
+      "example": "家族が大好きです。",
+      "example_translation": "我非常爱我的家人。"
+    },
+    {
+      "id": 31,
+      "language": "ja",
+      "level": "beginner",
+      "word": "食べ物",
+      "meaning": "食物",
+      "pronunciation": "tabemono",
+      "example": "この食べ物は美味しいです。",
+      "example_translation": "这个食物很好吃。"
+    },
+    {
+      "id": 32,
+      "language": "ja",
+      "level": "beginner",
+      "word": "学校",
+      "meaning": "学校",
+      "pronunciation": "gakkou",
+      "example": "学校に行きます。",
+      "example_translation": "我去学校。"
+    },
+    {
+      "id": 33,
+      "language": "ja",
+      "level": "beginner",
+      "word": "仕事",
+      "meaning": "工作",
+      "pronunciation": "shigoto",
+      "example": "仕事が終わりました。",
+      "example_translation": "工作结束了。"
+    },
+    {
+      "id": 34,
+      "language": "ja",
+      "level": "beginner",
+      "word": "音楽",
+      "meaning": "音乐",
+      "pronunciation": "ongaku",
+      "example": "音楽を聞くのが好きです。",
+      "example_translation": "我喜欢听音乐。"
+    },
+    {
+      "id": 35,
+      "language": "ja",
+      "level": "beginner",
+      "word": "映画",
+      "meaning": "电影",
+      "pronunciation": "eiga",
+      "example": "映画を見に行きましょう。",
+      "example_translation": "去看电影吧。"
+    },
+    {
+      "id": 36,
+      "language": "ja",
+      "level": "beginner",
+      "word": "旅行",
+      "meaning": "旅行",
+      "pronunciation": "ryokou",
+      "example": "日本へ旅行に行きたいです。",
+      "example_translation": "我想去日本旅行。"
+    },
+    {
+      "id": 37,
+      "language": "ja",
+      "level": "beginner",
+      "word": "天気",
+      "meaning": "天气",
+      "pronunciation": "tenki",
+      "example": "今日はいい天気ですね。",
+      "example_translation": "今天天气真好。"
+    },
+    {
+      "id": 38,
+      "language": "ja",
+      "level": "beginner",
+      "word": "時間",
+      "meaning": "时间",
+      "pronunciation": "jikan",
+      "example": "時間がありますか？",
+      "example_translation": "你有时间吗？"
+    },
+    {
+      "id": 39,
+      "language": "ja",
+      "level": "beginner",
+      "word": "朝",
+      "meaning": "早晨",
+      "pronunciation": "asa",
+      "example": "おはようございます。",
+      "example_translation": "早上好。"
+    },
+    {
+      "id": 40,
+      "language": "ja",
+      "level": "beginner",
+      "word": "夜",
+      "meaning": "夜晚",
+      "pronunciation": "yoru",
+      "example": "おやすみなさい。",
+      "example_translation": "晚安。"
+    },
+    {
+      "id": 41,
+      "language": "ko",
+      "level": "beginner",
+      "word": "안녕하세요",
+      "meaning": "你好",
+      "pronunciation": "annyeonghaseyo",
+      "example": "안녕하세요, 만나서 반갑습니다.",
+      "example_translation": "你好，很高兴见到你。"
+    },
+    {
+      "id": 42,
+      "language": "ko",
+      "level": "beginner",
+      "word": "감사합니다",
+      "meaning": "谢谢",
+      "pronunciation": "gamsahamnida",
+      "example": "도와주셔서 감사합니다.",
+      "example_translation": "感谢您的帮助。"
+    },
+    {
+      "id": 43,
+      "language": "ko",
+      "level": "beginner",
+      "word": "안녕히 가세요",
+      "meaning": "再见",
+      "pronunciation": "annyeonghi gaseyo",
+      "example": "안녕히 가세요, 내일 봐요.",
+      "example_translation": "再见，明天见。"
+    },
+    {
+      "id": 44,
+      "language": "ko",
+      "level": "beginner",
+      "word": "죄송합니다",
+      "meaning": "对不起",
+      "pronunciation": "joesonghamnida",
+      "example": "늦어서 죄송합니다.",
+      "example_translation": "对不起我迟到了。"
+    },
+    {
+      "id": 45,
+      "language": "ko",
+      "level": "beginner",
+      "word": "네",
+      "meaning": "是",
+      "pronunciation": "ne",
+      "example": "네, 알겠습니다.",
+      "example_translation": "是的，我知道了。"
+    },
+    {
+      "id": 46,
+      "language": "ko",
+      "level": "beginner",
+      "word": "아니요",
+      "meaning": "不是",
+      "pronunciation": "aniyo",
+      "example": "아니요, 그게 아니에요.",
+      "example_translation": "不，不是那样的。"
+    },
+    {
+      "id": 47,
+      "language": "ko",
+      "level": "beginner",
+      "word": "물",
+      "meaning": "水",
+      "pronunciation": "mul",
+      "example": "물 좀 주세요.",
+      "example_translation": "请给我点水。"
+    },
+    {
+      "id": 48,
+      "language": "ko",
+      "level": "beginner",
+      "word": "책",
+      "meaning": "书",
+      "pronunciation": "chaek",
+      "example": "책을 읽고 있어요.",
+      "example_translation": "我正在读书。"
+    },
+    {
+      "id": 49,
+      "language": "ko",
+      "level": "beginner",
+      "word": "친구",
+      "meaning": "朋友",
+      "pronunciation": "chingu",
+      "example": "그는 제 친구예요.",
+      "example_translation": "他是我的朋友。"
+    },
+    {
+      "id": 50,
+      "language": "ko",
+      "level": "beginner",
+      "word": "가족",
+      "meaning": "家庭",
+      "pronunciation": "gajok",
+      "example": "가족을 사랑해요.",
+      "example_translation": "我爱我的家人。"
+    },
+    {
+      "id": 51,
+      "language": "ko",
+      "level": "beginner",
+      "word": "음식",
+      "meaning": "食物",
+      "pronunciation": "eumsik",
+      "example": "음식이 맛있어요.",
+      "example_translation": "食物很好吃。"
+    },
+    {
+      "id": 52,
+      "language": "ko",
+      "level": "beginner",
+      "word": "학교",
+      "meaning": "学校",
+      "pronunciation": "hakgyo",
+      "example": "학교에 가요.",
+      "example_translation": "我去学校。"
+    },
+    {
+      "id": 53,
+      "language": "ko",
+      "level": "beginner",
+      "word": "일",
+      "meaning": "工作",
+      "pronunciation": "il",
+      "example": "일이 끝났어요.",
+      "example_translation": "工作结束了。"
+    },
+    {
+      "id": 54,
+      "language": "ko",
+      "level": "beginner",
+      "word": "음악",
+      "meaning": "音乐",
+      "pronunciation": "eumak",
+      "example": "음악 듣는 것을 좋아해요.",
+      "example_translation": "我喜欢听音乐。"
+    },
+    {
+      "id": 55,
+      "language": "ko",
+      "level": "beginner",
+      "word": "영화",
+      "meaning": "电影",
+      "pronunciation": "yeonghwa",
+      "example": "영화 보러 가요.",
+      "example_translation": "去看电影。"
+    },
+    {
+      "id": 56,
+      "language": "ko",
+      "level": "beginner",
+      "word": "여행",
+      "meaning": "旅行",
+      "pronunciation": "yeohaeng",
+      "example": "한국에 여행 가고 싶어요.",
+      "example_translation": "我想去韩国旅行。"
+    },
+    {
+      "id": 57,
+      "language": "ko",
+      "level": "beginner",
+      "word": "날씨",
+      "meaning": "天气",
+      "pronunciation": "nalssi",
+      "example": "오늘 날씨가 좋네요.",
+      "example_translation": "今天天气真好。"
+    },
+    {
+      "id": 58,
+      "language": "ko",
+      "level": "beginner",
+      "word": "시간",
+      "meaning": "时间",
+      "pronunciation": "sigan",
+      "example": "시간 있어요?",
+      "example_translation": "你有时间吗？"
+    },
+    {
+      "id": 59,
+      "language": "ko",
+      "level": "beginner",
+      "word": "아침",
+      "meaning": "早晨",
+      "pronunciation": "achim",
+      "example": "좋은 아침이에요.",
+      "example_translation": "早上好。"
+    },
+    {
+      "id": 60,
+      "language": "ko",
+      "level": "beginner",
+      "word": "밤",
+      "meaning": "夜晚",
+      "pronunciation": "bam",
+      "example": "잘 자요.",
+      "example_translation": "晚安。"
+    }
+  ],
+  "grammar_questions": [
+    {
+      "id": 1,
+      "language": "en",
+      "level": "beginner",
+      "question": "She ___ to school every day.",
+      "options": "[\"go\", \"goes\", \"going\", \"went\"]",
+      "correct_answer": 1,
+      "explanation": "主语是第三人称单数she，一般现在时动词要加s/es，所以用goes。"
+    },
+    {
+      "id": 2,
+      "language": "en",
+      "level": "beginner",
+      "question": "I have ___ apple.",
+      "options": "[\"a\", \"an\", \"the\", \"/\"]",
+      "correct_answer": 1,
+      "explanation": "apple以元音音素开头，所以用不定冠词an。"
+    },
+    {
+      "id": 3,
+      "language": "en",
+      "level": "beginner",
+      "question": "They ___ football yesterday.",
+      "options": "[\"play\", \"plays\", \"played\", \"playing\"]",
+      "correct_answer": 2,
+      "explanation": "yesterday表示过去时间，要用一般过去时，play的过去式是played。"
+    },
+    {
+      "id": 4,
+      "language": "en",
+      "level": "beginner",
+      "question": "This book is ___ than that one.",
+      "options": "[\"interesting\", \"more interesting\", \"most interesting\", \"interestinger\"]",
+      "correct_answer": 1,
+      "explanation": "than表示比较，interesting是多音节词，比较级用more interesting。"
+    },
+    {
+      "id": 5,
+      "language": "en",
+      "level": "beginner",
+      "question": "___ you like some coffee?",
+      "options": "[\"Do\", \"Are\", \"Would\", \"Is\"]",
+      "correct_answer": 2,
+      "explanation": "Would you like... 是礼貌地询问对方想要什么的常用句型。"
+    },
+    {
+      "id": 6,
+      "language": "en",
+      "level": "beginner",
+      "question": "He can ___ English very well.",
+      "options": "[\"speak\", \"speaks\", \"speaking\", \"spoke\"]",
+      "correct_answer": 0,
+      "explanation": "can是情态动词，后面要跟动词原形。"
+    },
+    {
+      "id": 7,
+      "language": "en",
+      "level": "beginner",
+      "question": "There ___ a book on the desk.",
+      "options": "[\"is\", \"are\", \"have\", \"has\"]",
+      "correct_answer": 0,
+      "explanation": "There be句型，a book是单数，所以用is。"
+    },
+    {
+      "id": 8,
+      "language": "en",
+      "level": "beginner",
+      "question": "What time do you usually ___ up?",
+      "options": "[\"get\", \"gets\", \"got\", \"getting\"]",
+      "correct_answer": 0,
+      "explanation": "前面有助动词do，后面的动词要用原形。"
+    },
+    {
+      "id": 9,
+      "language": "en",
+      "level": "beginner",
+      "question": "My birthday is ___ May 5th.",
+      "options": "[\"in\", \"on\", \"at\", \"for\"]",
+      "correct_answer": 1,
+      "explanation": "具体的某一天要用介词on。"
+    },
+    {
+      "id": 10,
+      "language": "en",
+      "level": "beginner",
+      "question": "I'm hungry. I want ___ to eat.",
+      "options": "[\"something\", \"anything\", \"nothing\", \"everything\"]",
+      "correct_answer": 0,
+      "explanation": "肯定句中用something表示\"一些东西\"。"
+    },
+    {
+      "id": 11,
+      "language": "ja",
+      "level": "beginner",
+      "question": "私は学生___。",
+      "options": "[\"です\", \"ます\", \"だ\", \"でした\"]",
+      "correct_answer": 0,
+      "explanation": "名词谓语句的礼貌形式用です。私は学生です。我是学生。"
+    },
+    {
+      "id": 12,
+      "language": "ja",
+      "level": "beginner",
+      "question": "朝ご飯を___。",
+      "options": "[\"食べます\", \"食べる\", \"食べた\", \"食べて\"]",
+      "correct_answer": 0,
+      "explanation": "ます形是礼貌体，动词ます形作谓语。"
+    },
+    {
+      "id": 13,
+      "language": "ja",
+      "level": "beginner",
+      "question": "これは___本です。",
+      "options": "[\"私\", \"私の\", \"私に\", \"私と\"]",
+      "correct_answer": 1,
+      "explanation": "の表示所属，私の本 = 我的书。"
+    },
+    {
+      "id": 14,
+      "language": "ja",
+      "level": "beginner",
+      "question": "学校へ___行きます。",
+      "options": "[\"バスで\", \"バスに\", \"バスを\", \"バスの\"]",
+      "correct_answer": 0,
+      "explanation": "で表示交通手段，バスで行く = 坐公交去。"
+    },
+    {
+      "id": 15,
+      "language": "ja",
+      "level": "beginner",
+      "question": "昨日、映画を___。",
+      "options": "[\"見ます\", \"見ました\", \"見て\", \"見る\"]",
+      "correct_answer": 1,
+      "explanation": "昨日是过去的时间，动词要用过去式ました。"
+    },
+    {
+      "id": 16,
+      "language": "ja",
+      "level": "beginner",
+      "question": "___が好きですか？",
+      "options": "[\"何\", \"誰\", \"どこ\", \"いつ\"]",
+      "correct_answer": 0,
+      "explanation": "何が好きですか = 你喜欢什么？"
+    },
+    {
+      "id": 17,
+      "language": "ja",
+      "level": "beginner",
+      "question": "日本語が___わかりません。",
+      "options": "[\"よく\", \"すこし\", \"ぜんぜん\", \"とても\"]",
+      "correct_answer": 2,
+      "explanation": "ぜんぜん～ません是固定搭配，表示\"完全不...\"。"
+    },
+    {
+      "id": 18,
+      "language": "ja",
+      "level": "beginner",
+      "question": "毎日、日本語を___します。",
+      "options": "[\"勉強を\", \"勉強に\", \"勉強で\", \"勉強\"]",
+      "correct_answer": 3,
+      "explanation": "勉強します = 学习，する动词前面接名词。"
+    },
+    {
+      "id": 19,
+      "language": "ja",
+      "level": "beginner",
+      "question": "このペンは___ですか？",
+      "options": "[\"いくら\", \"いくつ\", \"なん\", \"どれ\"]",
+      "correct_answer": 0,
+      "explanation": "いくらですか = 多少钱？询问价格。"
+    },
+    {
+      "id": 20,
+      "language": "ja",
+      "level": "beginner",
+      "question": "友達___映画を見に行きます。",
+      "options": "[\"と\", \"に\", \"を\", \"で\"]",
+      "correct_answer": 0,
+      "explanation": "と表示\"和...一起\"，友達と行く = 和朋友去。"
+    },
+    {
+      "id": 21,
+      "language": "ko",
+      "level": "beginner",
+      "question": "저는 학생___.",
+      "options": "[\"입니다\", \"이에요\", \"예요\", \"이다\"]",
+      "correct_answer": 0,
+      "explanation": "입니다是名词谓语句的正式礼貌体。학생입니다 = 是学生。"
+    },
+    {
+      "id": 22,
+      "language": "ko",
+      "level": "beginner",
+      "question": "밥을___.",
+      "options": "[\"먹어요\", \"먹다\", \"먹었어요\", \"먹고\"]",
+      "correct_answer": 0,
+      "explanation": "아/어요是口语礼貌体。먹어요 = 吃。"
+    },
+    {
+      "id": 23,
+      "language": "ko",
+      "level": "beginner",
+      "question": "이것은___책이에요.",
+      "options": "[\"저\", \"제\", \"나\", \"내\"]",
+      "correct_answer": 1,
+      "explanation": "제是저의的缩略，我的。제 책 = 我的书。"
+    },
+    {
+      "id": 24,
+      "language": "ko",
+      "level": "beginner",
+      "question": "학교에___가요.",
+      "options": "[\"버스로\", \"버스에\", \"버스를\", \"버스가\"]",
+      "correct_answer": 0,
+      "explanation": "으로/로表示交通手段。버스로 가요 = 坐公交去。"
+    },
+    {
+      "id": 25,
+      "language": "ko",
+      "level": "beginner",
+      "question": "어제 영화를___.",
+      "options": "[\"봐요\", \"봤어요\", \"보고\", \"보다\"]",
+      "correct_answer": 1,
+      "explanation": "었/았过去式。보다的过去式是봤어요。"
+    },
+    {
+      "id": 26,
+      "language": "ko",
+      "level": "beginner",
+      "question": "___를 좋아해요?",
+      "options": "[\"무엇\", \"누구\", \"어디\", \"언제\"]",
+      "correct_answer": 0,
+      "explanation": "무엇을 좋아해요 = 你喜欢什么？"
+    },
+    {
+      "id": 27,
+      "language": "ko",
+      "level": "beginner",
+      "question": "한국어를___몰라요.",
+      "options": "[\"잘\", \"조금\", \"전혀\", \"아주\"]",
+      "correct_answer": 2,
+      "explanation": "전혀～지 않다/몰라요 表示\"完全不...\"。"
+    },
+    {
+      "id": 28,
+      "language": "ko",
+      "level": "beginner",
+      "question": "매일 한국어를___해요.",
+      "options": "[\"공부를\", \"공부에\", \"공부로\", \"공부\"]",
+      "correct_answer": 3,
+      "explanation": "공부하다 = 学习，공부해요是缩略形式。"
+    },
+    {
+      "id": 29,
+      "language": "ko",
+      "level": "beginner",
+      "question": "이 펜은___예요?",
+      "options": "[\"얼마\", \"몇\", \"무슨\", \"어느\"]",
+      "correct_answer": 0,
+      "explanation": "얼마예요 = 多少钱？询问价格。"
+    },
+    {
+      "id": 30,
+      "language": "ko",
+      "level": "beginner",
+      "question": "친구___영화를 보러 가요.",
+      "options": "[\"와\", \"에\", \"을\", \"로\"]",
+      "correct_answer": 0,
+      "explanation": "와/과表示\"和...一起\"。친구와 가요 = 和朋友去。"
+    }
+  ],
+  "listening_materials": [
+    {
+      "id": 1,
+      "language": "en",
+      "level": "beginner",
+      "title": "Daily Conversation: Greetings",
+      "audio_url": "",
+      "transcript": "A: Good morning! How are you today?\nB: I'm fine, thank you. And you?\nA: I'm great, thanks. It's a nice day today.\nB: Yes, it is. Are you going to work?\nA: Yes, I am. Have a good day!\nB: You too! See you later.",
+      "translation": "A：早上好！你今天怎么样？\nB：我很好，谢谢。你呢？\nA：我也很好，谢谢。今天天气真好。\nB：是的。你要去上班吗？\nA：是的。祝你今天愉快！\nB：你也是！回头见。",
+      "duration": 60
+    },
+    {
+      "id": 2,
+      "language": "en",
+      "level": "beginner",
+      "title": "At the Restaurant",
+      "audio_url": "",
+      "transcript": "A: Welcome! How many people?\nB: Two, please.\nA: This way, please.\nB: Thank you.\nA: Can I take your order?\nB: Yes, I'd like a hamburger and a cola.\nA: For here or to go?\nB: For here, please.",
+      "translation": "A：欢迎光临！几位？\nB：两位。\nA：这边请。\nB：谢谢。\nA：您要点餐吗？\nB：是的，我要一个汉堡和一杯可乐。\nA：在这吃还是带走？\nB：在这吃。",
+      "duration": 75
+    },
+    {
+      "id": 3,
+      "language": "ja",
+      "level": "beginner",
+      "title": "日常会話：挨拶",
+      "audio_url": "",
+      "transcript": "A：おはようございます。元気ですか？\nB：はい、元気です。あなたは？\nA：私も元気です。いい天気ですね。\nB：ええ、本当です。どこへ行きますか？\nA：学校へ行きます。いってきます。\nB：いってらっしゃい。",
+      "translation": "A：早上好。你好吗？\nB：是的，我很好。你呢？\nA：我也很好。天气真好啊。\nB：是啊，真的。你要去哪里？\nA：我去学校。我走了。\nB：路上小心。",
+      "duration": 70
+    },
+    {
+      "id": 4,
+      "language": "ja",
+      "level": "beginner",
+      "title": "レストランで",
+      "audio_url": "",
+      "transcript": "A：いらっしゃいませ。何名様ですか？\nB：二人です。\nA：こちらへどうぞ。\nB：ありがとうございます。\nA：ご注文は？\nB：ラーメンをお願いします。\nA：かしこまりました。少々お待ちください。",
+      "translation": "A：欢迎光临。几位？\nB：两位。\nA：这边请。\nB：谢谢。\nA：请问点什么？\nB：请给我拉面。\nA：好的，请稍等。",
+      "duration": 65
+    },
+    {
+      "id": 5,
+      "language": "ko",
+      "level": "beginner",
+      "title": "일상 대화: 인사",
+      "audio_url": "",
+      "transcript": "A: 안녕하세요! 오늘 기분이 어때요?\nB: 좋아요. 당신은요?\nA: 저도 좋아요. 날씨가 정말 좋네요.\nB: 네, 그래요. 어디 가요?\nA: 학교에 가요. 가봐요!\nB: 네, 잘 다녀오세요!",
+      "translation": "A：你好！今天心情怎么样？\nB：很好。你呢？\nA：我也很好。天气真好啊。\nB：是啊。你去哪里？\nA：我去学校。我走啦！\nB：好的，路上小心！",
+      "duration": 70
+    },
+    {
+      "id": 6,
+      "language": "ko",
+      "level": "beginner",
+      "title": "식당에서",
+      "audio_url": "",
+      "transcript": "A: 어서 오세요. 몇 명이에요?\nB: 두 명이에요.\nA: 이쪽으로 오세요.\nB: 감사합니다.\nA: 뭐 시키시겠어요?\nB: 김밥이랑 라면 주세요.\nA: 네, 알겠습니다. 잠시만 기다리세요.",
+      "translation": "A：欢迎光临。几位？\nB：两位。\nA：这边请。\nB：谢谢。\nA：您要点什么？\nB：请给我紫菜包饭和拉面。\nA：好的，请稍等。",
+      "duration": 65
+    }
+  ],
+  "speaking_sentences": [
+    {
+      "id": 1,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "Hello, nice to meet you!",
+      "translation": "你好，很高兴认识你！",
+      "audio_url": ""
+    },
+    {
+      "id": 2,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "Thank you very much for your help.",
+      "translation": "非常感谢你的帮助。",
+      "audio_url": ""
+    },
+    {
+      "id": 3,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "I'm sorry, I don't understand.",
+      "translation": "对不起，我没听懂。",
+      "audio_url": ""
+    },
+    {
+      "id": 4,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "Could you speak more slowly?",
+      "translation": "你能说慢一点吗？",
+      "audio_url": ""
+    },
+    {
+      "id": 5,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "I want to learn English well.",
+      "translation": "我想学好英语。",
+      "audio_url": ""
+    },
+    {
+      "id": 6,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "What does this word mean?",
+      "translation": "这个单词是什么意思？",
+      "audio_url": ""
+    },
+    {
+      "id": 7,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "Let's practice together.",
+      "translation": "我们一起练习吧。",
+      "audio_url": ""
+    },
+    {
+      "id": 8,
+      "language": "en",
+      "level": "beginner",
+      "sentence": "How do you say this in English?",
+      "translation": "这个用英语怎么说？",
+      "audio_url": ""
+    },
+    {
+      "id": 9,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "はじめまして、よろしくお願いします。",
+      "translation": "初次见面，请多关照。",
+      "audio_url": ""
+    },
+    {
+      "id": 10,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "ありがとうございます。",
+      "translation": "非常感谢。",
+      "audio_url": ""
+    },
+    {
+      "id": 11,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "すみません、わかりません。",
+      "translation": "对不起，我不明白。",
+      "audio_url": ""
+    },
+    {
+      "id": 12,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "もう一度ゆっくり言ってください。",
+      "translation": "请再慢一点说一遍。",
+      "audio_url": ""
+    },
+    {
+      "id": 13,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "日本語を上手になりたいです。",
+      "translation": "我想学好日语。",
+      "audio_url": ""
+    },
+    {
+      "id": 14,
+      "language": "ja",
+      "level": "beginner",
+      "sentence": "この言葉はどういう意味ですか？",
+      "translation": "这个词是什么意思？",
+      "audio_url": ""
+    },
+    {
+      "id": 15,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "안녕하세요, 만나서 반갑습니다.",
+      "translation": "你好，很高兴见到你。",
+      "audio_url": ""
+    },
+    {
+      "id": 16,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "정말 감사합니다.",
+      "translation": "非常感谢。",
+      "audio_url": ""
+    },
+    {
+      "id": 17,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "죄송해요, 잘 모르겠어요.",
+      "translation": "对不起，我不太懂。",
+      "audio_url": ""
+    },
+    {
+      "id": 18,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "다시 천천히 말해 주세요.",
+      "translation": "请再慢一点说一遍。",
+      "audio_url": ""
+    },
+    {
+      "id": 19,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "한국어를 잘 하고 싶어요.",
+      "translation": "我想学好韩语。",
+      "audio_url": ""
+    },
+    {
+      "id": 20,
+      "language": "ko",
+      "level": "beginner",
+      "sentence": "이 단어는 무슨 뜻이에요?",
+      "translation": "这个单词是什么意思？",
+      "audio_url": ""
+    }
+  ],
+  "user_vocabulary": [],
+  "learning_records": [],
+  "achievements": [
+    {
+      "id": 1,
+      "name": "初学者",
+      "description": "完成第一次学习",
+      "icon": "Star",
+      "condition_type": "minutes",
+      "condition_value": 1,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 2,
+      "name": "坚持一周",
+      "description": "连续学习7天",
+      "icon": "Flame",
+      "condition_type": "streak",
+      "condition_value": 7,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 3,
+      "name": "单词达人",
+      "description": "累计学习100个单词",
+      "icon": "BookOpen",
+      "condition_type": "words",
+      "condition_value": 100,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 4,
+      "name": "勤奋学者",
+      "description": "累计学习10小时",
+      "icon": "Clock",
+      "condition_type": "minutes",
+      "condition_value": 600,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 5,
+      "name": "社交蝴蝶",
+      "description": "发布第一条社区动态",
+      "icon": "MessageCircle",
+      "condition_type": "posts",
+      "condition_value": 1,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 6,
+      "name": "课程新星",
+      "description": "完成一门课程",
+      "icon": "Award",
+      "condition_type": "courses",
+      "condition_value": 1,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 7,
+      "name": "口语新星",
+      "description": "完成10次口语练习",
+      "icon": "Mic",
+      "condition_type": "speaking",
+      "condition_value": 10,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 8,
+      "name": "听力高手",
+      "description": "完成20篇听力训练",
+      "icon": "Headphones",
+      "condition_type": "listening",
+      "condition_value": 20,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 9,
+      "name": "语法大师",
+      "description": "答对100道语法题",
+      "icon": "Lightbulb",
+      "condition_type": "grammar",
+      "condition_value": 100,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 10,
+      "name": "月度冠军",
+      "description": "连续学习30天",
+      "icon": "Trophy",
+      "condition_type": "streak",
+      "condition_value": 30,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    }
+  ],
+  "user_achievements": [],
+  "enrollments": [],
+  "community_posts": [
+    {
+      "id": 1,
+      "user_id": 2,
+      "content": "今天终于把五十音图全部背下来了！🎉 虽然花了一周时间，但是好有成就感，继续加油！#日语学习 #打卡",
+      "likes": 37,
+      "comments": 19,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "content": "韩语发音真的好有趣，收音部分刚开始有点难，但是练多了就有感觉了~ 有一起学韩语的小伙伴吗？",
+      "likes": 47,
+      "comments": 4,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "content": "今天学了10个新英语单词，感觉词汇量在慢慢提升。推荐大家用词根词缀记忆法，真的很高效！",
+      "likes": 13,
+      "comments": 15,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 4,
+      "user_id": 2,
+      "content": "打卡第12天！日语语法越来越有意思了，て形和た形的变化也慢慢熟练了。坚持就是胜利💪",
+      "likes": 41,
+      "comments": 4,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 5,
+      "user_id": 3,
+      "content": "刚刚完成了韩语入门第一阶段，开心！明天开始学习更多日常对话。",
+      "likes": 16,
+      "comments": 2,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 6,
+      "user_id": 1,
+      "content": "分享一个学习小技巧：把单词贴在家里的物品上，每天都能看到，不知不觉就记住了。",
+      "likes": 28,
+      "comments": 15,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    },
+    {
+      "id": 7,
+      "user_id": 2,
+      "content": "今天看了一集日本动漫，发现居然能听懂一些单词了！好有成就感，继续加油学习~",
+      "likes": 43,
+      "comments": 19,
+      "created_at": "2026-06-28T05:44:38.551Z"
+    }
+  ],
+  "post_likes": [],
+  "_nextIds": {
+    "users": 4,
+    "courses": 10,
+    "chapters": 109,
+    "vocabulary": 61,
+    "grammar_questions": 31,
+    "achievements": 11,
+    "community_posts": 8,
+    "listening_materials": 7,
+    "speaking_sentences": 21
+  }
+}
