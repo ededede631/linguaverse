@@ -5,6 +5,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Courses from "@/pages/Courses";
 import CourseDetail from "@/pages/CourseDetail";
+import ChapterLearn from "@/pages/ChapterLearn";
 import Vocabulary from "@/pages/Vocabulary";
 import Grammar from "@/pages/Grammar";
 import Speaking from "@/pages/Speaking";
@@ -19,8 +20,17 @@ function AppContent() {
   const location = useLocation();
   const { checkAuth, isAuthenticated, setUser } = useAuthStore();
   
-  const noNavRoutes = ['/login', '/register'];
-  const showNav = !noNavRoutes.includes(location.pathname);
+  // GitHub Pages 部署在 /linguaverse/ 子路径下
+  const basePath = '/linguaverse';
+  const currentPath = location.pathname;
+  
+  // 如果访问根路径，重定向到 /linguaverse
+  if (currentPath === '/' || currentPath === '') {
+    window.history.replaceState(null, '', `${basePath}/`);
+  }
+  
+  const noNavRoutes = [`${basePath}/login`, `${basePath}/register`, '/login', '/register'];
+  const showNav = !noNavRoutes.some(route => currentPath === route || currentPath.startsWith(route + '/'));
 
   useEffect(() => {
     checkAuth();
@@ -50,10 +60,11 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
-        <Route path="/learn/vocabulary" element={<Vocabulary />} />
-        <Route path="/learn/grammar" element={<Grammar />} />
-        <Route path="/learn/speaking" element={<Speaking />} />
-        <Route path="/learn/listening" element={<Listening />} />
+        <Route path="/courses/:courseId/chapter/:chapterId" element={<ChapterLearn />} />
+        <Route path="/vocabulary" element={<Vocabulary />} />
+        <Route path="/grammar" element={<Grammar />} />
+        <Route path="/speaking" element={<Speaking />} />
+        <Route path="/listening" element={<Listening />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/community" element={<Community />} />
         <Route path="/profile" element={<Profile />} />

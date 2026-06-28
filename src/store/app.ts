@@ -8,8 +8,8 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  currentLanguage: 'all',
-  currentLevel: 'all',
+  currentLanguage: 'en',
+  currentLevel: 'beginner',
   setLanguage: (lang) => set({ currentLanguage: lang }),
   setLevel: (level) => set({ currentLevel: level }),
 }));

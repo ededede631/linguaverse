@@ -12,8 +12,10 @@ import {
   Sparkles,
   Play
 } from 'lucide-react';
+import { useAuthStore } from '@/store/auth';
 
 export default function Home() {
+  const { isAuthenticated } = useAuthStore();
   const languages = [
     { code: 'en', name: '英语', flag: '🇺🇸', learners: '120万+', color: 'from-sky-500 to-blue-600' },
     { code: 'ja', name: '日语', flag: '🇯🇵', learners: '85万+', color: 'from-rose-500 to-pink-600' },
@@ -60,19 +62,31 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link 
-                to="/register" 
-                className="px-8 py-4 text-white font-semibold rounded-full gradient-btn text-lg"
-              >
-                免费开始学习
-              </Link>
-              <Link 
-                to="/courses" 
-                className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-full border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all text-lg flex items-center gap-2"
-              >
-                <Play className="w-5 h-5" />
-                浏览课程
-              </Link>
+              {isAuthenticated ? (
+                <Link 
+                  to="/courses" 
+                  className="px-8 py-4 text-white font-semibold rounded-full gradient-btn text-lg flex items-center gap-2"
+                >
+                  <Play className="w-5 h-5" />
+                  继续学习
+                </Link>
+              ) : (
+                <>
+                  <Link 
+                    to="/register" 
+                    className="px-8 py-4 text-white font-semibold rounded-full gradient-btn text-lg"
+                  >
+                    免费开始学习
+                  </Link>
+                  <Link 
+                    to="/courses" 
+                    className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-full border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all text-lg flex items-center gap-2"
+                  >
+                    <Play className="w-5 h-5" />
+                    浏览课程
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -300,24 +314,43 @@ export default function Home() {
             
             <div className="relative z-10 max-w-2xl mx-auto text-center">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
-                准备好开始你的语言学习之旅了吗？
+                {isAuthenticated ? '继续你的语言学习之旅！' : '准备好开始你的语言学习之旅了吗？'}
               </h2>
               <p className="text-slate-300 mb-8 text-lg">
-                免费注册，开启你的多语言学习新世界
+                {isAuthenticated ? '你已经迈出了学习的第一步，继续加油！' : '免费注册，开启你的多语言学习新世界'}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link 
-                  to="/register" 
-                  className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-colors"
-                >
-                  立即免费注册
-                </Link>
-                <Link 
-                  to="/courses" 
-                  className="px-8 py-4 text-white font-semibold rounded-full border border-white/30 hover:bg-white/10 transition-colors"
-                >
-                  了解更多
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link 
+                      to="/courses" 
+                      className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-colors"
+                    >
+                      继续学习
+                    </Link>
+                    <Link 
+                      to="/progress" 
+                      className="px-8 py-4 text-white font-semibold rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+                    >
+                      查看学习进度
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      to="/register" 
+                      className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-colors"
+                    >
+                      立即免费注册
+                    </Link>
+                    <Link 
+                      to="/courses" 
+                      className="px-8 py-4 text-white font-semibold rounded-full border border-white/30 hover:bg-white/10 transition-colors"
+                    >
+                      了解更多
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

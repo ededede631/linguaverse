@@ -19,6 +19,9 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
 
+  // GitHub Pages base path
+  const basePath = '/linguaverse';
+
   const navLinks = [
     { path: '/', label: '首页', icon: Sparkles },
     { path: '/courses', label: '课程中心', icon: BookOpen },
@@ -28,7 +31,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate(`${basePath}/`);
     setMobileMenuOpen(false);
   };
 

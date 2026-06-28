@@ -33,8 +33,8 @@ export default function Community() {
 
   const fetchPosts = async () => {
     try {
-      const data: any = await api.community.getPosts({ limit: 20 });
-      setPosts(data.posts || []);
+      const data: any = await api.community.getPosts();
+      setPosts(data || []);
     } catch (error) {
       console.error('Failed to fetch posts:', error);
     } finally {
@@ -46,7 +46,7 @@ export default function Community() {
     if (!newPost.trim() || !isAuthenticated) return;
     setPosting(true);
     try {
-      const post: any = await api.community.createPost({ content: newPost });
+      const post: any = await api.community.createPost(newPost);
       setPosts([post, ...posts]);
       setNewPost('');
     } catch (error) {

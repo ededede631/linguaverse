@@ -34,7 +34,7 @@ export default function Progress() {
   const fetchData = async () => {
     try {
       const [progressData, achievementsData]: any = await Promise.all([
-        api.progress.get(),
+        api.progress.getStats(),
         api.progress.getAchievements(),
       ]);
       setProgress(progressData);
@@ -48,7 +48,7 @@ export default function Progress() {
 
   const fetchLeaderboard = async () => {
     try {
-      const data: any = await api.progress.getLeaderboard({ type: leaderboardType, limit: 5 });
+      const data: any = await api.progress.getLeaderboard();
       setLeaderboard(data);
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error);
