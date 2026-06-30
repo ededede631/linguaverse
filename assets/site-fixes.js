@@ -177,56 +177,45 @@
       .linguaverse-domestic-video {
         position: absolute;
         inset: 0;
+        background: #0f172a;
+      }
+      .linguaverse-domestic-video iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+      .linguaverse-video-fallback {
+        position: absolute;
+        inset: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 14px;
+        gap: 12px;
         padding: 24px;
-        text-align: center;
         color: #fff;
-        background:
-          radial-gradient(circle at 20% 20%, rgba(56, 189, 248, .38), transparent 32%),
-          radial-gradient(circle at 80% 20%, rgba(244, 114, 182, .32), transparent 32%),
-          linear-gradient(135deg, #0f172a 0%, #312e81 52%, #7c2d12 100%);
+        text-align: center;
+        background: linear-gradient(135deg, #0f172a 0%, #312e81 52%, #7c2d12 100%);
       }
-      .linguaverse-domestic-video h4 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 800;
-        line-height: 1.35;
+      .linguaverse-video-source {
+        margin-top: 10px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
       }
-      .linguaverse-domestic-video p {
-        margin: 0;
+      .linguaverse-video-source a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .linguaverse-video-source a:hover {
+        text-decoration: underline;
+      }
+      .linguaverse-video-fallback p {
         max-width: 560px;
-        color: rgba(255, 255, 255, .82);
         font-size: 14px;
         line-height: 1.7;
-      }
-      .linguaverse-domestic-video-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-      }
-      .linguaverse-domestic-video-actions a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 128px;
-        padding: 10px 16px;
-        border-radius: 999px;
-        color: #111827;
-        background: #fff;
-        font-size: 14px;
-        font-weight: 700;
-        text-decoration: none;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, .22);
-      }
-      .linguaverse-domestic-video-actions a:last-child {
-        color: #fff;
-        background: rgba(255, 255, 255, .16);
-        border: 1px solid rgba(255, 255, 255, .28);
+        color: rgba(255, 255, 255, .86);
       }
     `;
     document.head.appendChild(style);
@@ -304,17 +293,47 @@
     const panel = document.createElement("div");
     panel.className = "linguaverse-domestic-video";
     const keyword = normalizeVideoKeyword(title);
-    const bilibiliUrl = `https://search.bilibili.com/all?keyword=${encodeURIComponent(keyword)}`;
-    const douyinUrl = `https://www.douyin.com/search/${encodeURIComponent(keyword)}`;
-    panel.innerHTML = `
-      <h4>B站 / 抖音视频讲解</h4>
-      <p>${escapeHtml(title)} 的 YouTube 播放源已替换为国内平台入口。点击下方按钮可在 B站或抖音观看对应课程讲解。</p>
-      <div class="linguaverse-domestic-video-actions">
-        <a href="${bilibiliUrl}" target="_blank" rel="noopener noreferrer">在B站观看</a>
-        <a href="${douyinUrl}" target="_blank" rel="noopener noreferrer">在抖音搜索</a>
-      </div>
-    `;
+    const video = getMatchedDomesticVideo(title);
+    if (video) {
+      panel.innerHTML = `
+        <iframe
+          src="https://player.bilibili.com/player.html?bvid=${encodeURIComponent(video.bvid)}&autoplay=0&page=1&high_quality=1"
+          title="${escapeHtml(title)} - B站视频讲解"
+          allowfullscreen="allowfullscreen"
+          scrolling="no"
+        ></iframe>
+      `;
+      setTimeout(() => appendVideoSource(panel, video), 0);
+    } else {
+      panel.innerHTML = `
+        <div class="linguaverse-video-fallback">
+          <h4>正在匹配课程视频</h4>
+          <p>${escapeHtml(keyword)} 的站内视频正在整理中。本页不会再加载 YouTube，后续章节会继续补充可直接播放的 B站或抖音视频。</p>
+        </div>
+      `;
+    }
     return panel;
+  }
+
+  function appendVideoSource(panel, video) {
+    const card = panel.closest('[trae-inspector-file-path*="VideoLesson"]') || panel.closest(".rounded-2xl") || panel.parentElement?.parentElement;
+    if (!card || card.querySelector(".linguaverse-video-source")) return;
+    const source = document.createElement("div");
+    source.className = "linguaverse-video-source";
+    source.innerHTML = `视频来源：B站公开播放器《${escapeHtml(video.title)}》。如播放器加载较慢，可稍等片刻后重试。`;
+    card.appendChild(source);
+  }
+
+  function getMatchedDomesticVideo(title) {
+    const text = `${title} ${document.body.innerText}`.replace(/\s+/g, " ");
+    if (/英文字母|26个字母|字母与发音|发音基础/.test(text)) {
+      return {
+        platform: "bilibili",
+        bvid: "BV11F411X7d7",
+        title: "零基础英语英文26个字母入门自学教程，正确发音读法，3分钟学会",
+      };
+    }
+    return null;
   }
 
   function normalizeVideoKeyword(title) {
