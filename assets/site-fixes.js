@@ -290,10 +290,11 @@
   }
 
   function getCurrentVideoTitle() {
+    const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4")).map((item) => item.textContent.trim().replace(/\s+/g, " "));
     const heading =
-      Array.from(document.querySelectorAll("h1, h2, h3, h4"))
-        .map((item) => item.textContent.trim().replace(/\s+/g, " "))
-        .find((text) => text.includes("视频讲解")) ||
+      headings.find((text) => /.+\s*-\s*视频讲解/.test(text)) ||
+      headings.find((text) => text.includes("第 ") && text.includes("章")) ||
+      headings.find((text) => text && text !== "视频讲解" && !text.includes("学习建议")) ||
       document.title ||
       "语言学习视频讲解";
     return heading.replace(/\s*-\s*视频讲解/g, "").replace(/^视频讲解\s*/, "").trim() || "语言学习视频讲解";
