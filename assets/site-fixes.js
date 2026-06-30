@@ -991,7 +991,6 @@
     if (!module) return;
 
     const context = getActiveCourseContext();
-    if (context.language === "英语") return;
 
     const titleMap = {
       vocabulary: "单词记忆",
@@ -1005,7 +1004,7 @@
     });
     if (!container) return;
 
-    const key = `${context.language}-${context.level}-${module}`;
+    const key = `${context.language}-${context.level}-${module}-expanded-v2`;
     if (container.getAttribute("data-linguaverse-learning-key") === key) return;
     container.setAttribute("data-linguaverse-learning-key", key);
     container.className = "container mx-auto py-10 max-w-4xl";
@@ -1017,22 +1016,22 @@
     const moduleInfo = {
       vocabulary: {
         title: "单词记忆",
-        subtitle: `${context.language}${context.level}词汇训练，不再混用英语内容`,
+        subtitle: `${context.language}${context.level}词汇训练：40个核心词汇，统一卡片格式`,
         body: renderVocabularyModule(data),
       },
       grammar: {
         title: "语法练习",
-        subtitle: `${context.language}${context.level}语法题库，围绕当前课程知识点训练`,
+        subtitle: `${context.language}${context.level}语法题库：10组语法点与选择练习`,
         body: renderGrammarModule(data),
       },
       speaking: {
         title: "口语跟读",
-        subtitle: `${context.language}${context.level}跟读材料，适配当前课程发音与会话目标`,
+        subtitle: `${context.language}${context.level}跟读材料：10条场景句，统一跟读训练格式`,
         body: renderSpeakingModule(data),
       },
       listening: {
         title: "听力训练",
-        subtitle: `${context.language}${context.level}听力素材，按课程阶段循序渐进`,
+        subtitle: `${context.language}${context.level}听力素材：10篇短材料，按课程阶段循序渐进`,
         body: renderListeningModule(data),
       },
     }[module];
@@ -1044,6 +1043,12 @@
         </div>
         <h1 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-3">${moduleInfo.title}</h1>
         <p class="text-slate-600">${moduleInfo.subtitle}</p>
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>40</strong><br><span class="text-slate-500">词汇卡</span></div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">语法题</span></div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">跟读句</span></div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">听力篇</span></div>
+        </div>
       </div>
       ${moduleInfo.body}
       <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1085,60 +1090,351 @@
 
   function renderGrammarModule(data) {
     return `
-      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
-        <div class="text-sm text-slate-400 mb-2">语法重点</div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.grammar.title)}</h2>
-        <p class="text-slate-600 mb-5">${escapeHtml(data.grammar.explain)}</p>
-        <div class="rounded-2xl bg-slate-50 p-4 mb-5">
-          <div class="text-sm text-slate-500 mb-1">例句</div>
-          <div class="text-xl font-semibold text-slate-900">${escapeHtml(data.grammar.example)}</div>
-          <div class="text-slate-500 mt-1">${escapeHtml(data.grammar.translation)}</div>
-        </div>
-        <h3 class="font-bold text-slate-900 mb-3">${escapeHtml(data.grammar.question)}</h3>
-        <div class="grid sm:grid-cols-2 gap-3">
-          ${data.grammar.options
-            .map((option) => `<button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-purple-300 hover:bg-purple-50">${escapeHtml(option)}</button>`)
-            .join("")}
-        </div>
+      <div class="grid gap-4">
+        ${(data.grammarItems || [data.grammar])
+          .map(
+            (item, index) => `
+          <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+            <div class="text-sm text-slate-400 mb-2">语法 ${index + 1}</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(item.title)}</h2>
+            <p class="text-slate-600 mb-5">${escapeHtml(item.explain)}</p>
+            <div class="rounded-2xl bg-slate-50 p-4 mb-5">
+              <div class="text-sm text-slate-500 mb-1">例句</div>
+              <div class="text-xl font-semibold text-slate-900">${escapeHtml(item.example)}</div>
+              <div class="text-slate-500 mt-1">${escapeHtml(item.translation)}</div>
+            </div>
+            <h3 class="font-bold text-slate-900 mb-3">${escapeHtml(item.question)}</h3>
+            <div class="grid sm:grid-cols-2 gap-3">
+              ${item.options
+                .map((option) => `<button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-purple-300 hover:bg-purple-50">${escapeHtml(option)}</button>`)
+                .join("")}
+            </div>
+          </div>`
+          )
+          .join("")}
       </div>
     `;
   }
 
   function renderSpeakingModule(data) {
     return `
-      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
-        <div class="text-sm text-slate-400 mb-2">跟读句子</div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.speaking.text)}</h2>
-        <p class="text-slate-600 mb-5">${escapeHtml(data.speaking.translation)}</p>
-        <div class="grid sm:grid-cols-3 gap-3">
-          <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">播放原音</button>
-          <button class="rounded-2xl bg-slate-900 text-white px-4 py-3 font-semibold">开始跟读</button>
-          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">下一句</button>
-        </div>
-        <div class="mt-5 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-          发音提示：${escapeHtml(data.speaking.tip)}
-        </div>
+      <div class="grid gap-4">
+        ${(data.speakingItems || [data.speaking])
+          .map(
+            (item, index) => `
+          <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+            <div class="text-sm text-slate-400 mb-2">跟读 ${index + 1}</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(item.text)}</h2>
+            <p class="text-slate-600 mb-5">${escapeHtml(item.translation)}</p>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">播放原音</button>
+              <button class="rounded-2xl bg-slate-900 text-white px-4 py-3 font-semibold">开始跟读</button>
+              <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
+            </div>
+            <div class="mt-5 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+              发音提示：${escapeHtml(item.tip)}
+            </div>
+          </div>`
+          )
+          .join("")}
       </div>
     `;
   }
 
   function renderListeningModule(data) {
     return `
-      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
-        <div class="text-sm text-slate-400 mb-2">听力材料</div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.listening.title)}</h2>
-        <p class="text-slate-700 leading-8 mb-5">${escapeHtml(data.listening.script)}</p>
-        <div class="rounded-2xl bg-slate-50 p-4 mb-5 text-slate-600">${escapeHtml(data.listening.translation)}</div>
-        <div class="grid sm:grid-cols-3 gap-3">
-          <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">点击播放语音朗读</button>
-          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">开始测验</button>
-          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
-        </div>
+      <div class="grid gap-4">
+        ${(data.listeningItems || [data.listening])
+          .map(
+            (item, index) => `
+          <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+            <div class="text-sm text-slate-400 mb-2">听力 ${index + 1}</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(item.title)}</h2>
+            <p class="text-slate-700 leading-8 mb-5">${escapeHtml(item.script)}</p>
+            <div class="rounded-2xl bg-slate-50 p-4 mb-5 text-slate-600">${escapeHtml(item.translation)}</div>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">点击播放语音朗读</button>
+              <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">开始测验</button>
+              <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
+            </div>
+          </div>`
+          )
+          .join("")}
       </div>
     `;
   }
 
+  function buildExpandedLearningData(language, level) {
+    const common = {
+      英语: {
+        words: [
+          ["hello", "/həˈloʊ/", "你好", "Hello, nice to meet you."],
+          ["thanks", "/θæŋks/", "谢谢", "Thanks for your help."],
+          ["family", "/ˈfæməli/", "家庭", "My family is very warm."],
+          ["morning", "/ˈmɔːrnɪŋ/", "早晨", "I study English every morning."],
+          ["school", "/skuːl/", "学校", "The school is near my home."],
+          ["teacher", "/ˈtiːtʃər/", "老师", "Our teacher speaks clearly."],
+          ["student", "/ˈstuːdənt/", "学生", "She is a new student."],
+          ["friend", "/frend/", "朋友", "My friend likes music."],
+          ["number", "/ˈnʌmbər/", "数字", "Please write the number."],
+          ["color", "/ˈkʌlər/", "颜色", "Blue is my favorite color."],
+          ["shape", "/ʃeɪp/", "形状", "A circle is a round shape."],
+          ["time", "/taɪm/", "时间", "What time is it now?"],
+          ["today", "/təˈdeɪ/", "今天", "Today is a good day."],
+          ["tomorrow", "/təˈmɑːroʊ/", "明天", "Tomorrow I will review grammar."],
+          ["question", "/ˈkwestʃən/", "问题", "I have one question."],
+          ["answer", "/ˈænsər/", "答案", "The answer is correct."],
+          ["listen", "/ˈlɪsən/", "听", "Listen to the sentence twice."],
+          ["speak", "/spiːk/", "说", "Please speak slowly."],
+          ["write", "/raɪt/", "写", "Write a short paragraph."],
+          ["read", "/riːd/", "读", "Read the story aloud."],
+          ["practice", "/ˈpræktɪs/", "练习", "Practice makes progress."],
+          ["travel", "/ˈtrævl/", "旅行", "We plan to travel next month."],
+          ["restaurant", "/ˈrestərɑːnt/", "餐厅", "The restaurant is busy."],
+          ["shopping", "/ˈʃɑːpɪŋ/", "购物", "Shopping online is convenient."],
+          ["meeting", "/ˈmiːtɪŋ/", "会议", "The meeting starts at nine."],
+          ["project", "/ˈprɑːdʒekt/", "项目", "This project is important."],
+          ["culture", "/ˈkʌltʃər/", "文化", "Language reflects culture."],
+          ["opinion", "/əˈpɪnjən/", "观点", "What is your opinion?"],
+          ["compare", "/kəmˈper/", "比较", "Compare these two ideas."],
+          ["describe", "/dɪˈskraɪb/", "描述", "Describe your daily routine."],
+          ["explain", "/ɪkˈspleɪn/", "解释", "Can you explain this rule?"],
+          ["improve", "/ɪmˈpruːv/", "提升", "I want to improve my speaking."],
+          ["confident", "/ˈkɑːnfɪdənt/", "自信的", "Be confident when you speak."],
+          ["fluent", "/ˈfluːənt/", "流利的", "She is fluent in English."],
+          ["business", "/ˈbɪznəs/", "商务", "Business English is useful."],
+          ["presentation", "/ˌprezənˈteɪʃən/", "演示", "He gave a presentation."],
+          ["discussion", "/dɪˈskʌʃən/", "讨论", "The discussion was helpful."],
+          ["translate", "/trænzˈleɪt/", "翻译", "Translate the sentence naturally."],
+          ["summary", "/ˈsʌməri/", "总结", "Write a short summary."],
+          ["achievement", "/əˈtʃiːvmənt/", "成就", "Progress is an achievement."],
+        ],
+        grammar: [
+          ["Be动词", "am/is/are 根据主语变化，是基础判断句的核心。", "I am a student.", "我是学生。", "选择正确形式：She ___ a teacher.", ["is", "am", "are", "be"]],
+          ["一般现在时", "表达习惯、事实或经常发生的动作。", "He studies English every day.", "他每天学习英语。", "选择正确形式：He ___ English.", ["studies", "study", "studying", "studied"]],
+          ["一般过去时", "表达过去发生并结束的动作。", "I visited Beijing last year.", "我去年去了北京。", "选择正确形式：I ___ a movie yesterday.", ["watched", "watch", "watches", "watching"]],
+          ["一般将来时", "will 或 be going to 表达未来计划。", "We will meet tomorrow.", "我们明天见面。", "选择正确形式：They ___ travel next week.", ["will", "are", "did", "was"]],
+          ["进行时", "be + doing 表达正在进行的动作。", "She is reading now.", "她现在正在读书。", "选择正确形式：Tom ___ playing soccer.", ["is", "am", "are", "be"]],
+          ["比较级", "形容词比较级用于比较两者。", "This book is easier than that one.", "这本书比那本更容易。", "选择正确形式：English is ___ than before.", ["easier", "easy", "easiest", "more easy"]],
+          ["被动语态", "be + done 表示动作承受者作主语。", "The letter was written by Anna.", "这封信是安娜写的。", "选择正确形式：The room ___ cleaned.", ["was", "did", "has", "were"]],
+          ["条件句", "if 引导条件，从句常用一般现在时代替将来。", "If it rains, I will stay home.", "如果下雨，我会待在家。", "选择正确形式：If he ___, we will start.", ["comes", "will come", "came", "come"]],
+          ["定语从句", "用 who/which/that 修饰名词。", "This is the book that I bought.", "这是我买的书。", "选择正确关系词：The man ___ called is my teacher.", ["who", "what", "where", "when"]],
+          ["虚拟语气", "表达假设、愿望或与事实相反的情况。", "If I were you, I would try again.", "如果我是你，我会再试一次。", "选择正确形式：If I ___ you, I would apologize.", ["were", "am", "was", "be"]],
+        ],
+        speaking: [
+          ["Hello, my name is Li Ming. Nice to meet you.", "你好，我叫李明。很高兴认识你。", "注意 name is 的连读。"],
+          ["Could you speak more slowly, please?", "请你说慢一点好吗？", "Could you 用升调更礼貌。"],
+          ["I usually review new words after dinner.", "我通常晚饭后复习新单词。", "usually 不要重读过重。"],
+          ["I am interested in learning different cultures.", "我对学习不同文化很感兴趣。", "interested in 连读。"],
+          ["What time does the meeting start?", "会议几点开始？", "疑问句语调自然上扬。"],
+          ["I would like to order a cup of coffee.", "我想点一杯咖啡。", "would like to 读得连贯。"],
+          ["In my opinion, practice is very important.", "在我看来，练习非常重要。", "opinion 的重音在第二音节。"],
+          ["Could you explain this grammar point again?", "你能再解释一下这个语法点吗？", "grammar point 可轻微连读。"],
+          ["I will give a short presentation tomorrow.", "我明天会做一个简短演示。", "presentation 重音在第三音节。"],
+          ["Learning a language takes time and patience.", "学习语言需要时间和耐心。", "takes time 可连读。" ],
+        ],
+        listening: [
+          ["Daily greeting", "Good morning. My name is Anna. I study English for thirty minutes every day.", "早上好。我叫安娜。我每天学习英语三十分钟。"],
+          ["At school", "Our teacher asks us to read one short story and write five new words.", "老师让我们读一篇短故事并写下五个新单词。"],
+          ["Asking time", "Excuse me, what time is the meeting? It starts at half past nine.", "不好意思，会议几点？九点半开始。"],
+          ["Restaurant order", "I would like a sandwich and a cup of tea, please.", "我想要一个三明治和一杯茶。"],
+          ["Travel plan", "We are going to visit the museum tomorrow morning.", "我们明天早上打算参观博物馆。"],
+          ["Shopping", "This jacket is cheaper than that one, but the blue one looks better.", "这件夹克比那件便宜，但蓝色那件更好看。"],
+          ["Study habit", "If I learn ten words a day, I can remember more expressions.", "如果我每天学十个单词，我能记住更多表达。"],
+          ["Presentation", "Today I will talk about my language learning experience.", "今天我将谈谈我的语言学习经验。"],
+          ["Business meeting", "Please send the report before Friday and prepare a short summary.", "请在周五前发送报告并准备简短总结。"],
+          ["Culture", "Language is not only words and grammar. It also shows culture.", "语言不只是词汇和语法，它也体现文化。"],
+        ],
+      },
+      日语: {
+        words: [
+          ["こんにちは", "konnichiwa", "你好", "こんにちは、田中さん。"],
+          ["ありがとう", "arigatou", "谢谢", "どうもありがとうございます。"],
+          ["家族", "かぞく / kazoku", "家人", "私の家族は四人です。"],
+          ["時間", "じかん / jikan", "时间", "今、何時ですか。"],
+          ["学校", "がっこう / gakkou", "学校", "学校へ行きます。"],
+          ["先生", "せんせい / sensei", "老师", "先生に質問します。"],
+          ["学生", "がくせい / gakusei", "学生", "私は学生です。"],
+          ["友達", "ともだち / tomodachi", "朋友", "友達と話します。"],
+          ["数字", "すうじ / suuji", "数字", "数字を読みます。"],
+          ["色", "いろ / iro", "颜色", "好きな色は青です。"],
+          ["形", "かたち / katachi", "形状", "丸い形です。"],
+          ["今日", "きょう / kyou", "今天", "今日は暑いです。"],
+          ["明日", "あした / ashita", "明天", "明日勉強します。"],
+          ["質問", "しつもん / shitsumon", "问题", "質問があります。"],
+          ["答え", "こたえ / kotae", "答案", "答えを書いてください。"],
+          ["聞く", "きく / kiku", "听、问", "音声を聞きます。"],
+          ["話す", "はなす / hanasu", "说", "日本語を話します。"],
+          ["書く", "かく / kaku", "写", "名前を書きます。"],
+          ["読む", "よむ / yomu", "读", "本を読みます。"],
+          ["練習", "れんしゅう / renshuu", "练习", "発音を練習します。"],
+          ["旅行", "りょこう / ryokou", "旅行", "京都へ旅行します。"],
+          ["予約", "よやく / yoyaku", "预约", "レストランを予約します。"],
+          ["買い物", "かいもの / kaimono", "购物", "週末に買い物します。"],
+          ["会議", "かいぎ / kaigi", "会议", "午後に会議があります。"],
+          ["提案", "ていあん / teian", "提案", "新しい案を提案します。"],
+          ["文化", "ぶんか / bunka", "文化", "日本文化を学びます。"],
+          ["意見", "いけん / iken", "意见", "意見を言ってください。"],
+          ["比べる", "くらべる / kuraberu", "比较", "二つの文を比べます。"],
+          ["説明", "せつめい / setsumei", "说明", "もう一度説明してください。"],
+          ["上達", "じょうたつ / joutatsu", "进步", "日本語が上達しました。"],
+          ["自信", "じしん / jishin", "自信", "自信を持って話します。"],
+          ["流暢", "りゅうちょう / ryuuchou", "流利", "流暢に話したいです。"],
+          ["ビジネス", "bijinesu", "商务", "ビジネス日本語を学びます。"],
+          ["発表", "はっぴょう / happyou", "发表", "来週発表します。"],
+          ["討論", "とうろん / touron", "讨论", "テーマについて討論します。"],
+          ["翻訳", "ほんやく / honyaku", "翻译", "文章を翻訳します。"],
+          ["要約", "ようやく / youyaku", "总结", "内容を要約します。"],
+          ["経験", "けいけん / keiken", "经验", "経験があります。"],
+          ["資料", "しりょう / shiryou", "资料", "資料を拝見しました。"],
+          ["確認", "かくにん / kakunin", "确认", "予定を確認します。"],
+        ],
+        grammar: [
+          ["助词「は」", "「は」提示句子的主题。", "私は学生です。", "我是学生。", "选择合适助词：私___学生です。", ["は", "を", "に", "で"]],
+          ["助词「が」", "「が」强调主语或新信息。", "雨が降っています。", "正在下雨。", "选择合适助词：誰___来ましたか。", ["が", "を", "へ", "で"]],
+          ["助词「を」", "「を」标记动作对象。", "水を飲みます。", "喝水。", "选择合适助词：本___読みます。", ["を", "は", "に", "が"]],
+          ["动词ます形", "ます形用于礼貌表达。", "毎日勉強します。", "每天学习。", "选择合适形式：日本語を勉強__。", ["します", "する", "した", "して"]],
+          ["て形", "て形可连接动作或提出请求。", "少し待ってください。", "请稍等。", "选择合适形式：窓を開け___ください。", ["て", "た", "ます", "ない"]],
+          ["た形", "た形表示过去动作。", "昨日映画を見ました。", "昨天看了电影。", "选择合适形式：昨日勉強し___。", ["ました", "ます", "ません", "たい"]],
+          ["たい形", "たい表示愿望。", "日本へ行きたいです。", "我想去日本。", "选择合适形式：水を飲み___です。", ["たい", "て", "た", "ます"]],
+          ["比较表达", "より用于比较基准。", "東京は大阪より大きいです。", "东京比大阪大。", "选择合适词：AはB___高いです。", ["より", "から", "まで", "ので"]],
+          ["敬语基础", "です/ます让表达更礼貌。", "こちらでお待ちください。", "请在这里等候。", "选择礼貌表达：少々お待ち___。", ["ください", "くれ", "する", "だ"]],
+          ["条件表达", "たら表示如果、之后。", "時間があったら、行きます。", "如果有时间，我会去。", "选择合适形式：雨が降っ___、行きません。", ["たら", "ても", "て", "ます"]],
+        ],
+        speaking: [
+          ["はじめまして。私は李です。よろしくお願いします。", "初次见面。我姓李，请多关照。", "注意「は」读作 wa。"],
+          ["すみません、もう一度お願いします。", "不好意思，请再说一遍。", "「お願いします」要连贯。"],
+          ["毎日三十分、日本語を勉強します。", "我每天学习三十分钟日语。", "数字和时间要读清楚。"],
+          ["駅までの行き方を教えてください。", "请告诉我去车站的路。", "请求语气自然下降。"],
+          ["この料理はとてもおいしいです。", "这道菜非常好吃。", "形容词「おいしい」拉长音。"],
+          ["週末に友達と買い物に行きます。", "周末和朋友去购物。", "助词「と」「に」不要省略。"],
+          ["日本の文化に興味があります。", "我对日本文化感兴趣。", "「興味」重音自然。"],
+          ["会議は午後三時から始まります。", "会议下午三点开始。", "时间表达读完整。"],
+          ["資料を拝見いたしました。", "我已经拜读了资料。", "商务表达语速放慢。"],
+          ["本日はお時間をいただき、ありがとうございます。", "感谢您今天抽出时间。", "正式场景保持礼貌语调。"],
+        ],
+        listening: [
+          ["日常问候", "こんにちは。私は李です。中国から来ました。日本語を勉強しています。", "你好。我姓李，来自中国。我正在学习日语。"],
+          ["课堂介绍", "今日は五十音を練習します。まず、あ行から読みましょう。", "今天练习五十音。首先从あ行开始读吧。"],
+          ["时间表达", "今は午前九時半です。授業は十時に始まります。", "现在是上午九点半。课程十点开始。"],
+          ["购物场景", "すみません、このかばんはいくらですか。三千円です。", "不好意思，这个包多少钱？三千日元。"],
+          ["餐厅点餐", "コーヒーを一つとサンドイッチをお願いします。", "请给我一杯咖啡和一个三明治。"],
+          ["问路", "駅へ行きたいです。この道をまっすぐ行ってください。", "我想去车站。请沿这条路直走。"],
+          ["旅行计划", "明日、友達と京都へ旅行に行きます。", "明天和朋友去京都旅行。"],
+          ["学习习惯", "毎日新しい単語を十個覚えて、文を作ります。", "每天记十个新单词并造句。"],
+          ["商务会面", "本日はお忙しいところ、ありがとうございます。", "感谢您百忙之中抽出时间。"],
+          ["发表开场", "これから私の日本語学習について発表します。", "接下来我将发表我的日语学习情况。"],
+        ],
+      },
+      韩语: {
+        words: [
+          ["안녕하세요", "annyeonghaseyo", "你好", "안녕하세요, 저는 민수예요."],
+          ["감사합니다", "gamsahamnida", "谢谢", "정말 감사합니다."],
+          ["가족", "gajok", "家人", "우리 가족은 네 명이에요."],
+          ["시간", "sigan", "时间", "지금 몇 시예요?"],
+          ["학교", "hakgyo", "学校", "학교에 가요."],
+          ["선생님", "seonsaengnim", "老师", "선생님께 질문해요."],
+          ["학생", "haksaeng", "学生", "저는 학생이에요."],
+          ["친구", "chingu", "朋友", "친구를 만나요."],
+          ["숫자", "sutja", "数字", "숫자를 읽어요."],
+          ["색깔", "saekkkal", "颜色", "파란색을 좋아해요."],
+          ["모양", "moyang", "形状", "동그란 모양이에요."],
+          ["오늘", "oneul", "今天", "오늘은 날씨가 좋아요."],
+          ["내일", "naeil", "明天", "내일 공부할 거예요."],
+          ["질문", "jilmun", "问题", "질문이 있어요."],
+          ["대답", "daedap", "回答", "대답해 주세요."],
+          ["듣다", "deutda", "听", "음성을 들어요."],
+          ["말하다", "malhada", "说", "한국어로 말해요."],
+          ["쓰다", "sseuda", "写", "이름을 써요."],
+          ["읽다", "ikda", "读", "책을 읽어요."],
+          ["연습", "yeonseup", "练习", "발음을 연습해요."],
+          ["여행", "yeohaeng", "旅行", "서울로 여행을 가요."],
+          ["예약", "yeyak", "预约", "식당을 예약했어요."],
+          ["쇼핑", "syoping", "购物", "주말에 쇼핑해요."],
+          ["회의", "hoeui", "会议", "오후에 회의가 있어요."],
+          ["제안", "jean", "提案", "새 계획을 제안해요."],
+          ["문화", "munhwa", "文化", "한국 문화를 배워요."],
+          ["의견", "uigyeon", "意见", "의견을 말해 주세요."],
+          ["비교하다", "bigyohada", "比较", "두 문장을 비교해요."],
+          ["설명", "seolmyeong", "说明", "다시 설명해 주세요."],
+          ["향상", "hyangsang", "提升", "실력이 향상됐어요."],
+          ["자신감", "jasingam", "自信", "자신감을 가져요."],
+          ["유창하다", "yuchanghada", "流利", "유창하게 말하고 싶어요."],
+          ["비즈니스", "bijeuniseu", "商务", "비즈니스 한국어를 배워요."],
+          ["발표", "balpyo", "发表", "내일 발표가 있어요."],
+          ["토론", "toron", "讨论", "주제에 대해 토론해요."],
+          ["번역", "beonyeok", "翻译", "문장을 번역해요."],
+          ["요약", "yoyak", "总结", "내용을 요약해요."],
+          ["경험", "gyeongheom", "经验", "경험이 있어요."],
+          ["자료", "jaryo", "资料", "자료를 확인했어요."],
+          ["확인", "hwagin", "确认", "일정을 확인해요."],
+        ],
+        grammar: [
+          ["助词 은/는", "用于提示主题。", "저는 학생이에요.", "我是学生。", "选择合适助词：저___ 학생이에요.", ["는", "를", "에", "도"]],
+          ["助词 이/가", "用于强调主语或新信息。", "비가 와요.", "下雨了。", "选择合适助词：누구___ 왔어요?", ["가", "를", "에", "로"]],
+          ["宾语助词 을/를", "标记动作对象。", "책을 읽어요.", "读书。", "选择合适助词：물을 마셔요.", ["을", "은", "에", "도"]],
+          ["地点助词 에", "表示存在或移动方向。", "학교에 가요.", "去学校。", "选择合适助词：집___ 있어요.", ["에", "를", "은", "가"]],
+          ["现在时 -아요/어요", "用于日常陈述。", "한국어를 배워요.", "学习韩语。", "选择合适形式：밥을 먹__.", ["어요", "았어요", "겠습니다", "자"]],
+          ["过去时 -았/었어요", "表示过去动作。", "어제 영화를 봤어요.", "昨天看了电影。", "选择合适形式：친구를 만났__.", ["어요", "아요", "고", "지"]],
+          ["未来表达 -ㄹ 거예요", "表达计划或将来。", "내일 공부할 거예요.", "明天会学习。", "选择合适表达：내일 갈 ___예요.", ["거", "수", "때", "곳"]],
+          ["敬语 -습니다", "正式场合使用。", "회의를 시작하겠습니다.", "会议现在开始。", "选择正式表达：감사__.", ["합니다", "해", "하자", "했어"]],
+          ["原因 -아서/어서", "表达原因或顺序。", "바빠서 못 갔어요.", "因为忙所以没去。", "选择合适连接：피곤___ 쉬었어요.", ["해서", "하고", "지만", "면"]],
+          ["条件 -(으)면", "表示如果。", "시간이 있으면 가요.", "如果有时间就去。", "选择合适形式：비가 오___ 안 가요.", ["면", "고", "서", "지만"]],
+        ],
+        speaking: [
+          ["안녕하세요. 저는 리밍이에요. 만나서 반갑습니다.", "你好。我是李明。很高兴认识你。", "注意收音和连读。"],
+          ["죄송하지만, 다시 한번 말씀해 주세요.", "不好意思，请再说一遍。", "正式请求语气要柔和。"],
+          ["저는 매일 삼십 분 동안 한국어를 공부해요.", "我每天学习三十分钟韩语。", "数字和时间表达要读清。"],
+          ["지하철역이 어디에 있어요?", "地铁站在哪里？", "疑问句句尾上扬。"],
+          ["이 음식은 정말 맛있어요.", "这个食物真的很好吃。", "맛있어요 的连读要自然。"],
+          ["주말에 친구와 쇼핑하러 가요.", "周末和朋友去购物。", "친구와 不要读断。"],
+          ["저는 한국 문화에 관심이 있어요.", "我对韩国文化感兴趣。", "관심이 있어요 连读。"],
+          ["회의는 오후 세 시에 시작합니다.", "会议下午三点开始。", "正式语气保持稳定。"],
+          ["자료를 확인했습니다.", "我已经确认了资料。", "했습니다 收音清晰。"],
+          ["오늘 회의에 참석해 주셔서 감사합니다.", "感谢参加今天的会议。", "商务场景语速放慢。"],
+        ],
+        listening: [
+          ["日常问候", "안녕하세요. 저는 리밍이에요. 중국에서 왔어요. 한국어를 공부하고 있어요.", "你好。我是李明，来自中国。我正在学习韩语。"],
+          ["课堂介绍", "오늘은 한글의 기본 모음과 자음을 연습하겠습니다.", "今天练习韩文字母的基本元音和辅音。"],
+          ["时间表达", "지금은 오전 아홉 시 반이에요. 수업은 열 시에 시작해요.", "现在是上午九点半。课程十点开始。"],
+          ["购物场景", "실례지만, 이 가방은 얼마예요? 삼만 원이에요.", "不好意思，这个包多少钱？三万韩元。"],
+          ["餐厅点餐", "커피 한 잔하고 샌드위치 하나 주세요.", "请给我一杯咖啡和一个三明治。"],
+          ["问路", "지하철역에 가고 싶어요. 이 길로 쭉 가세요.", "我想去地铁站。请沿这条路一直走。"],
+          ["旅行计划", "내일 친구와 서울로 여행을 갈 거예요.", "明天要和朋友去首尔旅行。"],
+          ["学习习惯", "매일 새 단어 열 개를 외우고 문장을 만들어요.", "每天背十个新单词并造句。"],
+          ["商务会面", "바쁘신데 시간 내 주셔서 감사합니다.", "感谢您百忙之中抽出时间。"],
+          ["发表开场", "지금부터 제 한국어 학습 경험을 발표하겠습니다.", "现在开始发表我的韩语学习经验。"],
+        ],
+      },
+    };
+
+    const source = common[language] || common.英语;
+    const words = source.words.map(([word, pronunciation, meaning, example]) => ({ word, pronunciation, meaning, example }));
+    const grammarItems = source.grammar.map(([title, explain, example, translation, question, options]) => ({
+      title: `${level}${title}`,
+      explain,
+      example,
+      translation,
+      question,
+      options,
+    }));
+    const speakingItems = source.speaking.map(([text, translation, tip]) => ({ text, translation, tip }));
+    const listeningItems = source.listening.map(([title, script, translation]) => ({ title, script, translation }));
+    return {
+      words,
+      grammar: grammarItems[0],
+      grammarItems,
+      speaking: speakingItems[0],
+      speakingItems,
+      listening: listeningItems[0],
+      listeningItems,
+    };
+  }
+
   function getLearningModuleData(language, level) {
+    const expanded = buildExpandedLearningData(language, level);
+    if (expanded) return expanded;
+
     const bank = {
       日语: {
         初级: {
