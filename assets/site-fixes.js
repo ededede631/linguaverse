@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260701f";
+  const VERSION = "20260701g";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -159,7 +159,7 @@
       let v = n.nodeValue.replaceAll("静态演示版", "正式学习版").replaceAll("演示数据", "学习数据").replaceAll("Demo", "学习版").replaceAll("demo", "学习版");
       v = v.replaceAll("趣味互动学习模块", "阶段化学习工具").replaceAll("（以下为演示评价）", "学习者反馈").replaceAll("和百万小伙伴一起学习", "和学习伙伴一起交流");
       v = v.replaceAll("配合艾宾浩斯复习曲线，效率提升好多。", "配合生词本和错题复盘，复习更方便。");
-      if (/^\s*(1\.2万\+|8千\+|6千\+)\s*学习者\s*$/.test(v)) v = "系统化学习路径";
+      if (/^\s*(1\.2万\+|8千\+|6千\+)\s*学习者\s*$/.test(v) || /^\s*系统化\s*学习者\s*$/.test(v)) v = "系统化学习路径";
       else v = v.replaceAll("1.2万+", "系统化").replaceAll("8千+", "系统化").replaceAll("6千+", "系统化");
       if (v !== n.nodeValue) n.nodeValue = v;
     });
