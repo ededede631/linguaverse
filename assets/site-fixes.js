@@ -247,6 +247,7 @@
   function patchPage() {
     cleanDemoCopy();
     formatCourseDurations();
+    patchChapterContentExpansion();
     patchDomesticVideoPlayers();
     patchLanguageLearningModules();
     makeFooterItemsClickable();
@@ -975,6 +976,172 @@
   function scrollToCourseChapters() {
     const heading = Array.from(document.querySelectorAll("h1, h2, h3")).find((item) => item.textContent.includes("课程章节"));
     heading?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function patchChapterContentExpansion() {
+    if (!/#\/courses\/\d+\/chapter\/\d+/.test(location.hash || "")) return;
+    const chapterContainer = Array.from(document.querySelectorAll(".container")).find((item) => {
+      const text = item.innerText || "";
+      return text.includes("学习内容") && text.includes("课后练习") && text.includes("知识点");
+    });
+    if (!chapterContainer) return;
+
+    const counts = patchChapterStatCards();
+    const key = `${location.hash}-${counts.knowledge}-${counts.vocabulary}-${counts.exercises}-x10-v1`;
+    if (chapterContainer.getAttribute("data-linguaverse-chapter-expanded") === key) return;
+    chapterContainer.setAttribute("data-linguaverse-chapter-expanded", key);
+
+    const contentArea = Array.from(chapterContainer.querySelectorAll(".space-y-6")).find((item) => (item.innerText || "").includes("学习内容")) || chapterContainer;
+    if (!contentArea.querySelector("#linguaverse-chapter-expansion")) {
+      contentArea.insertAdjacentHTML("beforeend", getChapterExpansionHtml(getChapterExpansionContext(), counts));
+    }
+  }
+
+  function patchChapterStatCards() {
+    const counts = { knowledge: 40, vocabulary: 80, exercises: 50 };
+    document.querySelectorAll("p, span, h3").forEach((node) => {
+      const text = node.textContent.trim();
+      const parentText = node.parentElement?.textContent || "";
+
+      if (/^\d+\s*个$/.test(text) && parentText.includes("知识点")) {
+        counts.knowledge = expandCountNode(node, "个");
+      }
+      if (/^\d+\s*个$/.test(text) && parentText.includes("重点词汇")) {
+        counts.vocabulary = expandCountNode(node, "个");
+      }
+      if (/^\d+\s*道$/.test(text) && parentText.includes("练习题")) {
+        counts.exercises = expandCountNode(node, "道");
+      }
+      if (/共\s*\d+\s*道/.test(text)) {
+        const raw = Number(text.match(/共\s*(\d+)\s*道/)?.[1] || 5);
+        const value = node.getAttribute("data-linguaverse-expanded-count") ? raw : raw * 10;
+        node.setAttribute("data-linguaverse-expanded-count", String(value));
+        node.textContent = text.replace(/共\s*\d+\s*道/g, `共 ${value} 道`);
+        counts.exercises = value;
+      }
+    });
+    return counts;
+  }
+
+  function expandCountNode(node, unit) {
+    const raw = Number(node.textContent.match(/\d+/)?.[0] || 0);
+    const value = node.getAttribute("data-linguaverse-expanded-count") ? raw : raw * 10;
+    node.setAttribute("data-linguaverse-expanded-count", String(value));
+    node.textContent = `${value} ${unit}`;
+    return value;
+  }
+
+  function getChapterExpansionContext() {
+    const pageText = `${document.title} ${document.body.innerText || ""}`;
+    const heading = Array.from(document.querySelectorAll("h1, h2")).map((item) => item.textContent.trim()).find((text) => /第\s*\d+\s*章|英语|日语|韩语/.test(text)) || document.title;
+    const language = /韩语/.test(pageText) ? "韩语" : /日语/.test(pageText) ? "日语" : "英语";
+    const level = /高级|精通/.test(pageText) ? "高级" : /中级|进阶/.test(pageText) ? "中级" : "初级";
+    return { language, level, chapterTitle: heading.replace(/^第\s*\d+\s*章[:：]\s*/, "").trim() || "课程章节" };
+  }
+
+  function getChapterExpansionHtml(context, counts) {
+    const knowledge = buildChapterKnowledge(context, counts.knowledge);
+    const vocabulary = buildChapterVocabulary(context, counts.vocabulary);
+    const exercises = buildChapterExercises(context, counts.exercises);
+    return `
+      <section id="linguaverse-chapter-expansion" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="mb-6">
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-semibold">扩展课程内容 · 已翻十倍</span>
+          <h3 class="text-xl font-bold text-slate-900 mt-3">章节扩展学习包</h3>
+          <p class="text-slate-600 mt-2">本章节已扩展为 ${counts.knowledge} 个知识点、${counts.vocabulary} 个重点词汇、${counts.exercises} 道练习题。</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="rounded-2xl bg-blue-50 p-4 text-center"><div class="text-3xl font-bold text-blue-700">${counts.knowledge}</div><div class="text-sm text-slate-600">知识点</div></div>
+          <div class="rounded-2xl bg-green-50 p-4 text-center"><div class="text-3xl font-bold text-green-700">${counts.vocabulary}</div><div class="text-sm text-slate-600">重点词汇</div></div>
+          <div class="rounded-2xl bg-amber-50 p-4 text-center"><div class="text-3xl font-bold text-amber-700">${counts.exercises}</div><div class="text-sm text-slate-600">练习题</div></div>
+        </div>
+        <div class="space-y-8">
+          <div>
+            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展知识点（${counts.knowledge} 个）</h4>
+            <div class="grid md:grid-cols-2 gap-3">
+              ${knowledge.map((item, index) => `
+                <div class="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+                  <div class="text-sm font-semibold text-blue-700 mb-1">知识点 ${index + 1}</div>
+                  <div class="font-bold text-slate-900">${escapeHtml(item.title)}</div>
+                  <div class="text-sm text-slate-600 mt-1">${escapeHtml(item.detail)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展重点词汇（${counts.vocabulary} 个）</h4>
+            <div class="grid md:grid-cols-2 gap-3">
+              ${vocabulary.map((item, index) => `
+                <div class="rounded-2xl border border-green-100 bg-green-50/40 p-4">
+                  <div class="text-sm font-semibold text-green-700 mb-1">词汇 ${index + 1}</div>
+                  <div class="font-bold text-slate-900">${escapeHtml(item.word)}</div>
+                  <div class="text-sm text-purple-700 mt-1">${escapeHtml(item.pronunciation)}</div>
+                  <div class="text-sm text-slate-600 mt-1">${escapeHtml(item.meaning)} · ${escapeHtml(item.example)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展练习题（${counts.exercises} 道）</h4>
+            <div class="space-y-3">
+              ${exercises.map((item, index) => `
+                <div class="rounded-2xl border border-amber-100 bg-amber-50/40 p-4">
+                  <div class="font-bold text-slate-900 mb-2">${index + 1}. ${escapeHtml(item.question)}</div>
+                  <div class="grid sm:grid-cols-2 gap-2 text-sm">
+                    ${item.options.map((option, optionIndex) => `<div class="rounded-xl bg-white border border-amber-100 px-3 py-2">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}</div>`).join("")}
+                  </div>
+                  <div class="text-sm text-slate-500 mt-2">参考答案：${escapeHtml(item.answer)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildChapterKnowledge(context, count) {
+    const seed = {
+      英语: ["字母发音规律", "元音与辅音分类", "自然拼读意识", "常见重音位置", "基础句型结构", "疑问句表达", "否定句表达", "日常会话场景", "听力关键词捕捉", "口语连读习惯"],
+      日语: ["五十音发音", "平假名识别", "片假名识别", "助词使用", "基础句型", "动词变形", "礼貌表达", "日常问候", "场景会话", "语调节奏"],
+      韩语: ["韩文字母结构", "基本元音", "基本辅音", "收音规则", "连音现象", "助词使用", "敬语结尾", "日常问候", "场景会话", "语音节奏"],
+    }[context.language] || [];
+    return Array.from({ length: count }, (_, index) => {
+      const topic = seed[index % seed.length] || "语言知识";
+      const round = Math.floor(index / seed.length) + 1;
+      return {
+        title: `${topic} · 拓展 ${round}`,
+        detail: `围绕「${context.chapterTitle}」进行第 ${index + 1} 个知识点训练，包含识别、理解、例句应用和口头复述。`,
+      };
+    });
+  }
+
+  function buildChapterVocabulary(context, count) {
+    const data = buildExpandedLearningData(context.language, context.level);
+    const words = data.words.length ? data.words : getLearningModuleData(context.language, context.level).words;
+    return Array.from({ length: count }, (_, index) => {
+      const item = words[index % words.length];
+      const round = Math.floor(index / words.length) + 1;
+      return {
+        word: round > 1 ? `${item.word}（拓展${round}）` : item.word,
+        pronunciation: item.pronunciation,
+        meaning: item.meaning,
+        example: item.example,
+      };
+    });
+  }
+
+  function buildChapterExercises(context, count) {
+    const data = buildExpandedLearningData(context.language, context.level);
+    const grammarItems = data.grammarItems.length ? data.grammarItems : [data.grammar];
+    return Array.from({ length: count }, (_, index) => {
+      const item = grammarItems[index % grammarItems.length];
+      return {
+        question: `${context.chapterTitle} · ${item.question}`,
+        options: item.options,
+        answer: item.options[0],
+      };
+    });
   }
 
   function patchLanguageLearningModules() {
