@@ -10,6 +10,7 @@
   installGlobalHandlers();
   observePageChanges();
   patchPage();
+  window.LinguaVerseFixes = { patchPage, showToast };
 
   function blockViteClientRequests() {
     const isViteClient = (node) => {
@@ -144,8 +145,19 @@
     };
 
     window.addEventListener("hashchange", schedule);
+    window.addEventListener("popstate", schedule);
+    window.addEventListener("load", schedule);
+    document.addEventListener("click", () => setTimeout(patchPage, 180), true);
+
     const root = document.getElementById("root") || document.body;
     new MutationObserver(schedule).observe(root, { childList: true, subtree: true, characterData: true });
+
+    let ticks = 0;
+    const interval = setInterval(() => {
+      patchPage();
+      ticks += 1;
+      if (ticks >= 40) clearInterval(interval);
+    }, 500);
   }
 
   function patchPage() {
