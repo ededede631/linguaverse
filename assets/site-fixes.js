@@ -175,15 +175,28 @@
     nodes.forEach((node) => {
       const original = node.nodeValue;
       const replaced = original.replace(/(\d+\.\d{2,})\s*小时/g, (_, raw) => {
-        const totalMinutes = Math.round(Number(raw) * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        if (hours && minutes) return `${hours}小时${minutes}分钟`;
-        if (hours) return `${hours}小时`;
-        return `${minutes}分钟`;
+        return formatDecimalHour(raw);
       });
       if (replaced !== original) node.nodeValue = replaced;
     });
+
+    nodes.forEach((node, index) => {
+      const value = node.nodeValue.trim();
+      if (!/^\d+\.\d{2,}$/.test(value)) return;
+      const next = nodes.slice(index + 1).find((item) => item.nodeValue.trim());
+      if (!next || !next.nodeValue.includes("小时")) return;
+      node.nodeValue = node.nodeValue.replace(value, formatDecimalHour(value));
+      next.nodeValue = next.nodeValue.replace(/\s*小时/, "");
+    });
+  }
+
+  function formatDecimalHour(raw) {
+    const totalMinutes = Math.round(Number(raw) * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours && minutes) return `${hours}小时${minutes}分钟`;
+    if (hours) return `${hours}小时`;
+    return `${minutes}分钟`;
   }
 
   function makeFooterItemsClickable() {
@@ -251,8 +264,15 @@
 
       if (["发布", "分享", "关注", "编辑", "加入收藏", "开始学习", "查看详情", "播放原音", "点击播放语音朗读", "开始测验", "标记完成"].includes(text)) {
         button.setAttribute(fixedAttr, "demo-button");
+        button.addEventListener("click", handleDemoButtonClick);
       }
     });
+  }
+
+  function handleDemoButtonClick(event) {
+    const button = event.currentTarget;
+    const text = (button.textContent || button.getAttribute("aria-label") || "").trim().replace(/\s+/g, " ");
+    handleAction(text, button, event);
   }
 
   function installGlobalHandlers() {
@@ -270,66 +290,83 @@
           return;
         }
 
-        if (text === "发布") {
-          event.preventDefault();
-          showInfoModal("发布学习动态", "这是静态演示站，暂未接入后端发布服务。正式版会支持发布文字、图片、学习打卡和评论互动。");
-          return;
-        }
-
-        if (text === "分享") {
-          event.preventDefault();
-          copyShareLink();
-          return;
-        }
-
-        if (text === "关注") {
-          event.preventDefault();
-          target.textContent = "已关注";
-          showToast("已关注该学习达人。");
-          return;
-        }
-
-        if (text === "编辑") {
-          event.preventDefault();
-          showInfoModal("编辑个人资料", "当前为演示账号，个人资料暂不保存到服务器。正式版会支持修改头像、目标语言、当前水平和每日学习目标。");
-          return;
-        }
-
-        if (text === "加入收藏") {
-          event.preventDefault();
-          target.textContent = "已收藏";
-          showToast("课程已加入收藏。");
-          return;
-        }
-
-        if (text === "开始学习" && hash.includes("/courses/")) {
-          event.preventDefault();
-          location.hash = "#/learn/vocabulary";
-          showToast("已进入单词记忆模块。");
-          return;
-        }
-
-        if (text === "播放原音" || text === "点击播放语音朗读") {
-          event.preventDefault();
-          speakCurrentPracticeText();
-          return;
-        }
-
-        if (text === "开始测验") {
-          event.preventDefault();
-          showInfoModal("听力测验", "测验功能已预留入口。当前演示版可先完成听力播放、原文和翻译查看；正式版会提供选择题和听写题。");
-          return;
-        }
-
-        if (text === "标记完成") {
-          event.preventDefault();
-          target.textContent = "已完成";
-          showToast("已标记为完成，本次学习记录已更新到页面状态。");
-          return;
-        }
+        handleAction(text, target, event, hash);
       },
       true
     );
+  }
+
+  function handleAction(text, target, event, currentHash) {
+    const hash = currentHash || location.hash || "#/";
+
+    if (text === "发布") {
+      event.preventDefault();
+      event.stopPropagation();
+      showInfoModal("发布学习动态", "这是静态演示站，暂未接入后端发布服务。正式版会支持发布文字、图片、学习打卡和评论互动。");
+      return true;
+    }
+
+    if (text === "分享") {
+      event.preventDefault();
+      event.stopPropagation();
+      copyShareLink();
+      return true;
+    }
+
+    if (text === "关注") {
+      event.preventDefault();
+      event.stopPropagation();
+      target.textContent = "已关注";
+      showToast("已关注该学习达人。");
+      return true;
+    }
+
+    if (text === "编辑") {
+      event.preventDefault();
+      event.stopPropagation();
+      showInfoModal("编辑个人资料", "当前为演示账号，个人资料暂不保存到服务器。正式版会支持修改头像、目标语言、当前水平和每日学习目标。");
+      return true;
+    }
+
+    if (text === "加入收藏") {
+      event.preventDefault();
+      event.stopPropagation();
+      target.textContent = "已收藏";
+      showToast("课程已加入收藏。");
+      return true;
+    }
+
+    if (text === "开始学习" && hash.includes("/courses/")) {
+      event.preventDefault();
+      event.stopPropagation();
+      location.hash = "#/learn/vocabulary";
+      showToast("已进入单词记忆模块。");
+      return true;
+    }
+
+    if (text === "播放原音" || text === "点击播放语音朗读") {
+      event.preventDefault();
+      event.stopPropagation();
+      speakCurrentPracticeText();
+      return true;
+    }
+
+    if (text === "开始测验") {
+      event.preventDefault();
+      event.stopPropagation();
+      showInfoModal("听力测验", "测验功能已预留入口。当前演示版可先完成听力播放、原文和翻译查看；正式版会提供选择题和听写题。");
+      return true;
+    }
+
+    if (text === "标记完成") {
+      event.preventDefault();
+      event.stopPropagation();
+      target.textContent = "已完成";
+      showToast("已标记为完成，本次学习记录已更新到页面状态。");
+      return true;
+    }
+
+    return false;
   }
 
   function fixAnchorNavigation(anchor, event) {
