@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260701c";
+  const VERSION = "20260701d";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
