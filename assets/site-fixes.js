@@ -217,6 +217,60 @@
         line-height: 1.7;
         color: rgba(255, 255, 255, .86);
       }
+      .linguaverse-canvas-wrap {
+        position: relative;
+        margin: 0 auto;
+        width: 280px;
+        height: 280px;
+      }
+      .linguaverse-canvas-wrap canvas {
+        position: relative;
+        z-index: 2;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        touch-action: none;
+        cursor: crosshair;
+        background: transparent;
+      }
+      .linguaverse-canvas-guide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 140px;
+        color: #e2e8f0;
+        pointer-events: none;
+        z-index: 1;
+        user-select: none;
+      }
+      .linguaverse-spelling-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .linguaverse-spelling-grid button {
+        aspect-ratio: 1;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all .15s ease;
+      }
+      .linguaverse-spelling-grid button:hover {
+        background: #f3f0ff;
+        border-color: #a78bfa;
+      }
+      .linguaverse-spelling-grid button.active {
+        background: #7c3aed;
+        color: #fff;
+        border-color: #7c3aed;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -1102,6 +1156,8 @@
     return "";
   }
 
+  /* ========== 章节内容扩展（修复数量统计与内容质量） ========== */
+
   function patchChapterContentExpansion() {
     if (!/#\/courses\/\d+\/chapter\/\d+/.test(location.hash || "")) return;
     const chapterContainer = Array.from(document.querySelectorAll(".container")).find((item) => {
@@ -1110,8 +1166,8 @@
     });
     if (!chapterContainer) return;
 
-    const counts = patchChapterStatCards();
-    const key = `${location.hash}-${counts.knowledge}-${counts.vocabulary}-${counts.exercises}-moderate-v2`;
+    const counts = patchChapterStatCards(chapterContainer);
+    const key = `${location.hash}-${counts.knowledge}-${counts.vocabulary}-${counts.exercises}-v3`;
     if (chapterContainer.getAttribute("data-linguaverse-chapter-expanded") === key) return;
     chapterContainer.setAttribute("data-linguaverse-chapter-expanded", key);
 
@@ -1131,27 +1187,71 @@
     }
   }
 
-  function patchChapterStatCards() {
-    const targets = { knowledge: 12, vocabulary: 20, exercises: 15 };
-    const counts = { ...targets, baseKnowledge: 4, baseVocabulary: 6, baseExercises: 5 };
-    document.querySelectorAll("p, span, h3").forEach((node) => {
+  function patchChapterStatCards(container) {
+    // 通过DOM统计实际原始列表项数量（而非仅依赖文本标签）
+    let actualKnowledge = 0, actualVocabulary = 0, actualExercises = 0;
+    
+    const allCards = Array.from(container.querySelectorAll(".rounded-2xl, .rounded-xl, .rounded-3xl"));
+    const learningArea = Array.from(container.children).find((item) => (item.innerText || "").includes("学习内容"));
+    const exerciseArea = Array.from(container.children).find((item) => (item.innerText || "").includes("课后练习"));
+    
+    if (learningArea) {
+      const learningCards = Array.from(learningArea.querySelectorAll(".rounded-2xl, .rounded-xl, .rounded-3xl"));
+      // 知识点卡片通常包含"知识点"字样或有h4标题
+      actualKnowledge = learningCards.filter((card) => {
+        const txt = card.innerText || "";
+        return txt.includes("知识点") || txt.includes("发音") || txt.includes("规则") || txt.includes("概念") || txt.includes("结构");
+      }).length;
+      // 词汇卡片通常包含"例句"或"发音"标注
+      actualVocabulary = learningCards.filter((card) => {
+        const txt = card.innerText || "";
+        return txt.includes("例句") || txt.includes("读音") || txt.includes("发音") || txt.includes("含义");
+      }).length;
+    }
+    if (exerciseArea) {
+      actualExercises = Array.from(exerciseArea.querySelectorAll(".rounded-2xl, .rounded-xl, .rounded-3xl")).length;
+    }
+    
+    // 兜底：如果DOM统计为0，回退到文本统计
+    if (actualKnowledge === 0) actualKnowledge = 4;
+    if (actualVocabulary === 0) actualVocabulary = 6;
+    if (actualExercises === 0) actualExercises = 4;
+    
+    // 目标：实际数量 + 适量补充（不夸大）
+    const targets = { 
+      knowledge: actualKnowledge + 3, 
+      vocabulary: actualVocabulary + 3, 
+      exercises: actualExercises + 2 
+    };
+    const counts = { ...targets, baseKnowledge: actualKnowledge, baseVocabulary: actualVocabulary, baseExercises: actualExercises };
+    
+    document.querySelectorAll("p, span, h3, h4, div").forEach((node) => {
       const text = node.textContent.trim();
       const parentText = node.parentElement?.textContent || "";
 
       if (/^\d+\s*个$/.test(text) && parentText.includes("知识点")) {
-        counts.baseKnowledge = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 4);
-        counts.knowledge = setCountNode(node, targets.knowledge, "个");
+        if (!node.getAttribute("data-linguaverse-original-count")) {
+          node.setAttribute("data-linguaverse-original-count", text.match(/\d+/)?.[0] || String(actualKnowledge));
+        }
+        node.textContent = `${targets.knowledge} 个`;
+        counts.knowledge = targets.knowledge;
       }
       if (/^\d+\s*个$/.test(text) && parentText.includes("重点词汇")) {
-        counts.baseVocabulary = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 6);
-        counts.vocabulary = setCountNode(node, targets.vocabulary, "个");
+        if (!node.getAttribute("data-linguaverse-original-count")) {
+          node.setAttribute("data-linguaverse-original-count", text.match(/\d+/)?.[0] || String(actualVocabulary));
+        }
+        node.textContent = `${targets.vocabulary} 个`;
+        counts.vocabulary = targets.vocabulary;
       }
       if (/^\d+\s*道$/.test(text) && parentText.includes("练习题")) {
-        counts.baseExercises = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 5);
-        counts.exercises = setCountNode(node, targets.exercises, "道");
+        if (!node.getAttribute("data-linguaverse-original-count")) {
+          node.setAttribute("data-linguaverse-original-count", text.match(/\d+/)?.[0] || String(actualExercises));
+        }
+        node.textContent = `${targets.exercises} 道`;
+        counts.exercises = targets.exercises;
       }
       if (/共\s*\d+\s*道/.test(text)) {
-        const raw = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/共\s*(\d+)\s*道/)?.[1] || 5);
+        const raw = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/共\s*(\d+)\s*道/)?.[1] || actualExercises);
         node.setAttribute("data-linguaverse-original-count", String(raw));
         node.textContent = text.replace(/共\s*\d+\s*道/g, `共 ${targets.exercises} 道`);
         counts.baseExercises = raw;
@@ -1159,14 +1259,6 @@
       }
     });
     return counts;
-  }
-
-  function setCountNode(node, value, unit) {
-    if (!node.getAttribute("data-linguaverse-original-count")) {
-      node.setAttribute("data-linguaverse-original-count", String(Number(node.textContent.match(/\d+/)?.[0] || value)));
-    }
-    node.textContent = `${value} ${unit}`;
-    return value;
   }
 
   function getChapterExpansionContext() {
@@ -1230,19 +1322,206 @@
   }
 
   function buildChapterKnowledge(context, count) {
-    const seed = {
-      英语: ["字母发音规律", "元音与辅音分类", "自然拼读意识", "常见重音位置", "基础句型结构", "疑问句表达", "否定句表达", "日常会话场景", "听力关键词捕捉", "口语连读习惯"],
-      日语: ["五十音发音", "平假名识别", "片假名识别", "助词使用", "基础句型", "动词变形", "礼貌表达", "日常问候", "场景会话", "语调节奏"],
-      韩语: ["韩文字母结构", "基本元音", "基本辅音", "收音规则", "连音现象", "助词使用", "敬语结尾", "日常问候", "场景会话", "语音节奏"],
-    }[context.language] || [];
+    const generators = getKnowledgeGenerators(context.language, context.chapterTitle);
     return Array.from({ length: count }, (_, index) => {
-      const topic = seed[index % seed.length] || "语言知识";
-      const round = Math.floor(index / seed.length) + 1;
+      const gen = generators[index % generators.length];
+      const round = Math.floor(index / generators.length) + 1;
       return {
-        title: `${topic} · 拓展 ${round}`,
-        detail: `围绕「${context.chapterTitle}」进行第 ${index + 1} 个知识点训练，包含识别、理解、例句应用和口头复述。`,
+        title: round > 1 ? `${gen.title}（深入 ${round}）` : gen.title,
+        detail: gen.detail,
       };
     });
+  }
+
+  function getKnowledgeGenerators(language, chapterTitle) {
+    const title = chapterTitle.toLowerCase();
+    
+    if (language === "英语") {
+      if (title.includes("字母") || title.includes("发音")) {
+        return [
+          { title: "元音字母识别", detail: "A、E、I、O、U 五个元音字母在单词中的常见发音规律及口型示范。" },
+          { title: "辅音清浊配对", detail: "按发音部位区分清辅音与浊辅音，如 /p/ 与 /b/ 的声带振动差异。" },
+          { title: "大小写书写规范", detail: "掌握26个字母的大小写书写规范，注意手写体与印刷体的区别。" },
+        ];
+      }
+      if (title.includes("单词") || title.includes("词汇") || title.includes("日常用语")) {
+        return [
+          { title: "高频名词场景记忆", detail: "将家庭、学校、餐厅等场景中的常用名词按主题归类记忆。" },
+          { title: "动词搭配规律", detail: "掌握 have、do、go、come 等基础动词与常见名词的搭配用法。" },
+          { title: "形容词比较级构成", detail: "单音节形容词加 -er，多音节前加 more 的基本构成规则。" },
+        ];
+      }
+      if (title.includes("数字") || title.includes("时间")) {
+        return [
+          { title: "基数词与序数词转换", detail: "one→first、two→second 等常见基数词变序数词的不规则变化。" },
+          { title: "时间表达法", detail: "整点、半点、刻钟的英语表达方式及常用介词 at、in、on 的区别。" },
+          { title: "日期读写格式", detail: "英式与美式日期表达差异，如 5th March 与 March 5th。" },
+        ];
+      }
+      if (title.includes("颜色") || title.includes("形状")) {
+        return [
+          { title: "常见颜色词汇", detail: "red、blue、green、yellow、black、white、purple、pink 等基础颜色词。" },
+          { title: "形状描述用语", detail: "circle、square、triangle、rectangle 等几何形状的名称与描述。" },
+          { title: "颜色+形状组合表达", detail: "a red circle、a blue square 等颜色与形状组合修饰名词的语序。" },
+        ];
+      }
+      if (title.includes("家庭") || title.includes("成员")) {
+        return [
+          { title: "直系亲属称呼", detail: "father、mother、brother、sister、son、daughter 等直系家庭成员词汇。" },
+          { title: "旁系亲属称呼", detail: "uncle、aunt、cousin、grandfather、grandmother 等旁系与祖辈称呼。" },
+          { title: "家庭关系句型", detail: "This is my... / He is my... 等介绍家庭成员的常用句型。" },
+        ];
+      }
+      if (title.includes("句型") || title.includes("结构")) {
+        return [
+          { title: "主谓宾基本句型", detail: "掌握 S+V+O 基本结构，如 I eat apples. 的主谓宾分析。" },
+          { title: "There be 句型", detail: "There is/are... 表示存在，注意主谓一致和就近原则。" },
+          { title: "祈使句与感叹句", detail: "Open the door. / What a nice day! 等祈使句和感叹句的结构特点。" },
+        ];
+      }
+      if (title.includes("be动词") || title.includes("be 动词")) {
+        return [
+          { title: "am/is/are 人称搭配", detail: "I am / He is / You are / They are 的基本人称搭配规则。" },
+          { title: "Be 动词否定形式", detail: "am not / is not / are not 的缩写 isn't、aren't 及使用场景。" },
+          { title: "Be 动词一般疑问句", detail: "将 Be 动词提前构成一般疑问句：Are you...? / Is he...?" },
+        ];
+      }
+      if (title.includes("现在时") || title.includes("一般现在")) {
+        return [
+          { title: "第三人称单数变化", detail: "动词加 -s/-es 的规则：work→works、go→goes、watch→watches。" },
+          { title: "一般现在时时间标志", detail: "often、usually、every day、sometimes 等常用时间状语。" },
+          { title: "一般现在时 vs 现在进行时", detail: "习惯性动作用一般现在时，正在进行的动作用现在进行时。" },
+        ];
+      }
+      if (title.includes("冠词")) {
+        return [
+          { title: "不定冠词 a/an 用法", detail: "a 用于辅音音素开头，an 用于元音音素开头的单词前。" },
+          { title: "定冠词 the 的特指用法", detail: "双方都知晓的事物、上文已提及的事物、独一无二的事物前用 the。" },
+          { title: "零冠词常见场景", detail: "泛指的复数名词、抽象名词、三餐球类运动前通常不加冠词。" },
+        ];
+      }
+      if (title.includes("介词")) {
+        return [
+          { title: "时间介词 in/on/at", detail: "in 用于月份年份，on 用于具体日期，at 用于具体时刻。" },
+          { title: "地点介词 in/on/at", detail: "in 用于大地点，at 用于小地点，on 用于表面接触。" },
+          { title: "方向介词 to/towards/into", detail: "to 表示目的地，towards 表示朝向，into 表示进入内部。" },
+        ];
+      }
+      if (title.includes("疑问") || title.includes("问句")) {
+        return [
+          { title: "一般疑问句结构", detail: "将助动词或 Be 动词提前，用 Yes/No 回答的基本结构。" },
+          { title: "特殊疑问句疑问词", detail: "what、where、when、why、who、how 等疑问词的选择与用法。" },
+          { title: "选择疑问句与反意疑问句", detail: "Do you like tea or coffee? / You like tea, don't you?" },
+        ];
+      }
+      if (title.includes("对话") || title.includes("会话")) {
+        return [
+          { title: "问候与告别用语", detail: "Hello、Good morning、See you、Goodbye 等日常问候与告别的恰当使用。" },
+          { title: "购物场景常用句", detail: "How much is it? / I'll take it. / Can I try it on? 等购物对话。" },
+          { title: "餐厅点餐用语", detail: "I'd like... / May I have the menu? / Check, please. 等餐厅常用句。" },
+        ];
+      }
+      // 英语中级/高级兜底
+      return [
+        { title: "核心语法规则", detail: `深入理解「${chapterTitle}」的核心语法规则与适用条件。` },
+        { title: "常见例句分析", detail: `通过典型例句掌握「${chapterTitle}」在实际语境中的运用。` },
+        { title: "易错点辨析", detail: `辨析「${chapterTitle}」与其他相近语法点的区别与联系。` },
+      ];
+    }
+    
+    if (language === "日语") {
+      if (title.includes("五十音") || title.includes("概览")) {
+        return [
+          { title: "清音あ行发音要领", detail: "あいうえお 的口型、舌位和声调练习，注意あ 与 う 的开口度差异。" },
+          { title: "清音か行送气控制", detail: "かきくけこ 的气流控制技巧，区分送气音与不送气音。" },
+          { title: "さ行与た行辨析", detail: "さしすせそ 和 たちつてと 的发音区别，注意 し 与 ち 的舌位。" },
+        ];
+      }
+      if (title.includes("平假名")) {
+        return [
+          { title: "平假名书写笔顺", detail: "あいうえお 的正确笔画顺序、书写比例和连笔技巧。" },
+          { title: "平假名使用场景", detail: "平假名用于日语固有词、语法助词和汉字注音（振り仮名）。" },
+          { title: "清音、浊音、半浊音", detail: "がぎぐげご、ざじずぜぞ、だぢづでど、ばびぶべぼ、ぱぴぷぺぽ 的发音区别。" },
+        ];
+      }
+      if (title.includes("片假名")) {
+        return [
+          { title: "片假名书写规范", detail: "アイウエオ 等片假名的笔画顺序，注意与平假名的字形差异。" },
+          { title: "片假名使用场景", detail: "外来语、外国人名、拟声拟态词、动植物学名常用片假名书写。" },
+          { title: "外来语长音规则", detail: "片假名外来语中的长音用 ー 表示，如 コーヒー、ケーキ。" },
+        ];
+      }
+      if (title.includes("助词") || title.includes("は") || title.includes("が")) {
+        return [
+          { title: "主题助词「は」", detail: "「は」用于提示句子的主题，读作 wa，后续谓语对主题进行说明。" },
+          { title: "主语助词「が」", detail: "「が」用于强调主语或引入新信息，回答疑问句时突出主语。" },
+          { title: "「は」与「が」的区别", detail: "「は」表示已知信息的主题，「が」表示未知信息的主语或强调。" },
+        ];
+      }
+      if (title.includes("动词") || title.includes("て形") || title.includes("た形")) {
+        return [
+          { title: "动词分类（一类/二类/三类）", detail: "以う段结尾为一类，以い段+る/え段+る为二类，する・来る为三类。" },
+          { title: "て形变形规则", detail: "一类动词音变（い音变、促音变、拨音变），二类去る加て，三类して/来て。" },
+          { title: "た形与て形的对应关系", detail: "将て形中的て替换为た、で替换为だ即可得到た形。" },
+        ];
+      }
+      if (title.includes("敬语")) {
+        return [
+          { title: "尊敬语（れる・られる）", detail: "对长辈或上级使用，抬高对方的动作：行かれる、おっしゃる。" },
+          { title: "谦让语（お～する）", detail: "降低自己的动作以表示谦逊：お伺いする、拝見する。" },
+          { title: "郑重语（です・ます）", detail: "日常礼貌表达，通过です、ます、ございます使语气更正式。" },
+        ];
+      }
+      // 日语兜底
+      return [
+        { title: "核心语法要点", detail: `掌握「${chapterTitle}」的核心语法规则与使用限制。` },
+        { title: "常用例句解析", detail: `通过典型例句理解「${chapterTitle}」在实际会话中的运用。` },
+        { title: "近义表达对比", detail: `辨析「${chapterTitle}」与其他相似表达的细微差别。` },
+      ];
+    }
+    
+    if (language === "韩语") {
+      if (title.includes("字母") || title.includes("发音") || title.includes("概览")) {
+        return [
+          { title: "基本元音ㅏㅓㅗㅜ", detail: "掌握四个基本元音的发音口型和舌位：ㅏ（开口大）、ㅓ（开口小）、ㅗ（圆唇）、ㅜ（更圆）。" },
+          { title: "基本辅音ㄱㄴㄷㄹ", detail: "理解舌根音ㄱ、舌尖音ㄴ、齿龈音ㄷ、闪音ㄹ 的发音方法。" },
+          { title: "韩字方块组合结构", detail: "初声（辅音）+ 中声（元音）+ 终声（收音）在方块字中的排列规则。" },
+        ];
+      }
+      if (title.includes("收音") || title.includes("韵尾")) {
+        return [
+          { title: "单收音发音规则", detail: "ㄱㄴㄷㄹㅁㅂㅇ 七个单收音的实际发音及其与后续音节连音的规则。" },
+          { title: "双收音代表音", detail: "ㄳ、ㄵ、ㄶ 等双收音在发音时只发其中一个音的代表音规则。" },
+          { title: "收音连音现象", detail: "当前字有收音、后字以元音开头时，收音移至后字音节首发音。" },
+        ];
+      }
+      if (title.includes("助词") || title.includes("은") || title.includes("는")) {
+        return [
+          { title: "主题助词 은/는", detail: "은 用于辅音结尾，는 用于元音结尾，用于提示句子主题。" },
+          { title: "主语助词 이/가", detail: "이 用于辅音结尾，가 用于元音结尾，用于强调主语或新信息。" },
+          { title: "宾语助词 을/를", detail: "을 用于辅音结尾，를 用于元音结尾，标记动作的直接对象。" },
+        ];
+      }
+      if (title.includes("过去") || title.includes("时态")) {
+        return [
+          { title: "过去时 -았/었어요", detail: "词干以ㅏ/ㅗ结尾用 -았어요，其余用 -었어요，하다 变 했어요。" },
+          { title: "过去时否定形式", detail: "过去时否定用 안 + 过去时或 지 않았어요，如 안 갔어요 / 가지 않았어요。" },
+          { title: "过去时与现在时对比", detail: "通过时间状语 어제、지난주 等区分过去时与现在时的使用场景。" },
+        ];
+      }
+      // 韩语兜底
+      return [
+        { title: "核心语法要点", detail: `掌握「${chapterTitle}」的核心语法规则与使用限制。` },
+        { title: "常用例句解析", detail: `通过典型例句理解「${chapterTitle}」在实际会话中的运用。` },
+        { title: "近义表达对比", detail: `辨析「${chapterTitle}」与其他相似表达的细微差别。` },
+      ];
+    }
+    
+    return [
+      { title: "核心概念理解", detail: `深入理解「${chapterTitle}」的核心语言概念和运用场景。` },
+      { title: "常见用法归纳", detail: `归纳「${chapterTitle}」在日常交流中的常见表达方式。` },
+      { title: "易错点辨析", detail: `辨析「${chapterTitle}」学习中容易混淆的语言点。` },
+    ];
   }
 
   function buildChapterVocabulary(context, count) {
@@ -1273,6 +1552,8 @@
     });
   }
 
+  /* ========== 语言学习模块 ========== */
+
   function patchLanguageLearningModules() {
     const hash = location.hash || "";
     const module = hash.includes("/learn/vocabulary")
@@ -1283,6 +1564,8 @@
       ? "speaking"
       : hash.includes("/learn/listening")
       ? "listening"
+      : hash.includes("/learn/spelling")
+      ? "spelling"
       : "";
     if (!module) return;
 
@@ -1293,6 +1576,7 @@
       grammar: "语法练习",
       speaking: "口语跟读",
       listening: "听力训练",
+      spelling: "拼写练习",
     };
     const container = Array.from(document.querySelectorAll(".container")).find((item) => {
       const text = item.innerText || "";
@@ -1300,11 +1584,15 @@
     });
     if (!container) return;
 
-    const key = `${context.language}-${context.level}-${module}-expanded-v2`;
+    const key = `${context.language}-${context.level}-${module}-expanded-v3`;
     if (container.getAttribute("data-linguaverse-learning-key") === key) return;
     container.setAttribute("data-linguaverse-learning-key", key);
     container.className = "container mx-auto py-10 max-w-4xl";
     container.innerHTML = getLearningModuleHtml(context, module);
+    
+    if (module === "spelling") {
+      initSpellingModule(context);
+    }
   }
 
   function getLearningModuleHtml(context, module) {
@@ -1312,23 +1600,28 @@
     const moduleInfo = {
       vocabulary: {
         title: "单词记忆",
-        subtitle: `${context.language}${context.level}词汇训练：40个核心词汇，统一卡片格式`,
+        subtitle: `${context.language}${context.level}词汇训练：核心词汇卡片，含人声朗读`,
         body: renderVocabularyModule(data),
       },
       grammar: {
         title: "语法练习",
-        subtitle: `${context.language}${context.level}语法题库：10组语法点与选择练习`,
+        subtitle: `${context.language}${context.level}语法题库：语法点讲解与选择练习`,
         body: renderGrammarModule(data),
       },
       speaking: {
         title: "口语跟读",
-        subtitle: `${context.language}${context.level}跟读材料：10条场景句，统一跟读训练格式`,
+        subtitle: `${context.language}${context.level}跟读材料：场景句与发音提示`,
         body: renderSpeakingModule(data),
       },
       listening: {
         title: "听力训练",
-        subtitle: `${context.language}${context.level}听力素材：10篇短材料，按课程阶段循序渐进`,
+        subtitle: `${context.language}${context.level}听力素材：短材料与理解练习`,
         body: renderListeningModule(data),
+      },
+      spelling: {
+        title: "拼写练习",
+        subtitle: `${context.language}${context.level}书写训练：触屏/鼠标书写字符`,
+        body: renderSpellingModule(data),
       },
     }[module];
 
@@ -1339,19 +1632,14 @@
         </div>
         <h1 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-3">${moduleInfo.title}</h1>
         <p class="text-slate-600">${moduleInfo.subtitle}</p>
-        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>40</strong><br><span class="text-slate-500">词汇卡</span></div>
-          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">语法题</span></div>
-          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">跟读句</span></div>
-          <div class="rounded-2xl bg-white border border-slate-200 p-3"><strong>10</strong><br><span class="text-slate-500">听力篇</span></div>
-        </div>
       </div>
       ${moduleInfo.body}
-      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
         ${renderModuleJump("单词记忆", "#/learn/vocabulary", module === "vocabulary")}
         ${renderModuleJump("语法练习", "#/learn/grammar", module === "grammar")}
         ${renderModuleJump("口语跟读", "#/learn/speaking", module === "speaking")}
         ${renderModuleJump("听力训练", "#/learn/listening", module === "listening")}
+        ${renderModuleJump("拼写练习", "#/learn/spelling", module === "spelling")}
       </div>
     `;
   }
@@ -1465,6 +1753,255 @@
     `;
   }
 
+  /* ========== 拼写/手写模块 ========== */
+
+  function renderSpellingModule(data) {
+    const chars = getSpellingCharacters(data.language, data.level);
+    return `
+      <div id="linguaverse-spelling-app">
+        <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div>
+              <div class="text-sm text-slate-400 mb-1">拼写练习 <span id="spelling-current-index">1</span> / ${chars.length}</div>
+              <h2 id="spelling-target-char" class="text-4xl font-bold text-slate-900">${escapeHtml(chars[0].char)}</h2>
+              <p id="spelling-target-info" class="text-slate-600 mt-1">${escapeHtml(chars[0].info)}</p>
+            </div>
+            <button class="rounded-2xl bg-purple-600 text-white px-4 py-2 text-sm font-semibold" 
+              id="spelling-speak-btn"
+              data-linguaverse-speak="${escapeHtml(chars[0].char)}" 
+              data-linguaverse-lang="${escapeHtml(data.language || "")}">播放发音</button>
+          </div>
+          
+          <div class="linguaverse-canvas-wrap mx-auto">
+            <div id="spelling-guide" class="linguaverse-canvas-guide">${escapeHtml(chars[0].char)}</div>
+            <canvas id="spelling-canvas" width="280" height="280"></canvas>
+          </div>
+          
+          <div class="flex gap-3 mt-4 justify-center flex-wrap">
+            <button id="spelling-clear" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold text-sm">清除</button>
+            <button id="spelling-toggle-guide" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold text-sm">隐藏参考</button>
+            <button id="spelling-prev" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold text-sm">上一个</button>
+            <button id="spelling-next" class="rounded-2xl bg-purple-600 text-white px-4 py-2 font-semibold text-sm">下一个</button>
+          </div>
+          
+          <div class="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+            <strong>书写提示：</strong><span id="spelling-tip">${escapeHtml(chars[0].tip)}</span>
+          </div>
+          
+          <div class="mt-4">
+            <div class="text-sm font-semibold text-slate-700 mb-2">快速选择字符：</div>
+            <div class="linguaverse-spelling-grid" id="spelling-char-grid">
+              ${chars.map((c, i) => `<button data-index="${i}" class="${i === 0 ? 'active' : ''}">${escapeHtml(c.char)}</button>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function getSpellingCharacters(language, level) {
+    if (language === "日语") {
+      const hiragana = [
+        { char: "あ", info: "平假名 あ（a）", tip: "先画横，再画竖弯钩，注意第二笔的弧度。" },
+        { char: "い", info: "平假名 い（i）", tip: "两竖，左短右长，注意间距。" },
+        { char: "う", info: "平假名 う（u）", tip: "起笔偏右上，向下画弧线再向左上收笔。" },
+        { char: "え", info: "平假名 え（e）", tip: "先横后竖，再向右下画一条斜线。" },
+        { char: "お", info: "平假名 お（o）", tip: "竖、横折、再一竖，注意中间一横偏上。" },
+        { char: "か", info: "平假名 か（ka）", tip: "先写十字形，再在右侧加一撇。" },
+        { char: "き", info: "平假名 き（ki）", tip: "两横一竖，中间一横短，底部带弯钩。" },
+        { char: "く", info: "平假名 く（ku）", tip: "像小于号，起笔重收笔轻，略有弧度。" },
+        { char: "け", info: "平假名 け（ke）", tip: "一撇一竖，竖带弯钩，撇从右上向左下。" },
+        { char: "こ", info: "平假名 こ（ko）", tip: "两横，上短下长，注意起笔位置。" },
+      ];
+      const katakana = [
+        { char: "ア", info: "片假名 ア（a）", tip: "像偏旁的宀加一竖，先写上部再写竖。" },
+        { char: "イ", info: "片假名 イ（i）", tip: "两竖，左竖短右竖长，起笔有角度。" },
+        { char: "ウ", info: "片假名 ウ（u）", tip: "起笔点加弧线，像平假名的简化版。" },
+        { char: "エ", info: "片假名 エ（e）", tip: "像工字，注意三笔的交点位置。" },
+        { char: "オ", info: "片假名 オ（o）", tip: "像才字，横竖撇的组合。" },
+        { char: "カ", info: "片假名 カ（ka）", tip: "像力字，横折钩加一撇。" },
+        { char: "キ", info: "片假名 キ（ki）", tip: "三横一竖，像キ字架结构。" },
+        { char: "ク", info: "片假名 ク（ku）", tip: "像孤字的一部分，一横折加一撇。" },
+        { char: "ケ", info: "片假名 ケ（ke）", tip: "像艹字头去掉一横，再向右下延伸。" },
+        { char: "コ", info: "片假名 コ（ko）", tip: "像口字去掉右边，横折加横。" },
+      ];
+      const kanjiBasic = [
+        { char: "日", info: "汉字 日（ひ/にち）", tip: "竖、横折、横、横，注意中间一横不连右边。" },
+        { char: "月", info: "汉字 月（つき/げつ）", tip: "撇、横折钩、横、横，注意内部两横间距。" },
+        { char: "山", info: "汉字 山（やま/さん）", tip: "竖、竖折/竖弯、竖，中竖最高。" },
+        { char: "田", info: "汉字 田（た/でん）", tip: "竖、横折、横、竖、横，注意十在正中。" },
+        { char: "人", info: "汉字 人（ひと/じん）", tip: "撇、捺，起笔相交于上部。" },
+      ];
+      if (level === "高级") return [...hiragana.slice(0, 5), ...katakana.slice(0, 5), ...kanjiBasic];
+      if (level === "中级") return [...hiragana.slice(5), ...katakana.slice(5)];
+      return hiragana;
+    }
+    
+    if (language === "韩语") {
+      const basic = [
+        { char: "ㄱ", info: "辅音 ㄱ（g/k）", tip: "像汉字 L，从左上向右下再横向右画。" },
+        { char: "ㄴ", info: "辅音 ㄴ（n）", tip: "像汉字 L 的镜像，竖加横折。" },
+        { char: "ㄷ", info: "辅音 ㄷ（d/t）", tip: "像口字缺底，竖、横折、横。" },
+        { char: "ㄹ", info: "辅音 ㄹ（r/l）", tip: "像数字 2 或波浪线，两折笔画。" },
+        { char: "ㅁ", info: "辅音 ㅁ（m）", tip: "像口字，竖、横折、横，封口。" },
+        { char: "ㅂ", info: "辅音 ㅂ（b/p）", tip: "像口字中间加一竖，注意两竖对称。" },
+        { char: "ㅅ", info: "辅音 ㅅ（s）", tip: "像人字形，两笔从中间向左右下分开。" },
+        { char: "ㅇ", info: "辅音 ㅇ（ng）", tip: "像圆圈，一笔画成，注意圆润。" },
+        { char: "ㅈ", info: "辅音 ㅈ（j）", tip: "像汉字 入 加一横，先写人字形再补横。" },
+        { char: "ㅊ", info: "辅音 ㅊ（ch）", tip: "像 ㅈ 加一短横，多了一短撇。" },
+      ];
+      const vowels = [
+        { char: "ㅏ", info: "元音 ㅏ（a）", tip: "竖加右横，像汉字 卜 但横在顶部。" },
+        { char: "ㅓ", info: "元音 ㅓ（eo）", tip: "竖加左横，像反方向的 卜。" },
+        { char: "ㅗ", info: "元音 ㅗ（o）", tip: "横加下竖，像倒 T 字。" },
+        { char: "ㅜ", info: "元音 ㅜ（u）", tip: "横加上竖，像 T 字。" },
+        { char: "ㅡ", info: "元音 ㅡ（eu）", tip: "一横，注意水平平直。" },
+        { char: "ㅣ", info: "元音 ㅣ（i）", tip: "一竖，垂直向下。" },
+      ];
+      const combined = [
+        { char: "각", info: "韩字 각（gak）", tip: "ㄱ + ㅏ + ㄱ，注意三部分的排列结构。" },
+        { char: "난", info: "韩字 난（nan）", tip: "ㄴ + ㅏ + ㄴ，左右结构加下部收音。" },
+        { char: "닭", info: "韩字 닭（dak）", tip: "ㄷ + ㅏ + ㄹㄱ，注意双收音在底部。" },
+        { char: "물", info: "韩字 물（mul）", tip: "ㅁ + ㅜ + ㄹ，左右结构紧凑排列。" },
+        { char: "학", info: "韩字 학（hak）", tip: "ㅎ + ㅏ + ㄱ，注意ㅎ的上部两横。" },
+      ];
+      if (level === "高级") return [...basic.slice(0, 5), ...vowels, ...combined];
+      if (level === "中级") return [...basic, ...vowels];
+      return basic;
+    }
+    
+    // 英语拼写 - 提供大小写字母书写
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("").map((char) => ({
+      char,
+      info: `字母 ${char}`,
+      tip: char === char.toUpperCase() ? "注意大写字母占上两格。" : "注意小写字母的占格位置。",
+    }));
+    if (level === "初级") return letters.slice(0, 26); // 大写
+    if (level === "中级") return letters.slice(26, 40); // 部分小写
+    return letters.slice(26); // 全部小写
+  }
+
+  function initSpellingModule(context) {
+    const canvas = document.getElementById("spelling-canvas");
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    const chars = getSpellingCharacters(context.language, context.level);
+    let currentIndex = 0;
+    let isDrawing = false;
+    let guideVisible = true;
+    
+    function updateDisplay() {
+      const char = chars[currentIndex];
+      document.getElementById("spelling-current-index").textContent = currentIndex + 1;
+      document.getElementById("spelling-target-char").textContent = char.char;
+      document.getElementById("spelling-target-info").textContent = char.info;
+      document.getElementById("spelling-tip").textContent = char.tip;
+      document.getElementById("spelling-guide").textContent = char.char;
+      
+      const speakBtn = document.getElementById("spelling-speak-btn");
+      if (speakBtn) {
+        speakBtn.setAttribute("data-linguaverse-speak", char.char);
+        speakBtn.setAttribute("data-linguaverse-lang", context.language);
+      }
+      
+      document.querySelectorAll("#spelling-char-grid button").forEach((btn, i) => {
+        btn.classList.toggle("active", i === currentIndex);
+      });
+      
+      clearCanvas();
+    }
+    
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+    
+    function startDraw(e) {
+      e.preventDefault();
+      isDrawing = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+    }
+    
+    function endDraw(e) {
+      if (e) e.preventDefault();
+      isDrawing = false;
+      ctx.beginPath();
+    }
+    
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseleave", endDraw);
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", endDraw);
+    
+    document.getElementById("spelling-clear")?.addEventListener("click", clearCanvas);
+    document.getElementById("spelling-toggle-guide")?.addEventListener("click", () => {
+      guideVisible = !guideVisible;
+      document.getElementById("spelling-guide").style.opacity = guideVisible ? "1" : "0";
+      document.getElementById("spelling-toggle-guide").textContent = guideVisible ? "隐藏参考" : "显示参考";
+    });
+    document.getElementById("spelling-prev")?.addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + chars.length) % chars.length;
+      updateDisplay();
+    });
+    document.getElementById("spelling-next")?.addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % chars.length;
+      updateDisplay();
+    });
+    
+    document.getElementById("spelling-char-grid")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const idx = Number(btn.getAttribute("data-index"));
+      if (!isNaN(idx)) {
+        currentIndex = idx;
+        updateDisplay();
+      }
+    });
+    
+    // 绘制网格辅助线
+    function drawGrid() {
+      ctx.save();
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    
+    drawGrid();
+  }
+
   function buildExpandedLearningData(language, level) {
     const common = {
       英语: {
@@ -1546,322 +2083,252 @@
           ["Business meeting", "Please send the report before Friday and prepare a short summary.", "请在周五前发送报告并准备简短总结。"],
           ["Culture", "Language is not only words and grammar. It also shows culture.", "语言不只是词汇和语法，它也体现文化。"],
         ],
-      },
-      日语: {
+      },      日语: {
         words: [
-          ["こんにちは", "konnichiwa", "你好", "こんにちは、田中さん。"],
-          ["ありがとう", "arigatou", "谢谢", "どうもありがとうございます。"],
-          ["家族", "かぞく / kazoku", "家人", "私の家族は四人です。"],
-          ["時間", "じかん / jikan", "时间", "今、何時ですか。"],
-          ["学校", "がっこう / gakkou", "学校", "学校へ行きます。"],
-          ["先生", "せんせい / sensei", "老师", "先生に質問します。"],
-          ["学生", "がくせい / gakusei", "学生", "私は学生です。"],
-          ["友達", "ともだち / tomodachi", "朋友", "友達と話します。"],
-          ["数字", "すうじ / suuji", "数字", "数字を読みます。"],
-          ["色", "いろ / iro", "颜色", "好きな色は青です。"],
-          ["形", "かたち / katachi", "形状", "丸い形です。"],
-          ["今日", "きょう / kyou", "今天", "今日は暑いです。"],
-          ["明日", "あした / ashita", "明天", "明日勉強します。"],
-          ["質問", "しつもん / shitsumon", "问题", "質問があります。"],
-          ["答え", "こたえ / kotae", "答案", "答えを書いてください。"],
-          ["聞く", "きく / kiku", "听、问", "音声を聞きます。"],
-          ["話す", "はなす / hanasu", "说", "日本語を話します。"],
-          ["書く", "かく / kaku", "写", "名前を書きます。"],
-          ["読む", "よむ / yomu", "读", "本を読みます。"],
-          ["練習", "れんしゅう / renshuu", "练习", "発音を練習します。"],
-          ["旅行", "りょこう / ryokou", "旅行", "京都へ旅行します。"],
-          ["予約", "よやく / yoyaku", "预约", "レストランを予約します。"],
-          ["買い物", "かいもの / kaimono", "购物", "週末に買い物します。"],
-          ["会議", "かいぎ / kaigi", "会议", "午後に会議があります。"],
-          ["提案", "ていあん / teian", "提案", "新しい案を提案します。"],
-          ["文化", "ぶんか / bunka", "文化", "日本文化を学びます。"],
-          ["意見", "いけん / iken", "意见", "意見を言ってください。"],
-          ["比べる", "くらべる / kuraberu", "比较", "二つの文を比べます。"],
-          ["説明", "せつめい / setsumei", "说明", "もう一度説明してください。"],
-          ["上達", "じょうたつ / joutatsu", "进步", "日本語が上達しました。"],
-          ["自信", "じしん / jishin", "自信", "自信を持って話します。"],
-          ["流暢", "りゅうちょう / ryuuchou", "流利", "流暢に話したいです。"],
-          ["ビジネス", "bijinesu", "商务", "ビジネス日本語を学びます。"],
-          ["発表", "はっぴょう / happyou", "发表", "来週発表します。"],
-          ["討論", "とうろん / touron", "讨论", "テーマについて討論します。"],
-          ["翻訳", "ほんやく / honyaku", "翻译", "文章を翻訳します。"],
-          ["要約", "ようやく / youyaku", "总结", "内容を要約します。"],
-          ["経験", "けいけん / keiken", "经验", "経験があります。"],
-          ["資料", "しりょう / shiryou", "资料", "資料を拝見しました。"],
-          ["確認", "かくにん / kakunin", "确认", "予定を確認します。"],
+          ["こんにちは", "[konnichiwa]", "你好", "こんにちは、田中です。"],
+          ["ありがとう", "[arigatou]", "谢谢", "ありがとうございます。"],
+          ["家族", "[kazoku]", "家庭", "私の家族は四人です。"],
+          ["学校", "[gakkou]", "学校", "学校へ行きます。"],
+          ["先生", "[sensei]", "老师", "田中先生は優しいです。"],
+          ["学生", "[gakusei]", "学生", "私は大学の学生です。"],
+          ["友達", "[tomodachi]", "朋友", "彼は私の友達です。"],
+          ["本", "[hon]", "书", "この本は面白いです。"],
+          ["時間", "[jikan]", "时间", "今、何時ですか。"],
+          ["今日", "[kyou]", "今天", "今日は晴れです。"],
+          ["明日", "[ashita]", "明天", "明日、試験があります。"],
+          ["質問", "[shitsumon]", "问题", "質問があります。"],
+          ["答え", "[kotae]", "答案", "答えを教えてください。"],
+          ["聞く", "[kiku]", "听", "音楽を聞きます。"],
+          ["話す", "[hanasu]", "说", "日本語を話します。"],
+          ["書く", "[kaku]", "写", "手紙を書きます。"],
+          ["読む", "[yomu]", "读", "新聞を読みます。"],
+          ["練習", "[renshuu]", "练习", "毎日練習します。"],
+          ["旅行", "[ryokou]", "旅行", "京都へ旅行しました。"],
+          ["レストラン", "[resutoran]", "餐厅", "レストランで食事します。"],
+          ["買い物", "[kaimono]", "购物", "買い物に行きます。"],
+          ["会議", "[kaigi]", "会议", "会議は三時からです。"],
+          ["仕事", "[shigoto]", "工作", "仕事が忙しいです。"],
+          ["文化", "[bunka]", "文化", "日本の文化が好きです。"],
+          ["意見", "[iken]", "意见", "あなたの意見を聞かせてください。"],
+          ["比べる", "[kuraberu]", "比较", "二つを比べてみましょう。"],
+          ["説明", "[setsumei]", "说明", "この文法を説明します。"],
+          ["上達", "[joutatsu]", "进步", "日本語が上達しました。"],
+          ["自信", "[jishin]", "自信", "自信を持って話してください。"],
+          ["流暢", "[ryuuchou]", "流利", "彼女は流暢に話します。"],
+          ["敬語", "[keigo]", "敬语", "敬語は大切です。"],
+          ["発表", "[happyou]", "发表", "発表の準備をします。"],
+          ["議論", "[giron]", "讨论", "議論を交わしましょう。"],
+          ["翻訳", "[honyaku]", "翻译", "この文章を翻訳してください。"],
+          ["まとめ", "[matome]", "总结", "今日のまとめをしましょう。"],
+          ["成果", "[seika]", "成果", "努力の成果が出ました。"],
+          ["経験", "[keiken]", "经验", "私の経験を話します。"],
+          ["習慣", "[shuukan]", "习惯", "毎朝の習慣が大切です。"],
+          ["挑戦", "[chousen]", "挑战", "新しい挑戦を始めます。"],
         ],
         grammar: [
-          ["助词「は」", "「は」提示句子的主题。", "私は学生です。", "我是学生。", "选择合适助词：私___学生です。", ["は", "を", "に", "で"]],
-          ["助词「が」", "「が」强调主语或新信息。", "雨が降っています。", "正在下雨。", "选择合适助词：誰___来ましたか。", ["が", "を", "へ", "で"]],
-          ["助词「を」", "「を」标记动作对象。", "水を飲みます。", "喝水。", "选择合适助词：本___読みます。", ["を", "は", "に", "が"]],
-          ["动词ます形", "ます形用于礼貌表达。", "毎日勉強します。", "每天学习。", "选择合适形式：日本語を勉強__。", ["します", "する", "した", "して"]],
-          ["て形", "て形可连接动作或提出请求。", "少し待ってください。", "请稍等。", "选择合适形式：窓を開け___ください。", ["て", "た", "ます", "ない"]],
-          ["た形", "た形表示过去动作。", "昨日映画を見ました。", "昨天看了电影。", "选择合适形式：昨日勉強し___。", ["ました", "ます", "ません", "たい"]],
-          ["たい形", "たい表示愿望。", "日本へ行きたいです。", "我想去日本。", "选择合适形式：水を飲み___です。", ["たい", "て", "た", "ます"]],
-          ["比较表达", "より用于比较基准。", "東京は大阪より大きいです。", "东京比大阪大。", "选择合适词：AはB___高いです。", ["より", "から", "まで", "ので"]],
-          ["敬语基础", "です/ます让表达更礼貌。", "こちらでお待ちください。", "请在这里等候。", "选择礼貌表达：少々お待ち___。", ["ください", "くれ", "する", "だ"]],
-          ["条件表达", "たら表示如果、之后。", "時間があったら、行きます。", "如果有时间，我会去。", "选择合适形式：雨が降っ___、行きません。", ["たら", "ても", "て", "ます"]],
+          ["です／ます体", "日语礼貌体，日常和正式场合使用。", "私は学生です。", "我是学生。", "选择正确形式：私は日本人___。", ["です", "だ", "である", "でした"]],
+          ["助词「は」", "提示句子主题，读作 wa。", "私は学生です。", "我是学生。", "选择正确助词：私___田中です。", ["は", "が", "を", "に"]],
+          ["助词「が」", "强调主语或引入新信息。", "私がやります。", "我来做。", "选择正确助词：誰___来ましたか。", ["が", "は", "を", "に"]],
+          ["助词「を」", "标记动作的直接对象。", "本を読みます。", "读书。", "选择正确助词：日本語___勉強します。", ["を", "は", "が", "に"]],
+          ["动词て形", "连接多个动作或表示进行、请求等。", "食べて、寝ます。", "吃了然后睡觉。", "选择正确形式：行___ください。", ["いて", "くて", "きて", "いって"]],
+          ["动词た形", "表示过去。", "昨日、映画を見た。", "昨天看了电影。", "选择正确形式：食べ___。", ["た", "て", "る", "ない"]],
+          ["可能态", "表示能力或可能性。", "日本語が話せます。", "会说日语。", "选择正确形式：漢字が読___。", ["めます", "みます", "まれます", "みたい"]],
+          ["比较句「より」", "A より B のほうが… 表示 B 比 A 更…", "東京より大阪のほうが安い。", "大阪比东京便宜。", "选择正确形式：猫___犬のほうが大きい。", ["より", "ほど", "と", "に"]],
+          ["愿望表达「たい」", "动词去ます + たい 表示想做某事。", "日本に行きたい。", "想去日本。", "选择正确形式：寿司を食べ___。", ["たい", "た", "て", "たがる"]],
+          ["变化表达「なる」", "表示状态变化。", "寒くなりました。", "变冷了。", "选择正确形式：日本語が上手に___。", ["なりたい", "したい", "なる", "する"]],
         ],
         speaking: [
-          ["はじめまして。私は李です。よろしくお願いします。", "初次见面。我姓李，请多关照。", "注意「は」读作 wa。"],
-          ["すみません、もう一度お願いします。", "不好意思，请再说一遍。", "「お願いします」要连贯。"],
-          ["毎日三十分、日本語を勉強します。", "我每天学习三十分钟日语。", "数字和时间要读清楚。"],
-          ["駅までの行き方を教えてください。", "请告诉我去车站的路。", "请求语气自然下降。"],
-          ["この料理はとてもおいしいです。", "这道菜非常好吃。", "形容词「おいしい」拉长音。"],
-          ["週末に友達と買い物に行きます。", "周末和朋友去购物。", "助词「と」「に」不要省略。"],
-          ["日本の文化に興味があります。", "我对日本文化感兴趣。", "「興味」重音自然。"],
-          ["会議は午後三時から始まります。", "会议下午三点开始。", "时间表达读完整。"],
-          ["資料を拝見いたしました。", "我已经拜读了资料。", "商务表达语速放慢。"],
-          ["本日はお時間をいただき、ありがとうございます。", "感谢您今天抽出时间。", "正式场景保持礼貌语调。"],
+          ["こんにちは、私は李明です。はじめまして。", "你好，我叫李明。初次见面。", "注意 はじめまして 的重音在第二拍。"],
+          ["もう少しゆっくり話していただけますか。", "请你说慢一点好吗？", "ゆっくり 的第二个く 轻读。"],
+          ["私は毎晩、新しい単語を復習します。", "我每天晚上复习新单词。", "復習 的重音在ふく。"],
+          ["私は異なる文化を学ぶことに興味があります。", "我对学习不同文化很感兴趣。", "興味がある 连读自然。"],
+          ["会議は何時から始まりますか。", "会议几点开始？", "何時から 语调上扬。"],
+          ["コーヒーを一杯、お願いします。", "我想点一杯咖啡。", "お願いします 礼貌结尾。"],
+          ["私の意見では、練習がとても大切です。", "在我看来，练习非常重要。", "意見 读作いけん，重音在第二拍。"],
+          ["この文法をもう一度説明していただけますか。", "你能再解释一下这个语法点吗？", "説明 读作せつめい。"],
+          ["明日、短い発表をします。", "我明天会做一个简短演示。", "発表 读作はっぴょう。"],
+          ["言語を学ぶには、時間と忍耐が必要です。", "学习语言需要时间和耐心。", "忍耐 读作にんたい。"],
         ],
         listening: [
-          ["日常问候", "こんにちは。私は李です。中国から来ました。日本語を勉強しています。", "你好。我姓李，来自中国。我正在学习日语。"],
-          ["课堂介绍", "今日は五十音を練習します。まず、あ行から読みましょう。", "今天练习五十音。首先从あ行开始读吧。"],
-          ["时间表达", "今は午前九時半です。授業は十時に始まります。", "现在是上午九点半。课程十点开始。"],
-          ["购物场景", "すみません、このかばんはいくらですか。三千円です。", "不好意思，这个包多少钱？三千日元。"],
-          ["餐厅点餐", "コーヒーを一つとサンドイッチをお願いします。", "请给我一杯咖啡和一个三明治。"],
-          ["问路", "駅へ行きたいです。この道をまっすぐ行ってください。", "我想去车站。请沿这条路直走。"],
-          ["旅行计划", "明日、友達と京都へ旅行に行きます。", "明天和朋友去京都旅行。"],
-          ["学习习惯", "毎日新しい単語を十個覚えて、文を作ります。", "每天记十个新单词并造句。"],
-          ["商务会面", "本日はお忙しいところ、ありがとうございます。", "感谢您百忙之中抽出时间。"],
-          ["发表开场", "これから私の日本語学習について発表します。", "接下来我将发表我的日语学习情况。"],
+          ["朝の挨拶", "おはようございます。私は田中です。毎朝、日本語を三十分勉強しています。", "早上好。我是田中。每天早上学习日语三十分钟。"],
+          ["学校の話", "先生は私たちに短い文章を読んで、新しい単語を五つ書くように言いました。", "老师让我们读一篇短文章并写下五个新单词。"],
+          ["時間を尋ねる", "すみません、会議は何時ですか。九時半から始まります。", "不好意思，会议几点？九点半开始。"],
+          ["レストランで", "サンドイッチと紅茶をお願いします。", "请给我三明治和红茶。"],
+          ["旅行の計画", "私たちは明日の朝、博物館へ行く予定です。", "我们明天早上打算去博物馆。"],
+          ["買い物", "このジャケットはあれより安いですが、青いほうが似合います。", "这件夹克比那件便宜，但蓝色的更适合。"],
+          ["勉強の習慣", "毎日十個の単語を覚えれば、もっと表現を覚えられます。", "如果每天记十个单词，能记住更多表达。"],
+          ["発表", "今日は私の語学学習の経験について話します。", "今天我将谈谈我的语言学习经验。"],
+          ["会議", "金曜日までにレポートを送って、簡単なまとめを準備してください。", "请在周五前发送报告并准备简短总结。"],
+          ["文化", "言語は単語と文法だけではありません。文化も表しています。", "语言不只是词汇和语法，它也体现文化。"],
         ],
       },
       韩语: {
         words: [
-          ["안녕하세요", "annyeonghaseyo", "你好", "안녕하세요, 저는 민수예요."],
-          ["감사합니다", "gamsahamnida", "谢谢", "정말 감사합니다."],
-          ["가족", "gajok", "家人", "우리 가족은 네 명이에요."],
-          ["시간", "sigan", "时间", "지금 몇 시예요?"],
-          ["학교", "hakgyo", "学校", "학교에 가요."],
-          ["선생님", "seonsaengnim", "老师", "선생님께 질문해요."],
-          ["학생", "haksaeng", "学生", "저는 학생이에요."],
-          ["친구", "chingu", "朋友", "친구를 만나요."],
-          ["숫자", "sutja", "数字", "숫자를 읽어요."],
-          ["색깔", "saekkkal", "颜色", "파란색을 좋아해요."],
-          ["모양", "moyang", "形状", "동그란 모양이에요."],
-          ["오늘", "oneul", "今天", "오늘은 날씨가 좋아요."],
-          ["내일", "naeil", "明天", "내일 공부할 거예요."],
-          ["질문", "jilmun", "问题", "질문이 있어요."],
-          ["대답", "daedap", "回答", "대답해 주세요."],
-          ["듣다", "deutda", "听", "음성을 들어요."],
-          ["말하다", "malhada", "说", "한국어로 말해요."],
-          ["쓰다", "sseuda", "写", "이름을 써요."],
-          ["읽다", "ikda", "读", "책을 읽어요."],
-          ["연습", "yeonseup", "练习", "발음을 연습해요."],
-          ["여행", "yeohaeng", "旅行", "서울로 여행을 가요."],
-          ["예약", "yeyak", "预约", "식당을 예약했어요."],
-          ["쇼핑", "syoping", "购物", "주말에 쇼핑해요."],
-          ["회의", "hoeui", "会议", "오후에 회의가 있어요."],
-          ["제안", "jean", "提案", "새 계획을 제안해요."],
-          ["문화", "munhwa", "文化", "한국 문화를 배워요."],
-          ["의견", "uigyeon", "意见", "의견을 말해 주세요."],
-          ["비교하다", "bigyohada", "比较", "두 문장을 비교해요."],
-          ["설명", "seolmyeong", "说明", "다시 설명해 주세요."],
-          ["향상", "hyangsang", "提升", "실력이 향상됐어요."],
-          ["자신감", "jasingam", "自信", "자신감을 가져요."],
-          ["유창하다", "yuchanghada", "流利", "유창하게 말하고 싶어요."],
-          ["비즈니스", "bijeuniseu", "商务", "비즈니스 한국어를 배워요."],
-          ["발표", "balpyo", "发表", "내일 발표가 있어요."],
-          ["토론", "toron", "讨论", "주제에 대해 토론해요."],
-          ["번역", "beonyeok", "翻译", "문장을 번역해요."],
-          ["요약", "yoyak", "总结", "내용을 요약해요."],
-          ["경험", "gyeongheom", "经验", "경험이 있어요."],
-          ["자료", "jaryo", "资料", "자료를 확인했어요."],
-          ["확인", "hwagin", "确认", "일정을 확인해요."],
+          ["안녕하세요", "[annyeonghaseyo]", "你好", "안녕하세요, 저는 명입니다."],
+          ["감사합니다", "[gamsahamnida]", "谢谢", "감사합니다, 도와주셔서."],
+          ["가족", "[gajok]", "家庭", "우리 가족은 네 명입니다."],
+          ["학교", "[hakgyo]", "学校", "학교에 갑니다."],
+          ["선생님", "[seonsaengnim]", "老师", "선생님은 친절하십니다."],
+          ["학생", "[haksaeng]", "学生", "저는 대학생입니다."],
+          ["친구", "[chingu]", "朋友", "그는 제 친구입니다."],
+          ["책", "[chaek]", "书", "이 책은 재미있습니다."],
+          ["시간", "[sigan]", "时间", "지금 몇 시예요?"],
+          ["오늘", "[oneul]", "今天", "오늘 날씨가 좋습니다."],
+          ["내일", "[naeil]", "明天", "내일 시험이 있습니다."],
+          ["질문", "[jilmun]", "问题", "질문이 있습니다."],
+          ["답", "[dap]", "答案", "답을 알려주세요."],
+          ["듣다", "[deutda]", "听", "음악을 듣습니다."],
+          ["말하다", "[malhada]", "说", "한국어를 말합니다."],
+          ["쓰다", "[sseuda]", "写", "편지를 씁니다."],
+          ["읽다", "[iktta]", "读", "신문을 읽습니다."],
+          ["연습", "[yeonseup]", "练习", "매일 연습합니다."],
+          ["여행", "[yeohaeng]", "旅行", "서울에 여행했습니다."],
+          ["식당", "[sikdang]", "餐厅", "식당에서 밥을 먹습니다."],
+          ["쇼핑", "[syoping]", "购物", "쇼핑하러 갑니다."],
+          ["회의", "[hoeui]", "会议", "회의는 세 시부터입니다."],
+          ["일", "[il]", "工作", "일이 바쁩니다."],
+          ["문화", "[munhwa]", "文化", "한국 문화를 좋아합니다."],
+          ["의견", "[uigyeon]", "意见", "당신의 의견을 들려주세요."],
+          ["비교하다", "[bigyohada]", "比较", "두 가지를 비교해 봅시다."],
+          ["설명", "[seolmyeong]", "说明", "이 문법을 설명하겠습니다."],
+          ["향상", "[hyangsang]", "提升", "한국어가 향상되었습니다."],
+          ["자신감", "[jasingam]", "自信", "자신감 있게 말하세요."],
+          ["유창한", "[yuchanghan]", "流利的", "그녀는 유창하게 말합니다."],
+          ["경어", "[gyeongeo]", "敬语", "경어는 중요합니다."],
+          ["발표", "[balpyo]", "发表", "발표 준비를 합니다."],
+          ["토론", "[toron]", "讨论", "토론을 나눕시다."],
+          ["번역", "[beonyeok]", "翻译", "이 글을 번역해 주세요."],
+          ["요약", "[yoyak]", "总结", "오늘의 요약을 합시다."],
+          ["성과", "[seonggwa]", "成果", "노력의 성과가 나타났습니다."],
+          ["경험", "[gyeongheom]", "经验", "제 경험을 말씀드리겠습니다."],
+          ["습관", "[seupgwan]", "习惯", "아침 습관이 중요합니다."],
+          ["도전", "[dojeon]", "挑战", "새로운 도전을 시작합니다."],
         ],
         grammar: [
-          ["助词 은/는", "用于提示主题。", "저는 학생이에요.", "我是学生。", "选择合适助词：저___ 학생이에요.", ["는", "를", "에", "도"]],
-          ["助词 이/가", "用于强调主语或新信息。", "비가 와요.", "下雨了。", "选择合适助词：누구___ 왔어요?", ["가", "를", "에", "로"]],
-          ["宾语助词 을/를", "标记动作对象。", "책을 읽어요.", "读书。", "选择合适助词：물을 마셔요.", ["을", "은", "에", "도"]],
-          ["地点助词 에", "表示存在或移动方向。", "학교에 가요.", "去学校。", "选择合适助词：집___ 있어요.", ["에", "를", "은", "가"]],
-          ["现在时 -아요/어요", "用于日常陈述。", "한국어를 배워요.", "学习韩语。", "选择合适形式：밥을 먹__.", ["어요", "았어요", "겠습니다", "자"]],
-          ["过去时 -았/었어요", "表示过去动作。", "어제 영화를 봤어요.", "昨天看了电影。", "选择合适形式：친구를 만났__.", ["어요", "아요", "고", "지"]],
-          ["未来表达 -ㄹ 거예요", "表达计划或将来。", "내일 공부할 거예요.", "明天会学习。", "选择合适表达：내일 갈 ___예요.", ["거", "수", "때", "곳"]],
-          ["敬语 -습니다", "正式场合使用。", "회의를 시작하겠습니다.", "会议现在开始。", "选择正式表达：감사__.", ["합니다", "해", "하자", "했어"]],
-          ["原因 -아서/어서", "表达原因或顺序。", "바빠서 못 갔어요.", "因为忙所以没去。", "选择合适连接：피곤___ 쉬었어요.", ["해서", "하고", "지만", "면"]],
-          ["条件 -(으)면", "表示如果。", "시간이 있으면 가요.", "如果有时间就去。", "选择合适形式：비가 오___ 안 가요.", ["면", "고", "서", "지만"]],
+          ["은/는 主题助词", "은 用于辅音结尾，는 用于元音结尾，提示句子主题。", "저는 학생입니다。", "我是学生。", "选择正确形式：그 사람___ 선생님입니다。", ["은", "는", "이", "가"]],
+          ["이/가 主语助词", "이 用于辅音结尾，가 用于元音结尾，强调主语。", "제가 하겠습니다。", "我来做。", "选择正确形式：누가 ___ 왔어요?", ["이", "가", "은", "는"]],
+          ["을/를 宾语助词", "을 用于辅音结尾，를 用于元音结尾，标记动作对象。", "책을 읽습니다。", "读书。", "选择正确助词：한국어___ 공부합니다。", ["를", "을", "이", "가"]],
+          ["에/에서 地点助词", "에 表示目的地或时间点，에서 表示动作发生地。", "학교에서 공부합니다。", "在学校学习。", "选择正确形式：집___ 쉽니다。", ["에서", "에", "으로", "부터"]],
+          ["过去时 -았/었어요", "词干以ㅏ/ㅗ结尾用 -았어요，其余用 -었어요。", "어제 영화를 봤어요。", "昨天看了电影。", "选择正确形式：어제 밥을 먹___。", ["었어요", "았어요", "어요", "아요"]],
+          ["将来时 -(으)ㄹ 거예요", "表示未来计划或推测。", "내일 만날 거예요。", "明天会见面。", "选择正确形式：다음 주에 여행___。", ["할 거예요", "했어요", "해요", "하다"]],
+          ["进行时 -고 있어요", "表示动作正在进行。", "지금 공부하고 있어요。", "现在正在学习。", "选择正确形式：지금 노래를 듣___。", ["고 있어요", "었어요", "아요", "을 거예요"]],
+          ["比较句 더", "A 보다 B 가 더… 表示 B 比 A 更…", "서울보다 부산이 더 따뜻해요。", "釜山比首尔更暖和。", "选择正确形式：고양이보다 개가 ___ 커요。", ["더", "덜", "많이", "조금"]],
+          ["愿望表达 고 싶어요", "动词词干 + 고 싶어요 表示想做某事。", "한국에 가고 싶어요。", "想去韩国。", "选择正确形式：김치를 먹___。", ["고 싶어요", "고 있어요", "을 거예요", "았어요"]],
+          ["变化表达 -아/어지다", "表示状态变化，如 好起来了、变大了。", "날씨가 좋아졌어요。", "天气变好了。", "选择正确形式：한국어가 쉬워___。", ["졌어요", "고 싶어요", "을 거예요", "고 있어요"]],
         ],
         speaking: [
-          ["안녕하세요. 저는 리밍이에요. 만나서 반갑습니다.", "你好。我是李明。很高兴认识你。", "注意收音和连读。"],
-          ["죄송하지만, 다시 한번 말씀해 주세요.", "不好意思，请再说一遍。", "正式请求语气要柔和。"],
-          ["저는 매일 삼십 분 동안 한국어를 공부해요.", "我每天学习三十分钟韩语。", "数字和时间表达要读清。"],
-          ["지하철역이 어디에 있어요?", "地铁站在哪里？", "疑问句句尾上扬。"],
-          ["이 음식은 정말 맛있어요.", "这个食物真的很好吃。", "맛있어요 的连读要自然。"],
-          ["주말에 친구와 쇼핑하러 가요.", "周末和朋友去购物。", "친구와 不要读断。"],
-          ["저는 한국 문화에 관심이 있어요.", "我对韩国文化感兴趣。", "관심이 있어요 连读。"],
-          ["회의는 오후 세 시에 시작합니다.", "会议下午三点开始。", "正式语气保持稳定。"],
-          ["자료를 확인했습니다.", "我已经确认了资料。", "했습니다 收音清晰。"],
-          ["오늘 회의에 참석해 주셔서 감사합니다.", "感谢参加今天的会议。", "商务场景语速放慢。"],
+          ["안녕하세요, 저는 이밍입니다. 처음 뵙겠습니다。", "你好，我叫李明。初次见面。", "처음 뵙겠습니다 要读得恭敬。"],
+          ["조금 더 천천히 말씀해 주시겠어요?", "请你说慢一点好吗？", "천천히 的第二个 천 轻读。"],
+          ["저는 매일 저녁, 새로운 단어를 복습합니다。", "我每天晚上复习新单词。", "복습합니다 读得连贯。"],
+          ["저는 다른 문화를 배우는 것에 관심이 있습니다。", "我对学习不同文化很感兴趣。", "관심이 있습니다 自然连读。"],
+          ["회의는 몇 시에 시작합니까?", "会议几点开始？", "몇 시에 语调上扬。"],
+          ["커피 한 잔 주세요。", "请给我一杯咖啡。", "주세요 礼貌结尾。"],
+          ["제 의견으로는, 연습이 매우 중요합니다。", "在我看来，练习非常重要。", "의견 读作의견，重音在第二音节。"],
+          ["이 문법을 다시 설명해 주실 수 있나요?", "你能再解释一下这个语法点吗？", "설명해 读得连贯。"],
+          ["내일 짧은 발표를 하겠습니다。", "我明天会做一个简短演示。", "발표 读作발표。"],
+          ["언어를 배우려면, 시간과 인내가 필요합니다。", "学习语言需要时间和耐心。", "인내 读作인내。"],
         ],
         listening: [
-          ["日常问候", "안녕하세요. 저는 리밍이에요. 중국에서 왔어요. 한국어를 공부하고 있어요.", "你好。我是李明，来自中国。我正在学习韩语。"],
-          ["课堂介绍", "오늘은 한글의 기본 모음과 자음을 연습하겠습니다.", "今天练习韩文字母的基本元音和辅音。"],
-          ["时间表达", "지금은 오전 아홉 시 반이에요. 수업은 열 시에 시작해요.", "现在是上午九点半。课程十点开始。"],
-          ["购物场景", "실례지만, 이 가방은 얼마예요? 삼만 원이에요.", "不好意思，这个包多少钱？三万韩元。"],
-          ["餐厅点餐", "커피 한 잔하고 샌드위치 하나 주세요.", "请给我一杯咖啡和一个三明治。"],
-          ["问路", "지하철역에 가고 싶어요. 이 길로 쭉 가세요.", "我想去地铁站。请沿这条路一直走。"],
-          ["旅行计划", "내일 친구와 서울로 여행을 갈 거예요.", "明天要和朋友去首尔旅行。"],
-          ["学习习惯", "매일 새 단어 열 개를 외우고 문장을 만들어요.", "每天背十个新单词并造句。"],
-          ["商务会面", "바쁘신데 시간 내 주셔서 감사합니다.", "感谢您百忙之中抽出时间。"],
-          ["发表开场", "지금부터 제 한국어 학습 경험을 발표하겠습니다.", "现在开始发表我的韩语学习经验。"],
+          ["아침 인사", "안녕하세요. 저는 김민수입니다. 매일 아침, 한국어를 삼십 분씩 공부합니다。", "你好。我是金敏秀。每天早上学习韩语三十分钟。"],
+          ["학교 이야기", "선생님께서 짧은 글을 읽고 새로운 단어 다섯 개를 쓰라고 하셨습니다。", "老师让我们读一篇短文并写下五个新单词。"],
+          ["시간 묻기", "실례합니다, 회의는 몇 시입니까? 아홉 시 반부터 시작합니다。", "不好意思，会议几点？九点半开始。"],
+          ["식당에서", "샌드위치와 차 한 잔 주세요。", "请给我三明治和一杯茶。"],
+          ["여행 계획", "우리는 내일 아침, 박물관에 갈 예정입니다。", "我们明天早上打算去博物馆。"],
+          ["쇼핑", "이 재킷은 저것보다 싼데, 파란 게 더 잘 어울려요。", "这件夹克比那件便宜，但蓝色的更适合。"],
+          ["학습 습관", "매일 열 개의 단어를 외우면, 더 많은 표현을 기억할 수 있습니다。", "如果每天记十个单词，能记住更多表达。"],
+          ["발표", "오늘은 제 언어 학습 경험에 대해 말씀드리겠습니다。", "今天我将谈谈我的语言学习经验。"],
+          ["회의", "금요일까지 보고서를 보내시고 간단한 요약을 준비해 주세요。", "请在周五前发送报告并准备简短总结。"],
+          ["문화", "언어는 단어와 문법만이 아닙니다. 문화도 보여줍니다。", "语言不只是词汇和语法，它也体现文化。"],
         ],
       },
     };
-
-    const source = common[language] || common.英语;
-    const offset = level === "高级" ? 24 : level === "中级" ? 12 : 0;
-    const rotate = (list) => list.slice(offset % list.length).concat(list.slice(0, offset % list.length));
-    const rotateShort = (list) => list.slice((level === "高级" ? 6 : level === "中级" ? 3 : 0) % list.length).concat(list.slice(0, (level === "高级" ? 6 : level === "中级" ? 3 : 0) % list.length));
-    const words = rotate(source.words).map(([word, pronunciation, meaning, example]) => ({ word, pronunciation, meaning, example }));
-    const grammarItems = rotateShort(source.grammar).map(([title, explain, example, translation, question, options]) => ({
-      title: `${level}${title}`,
-      explain,
-      example,
-      translation,
-      question,
-      options,
-    }));
-    const speakingItems = rotateShort(source.speaking).map(([text, translation, tip]) => ({ text, translation, tip }));
-    const listeningItems = rotateShort(source.listening).map(([title, script, translation]) => ({ title, script, translation }));
-    return {
-      language,
-      level,
-      words,
-      grammar: grammarItems[0],
-      grammarItems,
-      speaking: speakingItems[0],
-      speakingItems,
-      listening: listeningItems[0],
-      listeningItems,
+    const jp = common["日语"];
+    const kr = common["韩语"];
+    const en = common["英语"];
+    const pick = (arr, n) => {
+      const copy = arr.slice(0, n);
+      while (copy.length < n) copy.push(arr[copy.length % arr.length]);
+      return copy;
     };
+    const rotateShort = (arr) => arr.slice(0, Math.min(10, arr.length));
+    const rotateMid = (arr) => arr.slice(0, Math.min(15, arr.length));
+    const round1 = (arr) => arr.map(([a, b, c, d]) => ({ word: a, pronunciation: b, meaning: c, example: d }));
+    const round2 = (arr) => arr.map(([a, b, c, d]) => ({ word: a + "（二）", pronunciation: b, meaning: c, example: d }));
+    if (language === "英语") {
+      return {
+        language: "英语",
+        words: level === "初级" ? round1(en.words.slice(0, 15)) : level === "中级" ? round1(en.words.slice(10, 30)) : round1(en.words.slice(20, 39)),
+        grammarItems: rotateShort(en.grammar.map(([title, explain, example, translation, question, options]) => ({ title, explain, example, translation, question, options }))),
+        grammar: en.grammar[0],
+        speakingItems: rotateShort(en.speaking.map(([text, translation, tip]) => ({ text, translation, tip }))),
+        speaking: en.speaking[0],
+        listeningItems: rotateShort(en.listening.map(([title, script, translation]) => ({ title, script, translation }))),
+        listening: en.listening[0],
+      };
+    }
+    if (language === "日语") {
+      return {
+        language: "日语",
+        words: level === "初级" ? round1(jp.words.slice(0, 15)) : level === "中级" ? round1(jp.words.slice(10, 30)) : round1(jp.words.slice(20, 39)),
+        grammarItems: rotateShort(jp.grammar.map(([title, explain, example, translation, question, options]) => ({ title, explain, example, translation, question, options }))),
+        grammar: jp.grammar[0],
+        speakingItems: rotateShort(jp.speaking.map(([text, translation, tip]) => ({ text, translation, tip }))),
+        speaking: jp.speaking[0],
+        listeningItems: rotateShort(jp.listening.map(([title, script, translation]) => ({ title, script, translation }))),
+        listening: jp.listening[0],
+      };
+    }
+    if (language === "韩语") {
+      return {
+        language: "韩语",
+        words: level === "初级" ? round1(kr.words.slice(0, 15)) : level === "中级" ? round1(kr.words.slice(10, 30)) : round1(kr.words.slice(20, 39)),
+        grammarItems: rotateShort(kr.grammar.map(([title, explain, example, translation, question, options]) => ({ title, explain, example, translation, question, options }))),
+        grammar: kr.grammar[0],
+        speakingItems: rotateShort(kr.speaking.map(([text, translation, tip]) => ({ text, translation, tip }))),
+        speaking: kr.speaking[0],
+        listeningItems: rotateShort(kr.listening.map(([title, script, translation]) => ({ title, script, translation }))),
+        listening: kr.listening[0],
+      };
+    }
+    return { language: "英语", words: round1(en.words.slice(0, 15)), grammar: en.grammar[0], speaking: en.speaking[0], listening: en.listening[0], grammarItems: [], speakingItems: [], listeningItems: [] };
   }
 
   function getLearningModuleData(language, level) {
-    const expanded = buildExpandedLearningData(language, level);
-    if (expanded) return expanded;
-
-    const bank = {
-      日语: {
-        初级: {
-          words: [
-            { word: "こんにちは", pronunciation: "konnichiwa", meaning: "你好", example: "こんにちは、田中さん。" },
-            { word: "ありがとう", pronunciation: "arigatou", meaning: "谢谢", example: "どうもありがとうございます。" },
-            { word: "家族", pronunciation: "かぞく / kazoku", meaning: "家人", example: "私の家族は四人です。" },
-            { word: "時間", pronunciation: "じかん / jikan", meaning: "时间", example: "今、何時ですか。" },
-          ],
-          grammar: { title: "助词「は」和「が」", explain: "「は」提示主题，「が」强调主语或新信息。初学阶段先掌握主题句表达。", example: "私は学生です。", translation: "我是学生。", question: "选择合适助词：私___学生です。", options: ["は", "を", "に", "で"] },
-          speaking: { text: "はじめまして。私は李です。よろしくお願いします。", translation: "初次见面。我姓李，请多关照。", tip: "注意「は」读作 wa，「よろしく」保持连贯。" },
-          listening: { title: "日常问候", script: "こんにちは。私は李です。中国から来ました。日本語を勉強しています。", translation: "你好。我姓李，来自中国。我正在学习日语。" },
-        },
-        中级: {
-          words: [
-            { word: "予約", pronunciation: "よやく / yoyaku", meaning: "预约", example: "レストランを予約しました。" },
-            { word: "旅行", pronunciation: "りょこう / ryokou", meaning: "旅行", example: "京都へ旅行に行きます。" },
-            { word: "説明", pronunciation: "せつめい / setsumei", meaning: "说明", example: "もう一度説明してください。" },
-            { word: "経験", pronunciation: "けいけん / keiken", meaning: "经验", example: "日本で働いた経験があります。" },
-          ],
-          grammar: { title: "动词て形", explain: "て形可用于连接动作、提出请求、描述正在进行的动作。", example: "窓を開けてください。", translation: "请打开窗户。", question: "选择合适表达：少し待っ___ください。", options: ["て", "た", "ない", "ます"] },
-          speaking: { text: "すみません、駅までの行き方を教えてください。", translation: "不好意思，请告诉我去车站的路。", tip: "「教えてください」是礼貌请求，语调自然下降。" },
-          listening: { title: "旅行咨询", script: "すみません。京都駅まで行きたいです。どの電車に乗ればいいですか。", translation: "不好意思。我想去京都站。应该坐哪趟电车？" },
-        },
-        高级: {
-          words: [
-            { word: "会議", pronunciation: "かいぎ / kaigi", meaning: "会议", example: "午後三時から会議があります。" },
-            { word: "提案", pronunciation: "ていあん / teian", meaning: "提案", example: "新しい計画を提案します。" },
-            { word: "拝見", pronunciation: "はいけん / haiken", meaning: "拜读、看（谦让语）", example: "資料を拝見しました。" },
-            { word: "恐れ入ります", pronunciation: "おそれいります / osoreirimasu", meaning: "不好意思、劳驾", example: "恐れ入りますが、少々お待ちください。" },
-          ],
-          grammar: { title: "敬语与商务表达", explain: "高级日语要区分尊敬语、谦让语和郑重语，根据商务场景选择合适表达。", example: "資料を拝見いたしました。", translation: "我已经拜读了资料。", question: "选择谦让表达：資料を___しました。", options: ["拝見", "見る", "見ます", "見た"] },
-          speaking: { text: "本日はお時間をいただき、誠にありがとうございます。", translation: "非常感谢您今天抽出时间。", tip: "商务场景语速放慢，重读「誠にありがとうございます」。" },
-          listening: { title: "商务会面", script: "本日はお忙しいところ、お時間をいただきまして、誠にありがとうございます。", translation: "感谢您在百忙之中抽出时间。" },
-        },
-      },
-      韩语: {
-        初级: {
-          words: [
-            { word: "안녕하세요", pronunciation: "annyeonghaseyo", meaning: "你好", example: "안녕하세요, 저는 민수예요." },
-            { word: "감사합니다", pronunciation: "gamsahamnida", meaning: "谢谢", example: "정말 감사합니다." },
-            { word: "가족", pronunciation: "gajok", meaning: "家人", example: "우리 가족은 네 명이에요." },
-            { word: "시간", pronunciation: "sigan", meaning: "时间", example: "지금 몇 시예요?" },
-          ],
-          grammar: { title: "助词 은/는 和 이/가", explain: "은/는 用于提示主题，이/가 用于强调主语或新信息。", example: "저는 학생이에요.", translation: "我是学生。", question: "选择合适助词：저___ 학생이에요.", options: ["는", "를", "에", "도"] },
-          speaking: { text: "안녕하세요. 저는 리밍이에요. 만나서 반갑습니다.", translation: "你好。我是李明。很高兴认识你。", tip: "注意收音和连读，「반갑습니다」不要逐字断开。" },
-          listening: { title: "日常问候", script: "안녕하세요. 저는 리밍이에요. 중국에서 왔어요. 한국어를 공부하고 있어요.", translation: "你好。我是李明，来自中国。我正在学习韩语。" },
-        },
-        中级: {
-          words: [
-            { word: "예약", pronunciation: "yeyak", meaning: "预约", example: "식당을 예약했어요." },
-            { word: "여행", pronunciation: "yeohaeng", meaning: "旅行", example: "서울로 여행을 가요." },
-            { word: "설명", pronunciation: "seolmyeong", meaning: "说明", example: "다시 설명해 주세요." },
-            { word: "경험", pronunciation: "gyeongheom", meaning: "经验", example: "한국에서 일한 경험이 있어요." },
-          ],
-          grammar: { title: "过去时 -았/었어요", explain: "动词或形容词词干结合 -았/었어요 表示过去发生的动作或状态。", example: "어제 영화를 봤어요.", translation: "昨天看了电影。", question: "选择合适表达：어제 친구를 ___어요.", options: ["만났", "만나고", "만날", "만나겠"] },
-          speaking: { text: "실례지만, 지하철역이 어디에 있어요?", translation: "不好意思，请问地铁站在哪里？", tip: "「실례지만」用于礼貌开场，句尾保持上扬。" },
-          listening: { title: "问路", script: "실례지만, 지하철역이 어디에 있어요? 이 길로 쭉 가면 보여요.", translation: "不好意思，地铁站在哪里？沿着这条路一直走就能看到。" },
-        },
-        高级: {
-          words: [
-            { word: "회의", pronunciation: "hoeui", meaning: "会议", example: "오후 세 시에 회의가 있습니다." },
-            { word: "제안", pronunciation: "jean", meaning: "提案", example: "새로운 계획을 제안합니다." },
-            { word: "확인", pronunciation: "hwagin", meaning: "确认", example: "자료를 확인했습니다." },
-            { word: "양해", pronunciation: "yanghae", meaning: "谅解", example: "양해 부탁드립니다." },
-          ],
-          grammar: { title: "正式敬语 -습니다/-ㅂ니다", explain: "商务和正式场合常用 -습니다/-ㅂ니다，语气更正式、礼貌。", example: "자료를 확인했습니다.", translation: "我已经确认了资料。", question: "选择正式表达：회의를 시작하__.", options: ["겠습니다", "고 있어", "자", "네"] },
-          speaking: { text: "오늘 회의에 참석해 주셔서 감사합니다.", translation: "感谢各位参加今天的会议。", tip: "正式场合使用敬语结尾，语速稳定清晰。" },
-          listening: { title: "商务会议", script: "오늘 회의에 참석해 주셔서 감사합니다. 먼저 새로운 제안을 설명드리겠습니다.", translation: "感谢各位参加今天的会议。首先我将说明新的提案。" },
-        },
-      },
-    };
-    return bank[language]?.[level] || bank[language]?.初级 || bank.日语.初级;
+    return buildExpandedLearningData(language, level);
   }
 
   function speakCurrentPracticeText() {
-    const supported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-    const headings = Array.from(document.querySelectorAll("h1, h2, h3")).map((h) => h.textContent.trim()).filter(Boolean);
-    const text =
-      headings.find((item) => /[A-Za-z]{3,}/.test(item)) ||
-      headings.find((item) => item !== "听力训练" && item !== "口语跟读") ||
-      "Welcome to LinguaVerse.";
-
-    if (!supported) {
-      showToast("当前浏览器不支持语音朗读。");
-      return;
+    const heading = Array.from(document.querySelectorAll("h2, h3")).find((item) => {
+      const text = item.textContent.trim();
+      return text.length > 3 && text.length < 200 && !text.includes("拼写") && !text.includes("提示");
+    });
+    const text = heading?.textContent?.trim() || "";
+    const context = getActiveCourseContext();
+    if (text) {
+      speakTextWithVoice(text, context.language);
+      showToast("正在播放语音朗读。");
+    } else {
+      showToast("未找到可朗读内容。");
     }
-
-    speakTextWithVoice(text, "");
   }
 
   function speakTextWithVoice(text, language) {
-    const supported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-    if (!supported) {
-      showToast("当前浏览器不支持语音朗读。");
-      return;
-    }
-    window.speechSynthesis.cancel();
+    if (!text) return;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang =
-      language === "日语" || /[ぁ-んァ-ン]/.test(text)
-        ? "ja-JP"
-        : language === "韩语" || /[가-힣]/.test(text)
-        ? "ko-KR"
-        : /[A-Za-z]/.test(text)
-        ? "en-US"
-        : "zh-CN";
     utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-    showToast("正在播放语音朗读。");
+    utterance.pitch = 1.0;
+    const langMap = { 英语: "en-US", 日语: "ja-JP", 韩语: "ko-KR" };
+    utterance.lang = langMap[language] || "en-US";
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
   }
 
   function copyShareLink() {
-    const link = location.href;
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(link).then(
-        () => showToast("分享链接已复制。"),
-        () => showToast("当前浏览器不允许复制，请手动复制地址栏链接。")
-      );
+    const url = location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => showToast("链接已复制。")).catch(() => showToast(链接：));
     } else {
-      showToast("当前浏览器不支持自动复制，请手动复制地址栏链接。");
+      showToast(链接：);
     }
   }
 
@@ -1874,45 +2341,42 @@
     }
     toast.textContent = message;
     toast.classList.add("show");
-    clearTimeout(showToast.timer);
-    showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove("show"), 2600);
   }
 
-  function showInfoModal(title, body) {
+  function showInfoModal(title, bodyHtml) {
     let modal = document.getElementById(modalId);
     if (!modal) {
       modal = document.createElement("div");
       modal.id = modalId;
-      modal.innerHTML = `
-        <div class="linguaverse-modal-card" role="dialog" aria-modal="true">
-          <div class="linguaverse-modal-head">
-            <h3></h3>
-            <button type="button">知道了</button>
-          </div>
-          <div class="linguaverse-modal-body"></div>
-        </div>
-      `;
       modal.addEventListener("click", (event) => {
-        if (event.target === modal || event.target.tagName === "BUTTON") modal.classList.remove("show");
+        if (event.target === modal) modal.classList.remove("show");
       });
       document.body.appendChild(modal);
     }
-
-    modal.querySelector("h3").textContent = title;
-    modal.querySelector(".linguaverse-modal-body").innerHTML = body;
+    modal.innerHTML = 
+      <div class="linguaverse-modal-card">
+        <div class="linguaverse-modal-head">
+          <h3></h3>
+          <button onclick="document.getElementById('').classList.remove('show')">关闭</button>
+        </div>
+        <div class="linguaverse-modal-body"></div>
+      </div>
+    ;
     modal.classList.add("show");
   }
 
-  function getInfoContent(type) {
-    const content = {
-      about: "LinguaVerse 是一个多语言学习平台，覆盖英语、日语、韩语课程和听说读写训练模块。",
-      contact: "联系邮箱：hello@linguaverse.com<br>我们会持续收集学习者反馈，优化课程与社区体验。",
-      careers: "LinguaVerse 欢迎课程教研、产品设计和社区运营方向的人才加入。",
-      help: "你可以从课程中心选择课程，也可以进入单词、语法、口语、听力模块进行练习。",
-      terms: "使用 LinguaVerse 即表示你同意遵守社区规范、学习内容使用规则和账号安全要求。",
-      privacy: "LinguaVerse 尊重用户隐私，学习数据仅用于课程推荐、进度记录和体验优化。",
-      copyright: "© 2024 LinguaVerse. All rights reserved.",
+  function getInfoContent(key) {
+    const contents = {
+      about: "<p>我们致力于提供优质语言学习资源，涵盖英语、日语和韩语课程。通过系统化课程和互动练习，帮助学习者高效掌握语言技能。</p>",
+      contact: "<p>欢迎通过官网或邮件与我们取得联系。我们会尽快回复学习咨询、合作建议和课程反馈。</p>",
+      careers: "<p>如果你热爱语言教育并具备相关背景，欢迎了解我们的岗位机会。请将简历发送至招聘邮箱。</p>",
+      help: "<p>常见问题包括课程选择、学习进度同步、账户设置和测验规则。如需进一步帮助，请提交工单或发送邮件。</p>",
+      terms: "<p>使用本平台即表示你同意相关服务条款。请遵守社区规范，尊重版权和他人权益。</p>",
+      privacy: "<p>我们重视用户隐私，严格保护个人信息。未经明确授权，不会向第三方分享个人数据。</p>",
+      copyright: "<p>所有课程内容、视频、文字和资料受版权保护。未经授权，禁止复制、传播或用于商业用途。</p>",
     };
-    return content[type] || "该页面正在准备中。";
+    return contents[key] || "<p>信息正在整理中，请稍后查看。</p>";
   }
 })();
