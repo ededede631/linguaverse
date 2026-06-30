@@ -171,6 +171,15 @@
       if (t.includes("3万+") && t.includes("满意度") && t.length < 500) el.style.display = "none";
       if (t.includes("今日学习目标") && t.includes("累计单词") && t.length < 500) el.style.display = "none";
     });
+    document.querySelectorAll("p,span,div").forEach(el => {
+      const t = (el.textContent || "").trim();
+      if (/^(1\.2万\+|8千\+|6千\+)\s*学习者$/.test(t)) el.textContent = "系统化学习路径";
+      if (/^(3万\+|10万\+|98%)$/.test(t)) el.closest("section,div")?.setAttribute("data-lv-hide-stat", "1");
+    });
+    document.querySelectorAll("[data-lv-hide-stat='1']").forEach(el => {
+      const t = el.innerText || "";
+      if (t.includes("注册用户") || t.includes("满意度") || t.includes("学习时长")) el.style.display = "none";
+    });
     if (!document.getElementById("lv-position-panel")) {
       root.insertAdjacentHTML("afterbegin", `<section id="lv-position-panel" class="lv-panel lv-hero"><div><span class="lv-chip">能力补强</span><h2>已从展示页升级为轻量学习工具</h2><p>新增本地学习记录、生词本、错题复盘、打卡、章节闭环、触屏手写、移动端优化、离线缓存、隐私与版权说明。账号云同步、AI发音评分、客服、ICP备案和正版内容库仍需要后端与正式运营资质。</p></div><button class="lv-primary" data-lv-open="roadmap">查看升级边界</button></section>`);
     }
