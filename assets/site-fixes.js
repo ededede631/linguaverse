@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260701e";
+  const VERSION = "20260701f";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -91,11 +91,18 @@
   injectStyles();
   registerSW();
   ready(() => {
+    normalizeSpellingRoute();
     patchAll();
-    window.addEventListener("hashchange", () => setTimeout(patchAll, 120));
+    window.addEventListener("hashchange", () => { normalizeSpellingRoute(); setTimeout(patchAll, 120); });
     new MutationObserver(debounce(patchAll, 120)).observe(document.body, { childList: true, subtree: true });
     setInterval(patchAll, 1200);
   });
+
+  function normalizeSpellingRoute() {
+    if ((location.hash || "").includes("/learn/spelling")) {
+      location.replace(`${location.pathname}${location.search}#/learn/listening?module=spelling`);
+    }
+  }
 
   function patchAll() {
     cleanCopy();
@@ -245,7 +252,7 @@
 
   function patchLearnModule() {
     const h = location.hash || "";
-    const module = h.includes("/learn/vocabulary") ? "vocabulary" : h.includes("/learn/grammar") ? "grammar" : h.includes("/learn/speaking") ? "speaking" : h.includes("/learn/listening") ? "listening" : h.includes("/learn/spelling") ? "spelling" : "";
+    const module = h.includes("module=spelling") || h.includes("/learn/spelling") ? "spelling" : h.includes("/learn/vocabulary") ? "vocabulary" : h.includes("/learn/grammar") ? "grammar" : h.includes("/learn/speaking") ? "speaking" : h.includes("/learn/listening") ? "listening" : "";
     if (!module) return;
     const c = ctx(), d = pack(c);
     const root = Array.from(document.querySelectorAll(".container,main")).find(x => /单词记忆|语法练习|口语跟读|听力训练|拼写/.test(x.innerText || "")) || document.querySelector("main") || document.body;
@@ -258,7 +265,10 @@
   }
 
   function moduleNav(active) {
-    return [["vocabulary", "单词记忆"], ["grammar", "语法练习"], ["speaking", "口语跟读"], ["listening", "听力训练"], ["spelling", "拼写练习"]].map(([k, n], i) => i === 0 ? `<div class="lv-tabs"><a class="${active === k ? "active" : ""}" href="#/learn/${k}">${n}</a>` : `<a class="${active === k ? "active" : ""}" href="#/learn/${k}">${n}</a>${i === 4 ? "</div>" : ""}`).join("");
+    return [["vocabulary", "单词记忆"], ["grammar", "语法练习"], ["speaking", "口语跟读"], ["listening", "听力训练"], ["spelling", "拼写练习"]].map(([k, n], i) => {
+      const href = k === "spelling" ? "#/learn/listening?module=spelling" : `#/learn/${k}`;
+      return i === 0 ? `<div class="lv-tabs"><a class="${active === k ? "active" : ""}" href="${href}">${n}</a>` : `<a class="${active === k ? "active" : ""}" href="${href}">${n}</a>${i === 4 ? "</div>" : ""}`;
+    }).join("");
   }
 
   function moduleSwitcher(c) {
