@@ -248,6 +248,7 @@
     cleanDemoCopy();
     formatCourseDurations();
     patchDomesticVideoPlayers();
+    patchLanguageLearningModules();
     makeFooterItemsClickable();
     makeTopicsClickable();
     labelIconButtons();
@@ -709,7 +710,7 @@
       const text = button.textContent.trim();
       if (!text || button.getAttribute(fixedAttr) === "demo-button") return;
 
-      if (["发布", "分享", "关注", "编辑", "加入收藏", "开始学习", "查看详情", "播放原音", "点击播放语音朗读", "开始测验", "标记完成"].includes(text)) {
+      if (["发布", "分享", "关注", "编辑", "加入收藏", "开始学习", "立即开始学习", "查看详情", "播放原音", "点击播放语音朗读", "开始测验", "标记完成"].includes(text)) {
         button.setAttribute(fixedAttr, "demo-button");
         button.addEventListener("click", handleDemoButtonClick);
       }
@@ -783,11 +784,18 @@
       return true;
     }
 
-    if (text === "开始学习" && hash.includes("/courses/")) {
+    if ((text === "开始学习" || text === "立即开始学习") && hash.includes("/courses/")) {
       event.preventDefault();
       event.stopPropagation();
-      location.hash = "#/learn/vocabulary";
-      showToast("已进入单词记忆模块。");
+      const context = persistCourseContextFromPage();
+      const courseId = getCourseIdFromHash(hash);
+      if (courseId) {
+        location.hash = `#/courses/${courseId}/chapter/1`;
+        showToast(`已进入「${context.courseTitle || context.language + "课程"}」第1章。`);
+      } else {
+        scrollToCourseChapters();
+        showToast("已定位到课程章节，请选择章节开始学习。");
+      }
       return true;
     }
 
@@ -830,17 +838,26 @@
 
     if (href.endsWith("#/grammar")) {
       event.preventDefault();
+      persistCourseContextFromPage();
       location.hash = "#/learn/grammar";
       return;
     }
     if (href.endsWith("#/speaking")) {
       event.preventDefault();
+      persistCourseContextFromPage();
       location.hash = "#/learn/speaking";
       return;
     }
     if (href.endsWith("#/listening")) {
       event.preventDefault();
+      persistCourseContextFromPage();
       location.hash = "#/learn/listening";
+      return;
+    }
+    if (href.endsWith("#/vocabulary")) {
+      event.preventDefault();
+      persistCourseContextFromPage();
+      location.hash = "#/learn/vocabulary";
       return;
     }
 
@@ -913,6 +930,288 @@
       description: "这里会展示该话题下的学习动态和讨论内容。",
       tip: "你可以关注该话题，也可以发布内容参与讨论。",
     };
+  }
+
+  function getCourseIdFromHash(hash) {
+    const match = String(hash || location.hash || "").match(/#\/courses\/(\d+)/);
+    return match ? match[1] : "";
+  }
+
+  function getCourseContextFromPage() {
+    const text = (document.body.innerText || "").replace(/\s+/g, " ");
+    const headings = Array.from(document.querySelectorAll("h1, h2"))
+      .map((item) => item.textContent.trim())
+      .filter(Boolean);
+    const courseTitle =
+      headings.find((item) => /英语|日语|韩语/.test(item) && !/LinguaVerse|课程中心|学习中心/.test(item)) ||
+      headings.find((item) => /入门|进阶|高级|精通/.test(item)) ||
+      "";
+    let language = "英语";
+    if (/🇯🇵|日语/.test(text)) language = "日语";
+    if (/🇰🇷|韩语/.test(text)) language = "韩语";
+    const level = /高级|精通/.test(text) ? "高级" : /中级|进阶/.test(text) ? "中级" : "初级";
+    return { language, level, courseTitle, courseId: getCourseIdFromHash(location.hash) };
+  }
+
+  function persistCourseContextFromPage() {
+    const context = getCourseContextFromPage();
+    window.__linguaverseCourseContext = context;
+    try {
+      localStorage.setItem("linguaverseCourseContext", JSON.stringify(context));
+    } catch (_) {}
+    return context;
+  }
+
+  function getActiveCourseContext() {
+    if (/#\/courses\/\d+/.test(location.hash || "")) return persistCourseContextFromPage();
+    if (window.__linguaverseCourseContext) return window.__linguaverseCourseContext;
+    try {
+      const saved = JSON.parse(localStorage.getItem("linguaverseCourseContext") || "null");
+      if (saved && saved.language) return saved;
+    } catch (_) {}
+    return { language: "英语", level: "初级", courseTitle: "英语课程", courseId: "" };
+  }
+
+  function scrollToCourseChapters() {
+    const heading = Array.from(document.querySelectorAll("h1, h2, h3")).find((item) => item.textContent.includes("课程章节"));
+    heading?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function patchLanguageLearningModules() {
+    const hash = location.hash || "";
+    const module = hash.includes("/learn/vocabulary")
+      ? "vocabulary"
+      : hash.includes("/learn/grammar")
+      ? "grammar"
+      : hash.includes("/learn/speaking")
+      ? "speaking"
+      : hash.includes("/learn/listening")
+      ? "listening"
+      : "";
+    if (!module) return;
+
+    const context = getActiveCourseContext();
+    if (context.language === "英语") return;
+
+    const titleMap = {
+      vocabulary: "单词记忆",
+      grammar: "语法练习",
+      speaking: "口语跟读",
+      listening: "听力训练",
+    };
+    const container = Array.from(document.querySelectorAll(".container")).find((item) => {
+      const text = item.innerText || "";
+      return text.includes(titleMap[module]) && !text.includes("LinguaVerse");
+    });
+    if (!container) return;
+
+    const key = `${context.language}-${context.level}-${module}`;
+    if (container.getAttribute("data-linguaverse-learning-key") === key) return;
+    container.setAttribute("data-linguaverse-learning-key", key);
+    container.className = "container mx-auto py-10 max-w-4xl";
+    container.innerHTML = getLearningModuleHtml(context, module);
+  }
+
+  function getLearningModuleHtml(context, module) {
+    const data = getLearningModuleData(context.language, context.level);
+    const moduleInfo = {
+      vocabulary: {
+        title: "单词记忆",
+        subtitle: `${context.language}${context.level}词汇训练，不再混用英语内容`,
+        body: renderVocabularyModule(data),
+      },
+      grammar: {
+        title: "语法练习",
+        subtitle: `${context.language}${context.level}语法题库，围绕当前课程知识点训练`,
+        body: renderGrammarModule(data),
+      },
+      speaking: {
+        title: "口语跟读",
+        subtitle: `${context.language}${context.level}跟读材料，适配当前课程发音与会话目标`,
+        body: renderSpeakingModule(data),
+      },
+      listening: {
+        title: "听力训练",
+        subtitle: `${context.language}${context.level}听力素材，按课程阶段循序渐进`,
+        body: renderListeningModule(data),
+      },
+    }[module];
+
+    return `
+      <div class="mb-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-semibold mb-4">
+          当前课程：${escapeHtml(context.courseTitle || context.language + context.level + "课程")}
+        </div>
+        <h1 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-3">${moduleInfo.title}</h1>
+        <p class="text-slate-600">${moduleInfo.subtitle}</p>
+      </div>
+      ${moduleInfo.body}
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${renderModuleJump("单词记忆", "#/learn/vocabulary", module === "vocabulary")}
+        ${renderModuleJump("语法练习", "#/learn/grammar", module === "grammar")}
+        ${renderModuleJump("口语跟读", "#/learn/speaking", module === "speaking")}
+        ${renderModuleJump("听力训练", "#/learn/listening", module === "listening")}
+      </div>
+    `;
+  }
+
+  function renderModuleJump(label, href, active) {
+    return `<a href="${href}" class="block text-center rounded-2xl px-4 py-3 text-sm font-semibold ${
+      active ? "bg-purple-600 text-white" : "bg-white text-slate-700 hover:bg-purple-50 border border-slate-200"
+    }">${label}</a>`;
+  }
+
+  function renderVocabularyModule(data) {
+    return `
+      <div class="grid md:grid-cols-2 gap-4">
+        ${data.words
+          .map(
+            (item, index) => `
+          <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+            <div class="text-sm text-slate-400 mb-2">词汇 ${index + 1}</div>
+            <div class="text-2xl font-bold text-slate-900 mb-2">${escapeHtml(item.word)}</div>
+            <div class="text-purple-700 font-semibold mb-3">${escapeHtml(item.pronunciation)}</div>
+            <div class="text-slate-700 mb-2">${escapeHtml(item.meaning)}</div>
+            <div class="text-sm text-slate-500">${escapeHtml(item.example)}</div>
+          </div>`
+          )
+          .join("")}
+      </div>
+      <div class="mt-6 rounded-3xl bg-purple-50 border border-purple-100 p-5 text-slate-700">
+        建议：先听读词汇，再结合例句复述。系统已根据当前课程语种切换内容。
+      </div>
+    `;
+  }
+
+  function renderGrammarModule(data) {
+    return `
+      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+        <div class="text-sm text-slate-400 mb-2">语法重点</div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.grammar.title)}</h2>
+        <p class="text-slate-600 mb-5">${escapeHtml(data.grammar.explain)}</p>
+        <div class="rounded-2xl bg-slate-50 p-4 mb-5">
+          <div class="text-sm text-slate-500 mb-1">例句</div>
+          <div class="text-xl font-semibold text-slate-900">${escapeHtml(data.grammar.example)}</div>
+          <div class="text-slate-500 mt-1">${escapeHtml(data.grammar.translation)}</div>
+        </div>
+        <h3 class="font-bold text-slate-900 mb-3">${escapeHtml(data.grammar.question)}</h3>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${data.grammar.options
+            .map((option) => `<button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-purple-300 hover:bg-purple-50">${escapeHtml(option)}</button>`)
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSpeakingModule(data) {
+    return `
+      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+        <div class="text-sm text-slate-400 mb-2">跟读句子</div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.speaking.text)}</h2>
+        <p class="text-slate-600 mb-5">${escapeHtml(data.speaking.translation)}</p>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">播放原音</button>
+          <button class="rounded-2xl bg-slate-900 text-white px-4 py-3 font-semibold">开始跟读</button>
+          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">下一句</button>
+        </div>
+        <div class="mt-5 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+          发音提示：${escapeHtml(data.speaking.tip)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderListeningModule(data) {
+    return `
+      <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+        <div class="text-sm text-slate-400 mb-2">听力材料</div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(data.listening.title)}</h2>
+        <p class="text-slate-700 leading-8 mb-5">${escapeHtml(data.listening.script)}</p>
+        <div class="rounded-2xl bg-slate-50 p-4 mb-5 text-slate-600">${escapeHtml(data.listening.translation)}</div>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">点击播放语音朗读</button>
+          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">开始测验</button>
+          <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function getLearningModuleData(language, level) {
+    const bank = {
+      日语: {
+        初级: {
+          words: [
+            { word: "こんにちは", pronunciation: "konnichiwa", meaning: "你好", example: "こんにちは、田中さん。" },
+            { word: "ありがとう", pronunciation: "arigatou", meaning: "谢谢", example: "どうもありがとうございます。" },
+            { word: "家族", pronunciation: "かぞく / kazoku", meaning: "家人", example: "私の家族は四人です。" },
+            { word: "時間", pronunciation: "じかん / jikan", meaning: "时间", example: "今、何時ですか。" },
+          ],
+          grammar: { title: "助词「は」和「が」", explain: "「は」提示主题，「が」强调主语或新信息。初学阶段先掌握主题句表达。", example: "私は学生です。", translation: "我是学生。", question: "选择合适助词：私___学生です。", options: ["は", "を", "に", "で"] },
+          speaking: { text: "はじめまして。私は李です。よろしくお願いします。", translation: "初次见面。我姓李，请多关照。", tip: "注意「は」读作 wa，「よろしく」保持连贯。" },
+          listening: { title: "日常问候", script: "こんにちは。私は李です。中国から来ました。日本語を勉強しています。", translation: "你好。我姓李，来自中国。我正在学习日语。" },
+        },
+        中级: {
+          words: [
+            { word: "予約", pronunciation: "よやく / yoyaku", meaning: "预约", example: "レストランを予約しました。" },
+            { word: "旅行", pronunciation: "りょこう / ryokou", meaning: "旅行", example: "京都へ旅行に行きます。" },
+            { word: "説明", pronunciation: "せつめい / setsumei", meaning: "说明", example: "もう一度説明してください。" },
+            { word: "経験", pronunciation: "けいけん / keiken", meaning: "经验", example: "日本で働いた経験があります。" },
+          ],
+          grammar: { title: "动词て形", explain: "て形可用于连接动作、提出请求、描述正在进行的动作。", example: "窓を開けてください。", translation: "请打开窗户。", question: "选择合适表达：少し待っ___ください。", options: ["て", "た", "ない", "ます"] },
+          speaking: { text: "すみません、駅までの行き方を教えてください。", translation: "不好意思，请告诉我去车站的路。", tip: "「教えてください」是礼貌请求，语调自然下降。" },
+          listening: { title: "旅行咨询", script: "すみません。京都駅まで行きたいです。どの電車に乗ればいいですか。", translation: "不好意思。我想去京都站。应该坐哪趟电车？" },
+        },
+        高级: {
+          words: [
+            { word: "会議", pronunciation: "かいぎ / kaigi", meaning: "会议", example: "午後三時から会議があります。" },
+            { word: "提案", pronunciation: "ていあん / teian", meaning: "提案", example: "新しい計画を提案します。" },
+            { word: "拝見", pronunciation: "はいけん / haiken", meaning: "拜读、看（谦让语）", example: "資料を拝見しました。" },
+            { word: "恐れ入ります", pronunciation: "おそれいります / osoreirimasu", meaning: "不好意思、劳驾", example: "恐れ入りますが、少々お待ちください。" },
+          ],
+          grammar: { title: "敬语与商务表达", explain: "高级日语要区分尊敬语、谦让语和郑重语，根据商务场景选择合适表达。", example: "資料を拝見いたしました。", translation: "我已经拜读了资料。", question: "选择谦让表达：資料を___しました。", options: ["拝見", "見る", "見ます", "見た"] },
+          speaking: { text: "本日はお時間をいただき、誠にありがとうございます。", translation: "非常感谢您今天抽出时间。", tip: "商务场景语速放慢，重读「誠にありがとうございます」。" },
+          listening: { title: "商务会面", script: "本日はお忙しいところ、お時間をいただきまして、誠にありがとうございます。", translation: "感谢您在百忙之中抽出时间。" },
+        },
+      },
+      韩语: {
+        初级: {
+          words: [
+            { word: "안녕하세요", pronunciation: "annyeonghaseyo", meaning: "你好", example: "안녕하세요, 저는 민수예요." },
+            { word: "감사합니다", pronunciation: "gamsahamnida", meaning: "谢谢", example: "정말 감사합니다." },
+            { word: "가족", pronunciation: "gajok", meaning: "家人", example: "우리 가족은 네 명이에요." },
+            { word: "시간", pronunciation: "sigan", meaning: "时间", example: "지금 몇 시예요?" },
+          ],
+          grammar: { title: "助词 은/는 和 이/가", explain: "은/는 用于提示主题，이/가 用于强调主语或新信息。", example: "저는 학생이에요.", translation: "我是学生。", question: "选择合适助词：저___ 학생이에요.", options: ["는", "를", "에", "도"] },
+          speaking: { text: "안녕하세요. 저는 리밍이에요. 만나서 반갑습니다.", translation: "你好。我是李明。很高兴认识你。", tip: "注意收音和连读，「반갑습니다」不要逐字断开。" },
+          listening: { title: "日常问候", script: "안녕하세요. 저는 리밍이에요. 중국에서 왔어요. 한국어를 공부하고 있어요.", translation: "你好。我是李明，来自中国。我正在学习韩语。" },
+        },
+        中级: {
+          words: [
+            { word: "예약", pronunciation: "yeyak", meaning: "预约", example: "식당을 예약했어요." },
+            { word: "여행", pronunciation: "yeohaeng", meaning: "旅行", example: "서울로 여행을 가요." },
+            { word: "설명", pronunciation: "seolmyeong", meaning: "说明", example: "다시 설명해 주세요." },
+            { word: "경험", pronunciation: "gyeongheom", meaning: "经验", example: "한국에서 일한 경험이 있어요." },
+          ],
+          grammar: { title: "过去时 -았/었어요", explain: "动词或形容词词干结合 -았/었어요 表示过去发生的动作或状态。", example: "어제 영화를 봤어요.", translation: "昨天看了电影。", question: "选择合适表达：어제 친구를 ___어요.", options: ["만났", "만나고", "만날", "만나겠"] },
+          speaking: { text: "실례지만, 지하철역이 어디에 있어요?", translation: "不好意思，请问地铁站在哪里？", tip: "「실례지만」用于礼貌开场，句尾保持上扬。" },
+          listening: { title: "问路", script: "실례지만, 지하철역이 어디에 있어요? 이 길로 쭉 가면 보여요.", translation: "不好意思，地铁站在哪里？沿着这条路一直走就能看到。" },
+        },
+        高级: {
+          words: [
+            { word: "회의", pronunciation: "hoeui", meaning: "会议", example: "오후 세 시에 회의가 있습니다." },
+            { word: "제안", pronunciation: "jean", meaning: "提案", example: "새로운 계획을 제안합니다." },
+            { word: "확인", pronunciation: "hwagin", meaning: "确认", example: "자료를 확인했습니다." },
+            { word: "양해", pronunciation: "yanghae", meaning: "谅解", example: "양해 부탁드립니다." },
+          ],
+          grammar: { title: "正式敬语 -습니다/-ㅂ니다", explain: "商务和正式场合常用 -습니다/-ㅂ니다，语气更正式、礼貌。", example: "자료를 확인했습니다.", translation: "我已经确认了资料。", question: "选择正式表达：회의를 시작하__.", options: ["겠습니다", "고 있어", "자", "네"] },
+          speaking: { text: "오늘 회의에 참석해 주셔서 감사합니다.", translation: "感谢各位参加今天的会议。", tip: "正式场合使用敬语结尾，语速稳定清晰。" },
+          listening: { title: "商务会议", script: "오늘 회의에 참석해 주셔서 감사합니다. 먼저 새로운 제안을 설명드리겠습니다.", translation: "感谢各位参加今天的会议。首先我将说明新的提案。" },
+        },
+      },
+    };
+    return bank[language]?.[level] || bank[language]?.初级 || bank.日语.初级;
   }
 
   function speakCurrentPracticeText() {
