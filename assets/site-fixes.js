@@ -425,6 +425,9 @@
   }
 
   function extractTopic(text) {
+    const knownTopics = ["#每日打卡", "#英语学习", "#日语入门", "#韩语学习", "#学习方法"];
+    const knownTopic = knownTopics.find((topic) => text.includes(topic));
+    if (knownTopic) return knownTopic;
     const match = text.match(/#([\u4e00-\u9fa5A-Za-z0-9_-]+)/);
     return match ? `#${match[1]}` : "";
   }
