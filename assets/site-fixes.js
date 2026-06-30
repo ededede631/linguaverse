@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260701g";
+  const VERSION = "20260701h";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -182,6 +182,7 @@
     document.querySelectorAll("p,span,div").forEach(el => {
       const t = (el.textContent || "").trim();
       if (/^(1\.2万\+|8千\+|6千\+)\s*学习者$/.test(t)) el.textContent = "系统化学习路径";
+      if (/^系统化\s*学习者$/.test(t)) el.textContent = "系统化学习路径";
       if (/^(3万\+|10万\+|98%)$/.test(t)) el.closest("section,div")?.setAttribute("data-lv-hide-stat", "1");
     });
     document.querySelectorAll("[data-lv-hide-stat='1']").forEach(el => {
