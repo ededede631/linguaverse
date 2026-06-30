@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260701b";
+  const VERSION = "20260701c";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -113,8 +113,11 @@
     const text = `${location.hash} ${document.body.innerText || ""}`;
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}"); } catch (_) {}
-    const language = /韩语|韩文|🇰🇷/.test(text) ? "韩语" : /日语|日本|🇯🇵/.test(text) ? "日语" : /英语|English|🇬🇧|🇺🇸/.test(text) ? "英语" : saved.language || "英语";
-    const level = /高级|精通|N1|商务/.test(text) ? "高级" : /中级|进阶|N2|N3/.test(text) ? "中级" : saved.level || "初级";
+    const hash = location.hash || "";
+    const isLearnRoute = /#\/learn\//.test(hash);
+    const signal = isLearnRoute ? `${saved.language || ""} ${saved.level || ""} ${hash}` : text;
+    const language = /韩语|韩文|🇰🇷/.test(signal) ? "韩语" : /日语|日本|🇯🇵/.test(signal) ? "日语" : /英语|English|🇬🇧|🇺🇸/.test(signal) ? "英语" : saved.language || "英语";
+    const level = /高级|精通|N1|商务/.test(signal) ? "高级" : /中级|进阶|N2|N3/.test(signal) ? "中级" : saved.level || "初级";
     const courseTitle = Array.from(document.querySelectorAll("h1,h2")).map(x => x.textContent.trim()).find(x => /英语|日语|韩语|第\s*\d+\s*章/.test(x)) || `${language}${level}课程`;
     const c = { language, level, courseTitle };
     try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(c)); } catch (_) {}
@@ -147,6 +150,8 @@
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
       let v = n.nodeValue.replaceAll("静态演示版", "正式学习版").replaceAll("演示数据", "学习数据").replaceAll("Demo", "学习版").replaceAll("demo", "学习版");
+      v = v.replaceAll("趣味互动学习模块", "阶段化学习工具").replaceAll("（以下为演示评价）", "学习者反馈").replaceAll("和百万小伙伴一起学习", "和学习伙伴一起交流");
+      v = v.replaceAll("配合艾宾浩斯复习曲线，效率提升好多。", "配合生词本和错题复盘，复习更方便。");
       if (v !== n.nodeValue) n.nodeValue = v;
     });
   }
@@ -160,6 +165,10 @@
       }
     });
     const root = document.querySelector("main") || document.body;
+    Array.from(document.querySelectorAll("section,div")).forEach(el => {
+      const t = el.innerText || "";
+      if (t.includes("3万+") && t.includes("满意度") && t.length < 500) el.style.display = "none";
+    });
     if (!document.getElementById("lv-position-panel")) {
       root.insertAdjacentHTML("afterbegin", `<section id="lv-position-panel" class="lv-panel lv-hero"><div><span class="lv-chip">能力补强</span><h2>已从展示页升级为轻量学习工具</h2><p>新增本地学习记录、生词本、错题复盘、打卡、章节闭环、触屏手写、移动端优化、离线缓存、隐私与版权说明。账号云同步、AI发音评分、客服、ICP备案和正版内容库仍需要后端与正式运营资质。</p></div><button class="lv-primary" data-lv-open="roadmap">查看升级边界</button></section>`);
     }
@@ -232,12 +241,16 @@
     root.dataset.lvModule = `${VERSION}-${module}-${c.language}-${c.level}`;
     root.className = "container mx-auto py-10 max-w-5xl";
     const names = { vocabulary: "单词记忆", grammar: "语法练习", speaking: "口语跟读", listening: "听力训练", spelling: "拼写练习" };
-    root.innerHTML = `<div class="lv-module-head"><span class="lv-chip">${c.language} · ${c.level}</span><h1>${names[module]}</h1><p>内容已按语种和阶段区分，并会写入本地学习记录。</p></div>${moduleNav(module)}${renderModule(module, c, d)}`;
+    root.innerHTML = `<div class="lv-module-head"><span class="lv-chip">${c.language} · ${c.level}</span><h1>${names[module]}</h1><p>内容已按语种和阶段区分，并会写入本地学习记录。</p>${moduleSwitcher(c)}</div>${moduleNav(module)}${renderModule(module, c, d)}`;
     if (module === "spelling") initCanvas(c);
   }
 
   function moduleNav(active) {
     return [["vocabulary", "单词记忆"], ["grammar", "语法练习"], ["speaking", "口语跟读"], ["listening", "听力训练"], ["spelling", "拼写练习"]].map(([k, n], i) => i === 0 ? `<div class="lv-tabs"><a class="${active === k ? "active" : ""}" href="#/learn/${k}">${n}</a>` : `<a class="${active === k ? "active" : ""}" href="#/learn/${k}">${n}</a>${i === 4 ? "</div>" : ""}`).join("");
+  }
+
+  function moduleSwitcher(c) {
+    return `<div class="lv-switcher"><label>语种 <select data-lv-set-language><option ${c.language === "英语" ? "selected" : ""}>英语</option><option ${c.language === "日语" ? "selected" : ""}>日语</option><option ${c.language === "韩语" ? "selected" : ""}>韩语</option></select></label><label>阶段 <select data-lv-set-level><option ${c.level === "初级" ? "selected" : ""}>初级</option><option ${c.level === "中级" ? "selected" : ""}>中级</option><option ${c.level === "高级" ? "selected" : ""}>高级</option></select></label></div>`;
   }
 
   function renderModule(module, c, d) {
@@ -331,6 +344,14 @@
     document.querySelectorAll("[data-lv-choice]").forEach(b => bind(b, "choice", () => answer(b)));
     document.querySelectorAll("[data-lv-checkin]").forEach(b => bind(b, "check", checkin));
     document.querySelectorAll("[data-lv-clear-filter]").forEach(b => bind(b, "clear", () => { localStorage.removeItem(FILTER_KEY); location.reload(); }));
+    document.querySelectorAll("[data-lv-set-language],[data-lv-set-level]").forEach(sel => bind(sel, "switch", () => {
+      const current = ctx();
+      const language = document.querySelector("[data-lv-set-language]")?.value || current.language;
+      const level = document.querySelector("[data-lv-set-level]")?.value || current.level;
+      localStorage.setItem(CONTEXT_KEY, JSON.stringify({ ...current, language, level, courseTitle: `${language}${level}课程` }));
+      document.querySelector(".container,main")?.removeAttribute("data-lv-module");
+      patchLearnModule();
+    }));
   }
 
   function bind(el, name, fn) {
@@ -338,6 +359,7 @@
     if (el.dataset[key]) return;
     el.dataset[key] = "1";
     el.addEventListener("click", fn);
+    if (el.tagName === "SELECT") el.addEventListener("change", fn);
   }
 
   function speak(text, language) {
@@ -399,7 +421,7 @@
     st.id = "lv-styles";
     st.textContent = `
       html{scroll-behavior:smooth}body{overflow-x:hidden}img,video,iframe{max-width:100%}.container{padding-left:16px!important;padding-right:16px!important}
-      .lv-panel,.lv-card{border:1px solid rgba(124,58,237,.14);background:#fff;border-radius:22px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.06);margin:16px 0}.lv-hero{display:flex;justify-content:space-between;gap:18px;align-items:center;background:linear-gradient(135deg,#f5f3ff,#ecfeff)}.lv-chip{display:inline-flex;background:#ede9fe;color:#6d28d9;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}.lv-primary,.lv-ghost,.lv-question button,.lv-tabs a,#lv-dashboard button,.lv-char-grid button{border-radius:14px;border:1px solid #ddd;padding:9px 12px;cursor:pointer;font-weight:700}.lv-primary{background:#7c3aed;color:white;border-color:#7c3aed}.lv-ghost{background:white;color:#334155}.lv-grid{display:grid;gap:14px}.lv-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.lv-list{display:grid;gap:14px}.lv-word b{font-size:22px;display:block}.lv-word span{color:#7c3aed}.lv-example{color:#475569;background:#f8fafc;border-radius:12px;padding:10px}.lv-tip{color:#0369a1;background:#ecfeff;border-radius:12px;padding:10px}.lv-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.lv-tabs a{background:white;color:#334155;text-decoration:none}.lv-tabs a.active{background:#7c3aed;color:white}.lv-flow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.lv-flow span{background:#f1f5f9;border-radius:999px;padding:8px 12px;font-weight:700}.lv-question div{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.lv-question button.ok{background:#dcfce7;border-color:#22c55e}.lv-question button.bad{background:#fee2e2;border-color:#ef4444}.lv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.lv-bili{width:100%;height:100%;min-height:320px;border:0}.lv-video-note{font-size:13px;color:#64748b}.lv-module-head h1{font-size:34px;margin:8px 0}.lv-spell-layout{display:grid;grid-template-columns:1fr 260px;gap:18px}.lv-canvas-wrap{width:320px;height:320px;max-width:100%;background:#f8fafc;border:1px solid #dbeafe;border-radius:18px;overflow:hidden}.lv-canvas-wrap canvas{width:100%;height:100%;touch-action:none}.lv-char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.lv-char-grid button.active{background:#7c3aed;color:white}#lv-dashboard{position:fixed;right:18px;bottom:18px;z-index:99997}#lv-dashboard-toggle{background:#7c3aed;color:white;border:0;box-shadow:0 10px 30px rgba(124,58,237,.35)}#lv-dashboard-panel{display:none;width:260px;background:white;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 20px 60px rgba(15,23,42,.18)}#lv-dashboard.open #lv-dashboard-panel{display:block}#${toastId}{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;background:#111827;color:white;border-radius:999px;padding:11px 16px;opacity:0;transition:.2s;max-width:calc(100vw - 32px)}#${toastId}.show{opacity:1}#${modalId}{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:99998;display:none;place-items:center;padding:20px}#${modalId}.show{display:grid}.lv-modal-card{background:white;border-radius:22px;max-width:620px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:hidden}.lv-modal-head{display:flex;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid #e2e8f0}.lv-modal-body{padding:20px;line-height:1.8}.lv-modal-head button{border:0;background:#7c3aed;color:white;border-radius:999px;padding:8px 14px;cursor:pointer}
+      .trae-browser-inspect-overlay,.trae-browser-inspect-comment-card-container,.trae-browser-inspect-drop-indicator{display:none!important;pointer-events:none!important;opacity:0!important}.lv-panel,.lv-card{border:1px solid rgba(124,58,237,.14);background:#fff;border-radius:22px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.06);margin:16px 0}.lv-hero{display:flex;justify-content:space-between;gap:18px;align-items:center;background:linear-gradient(135deg,#f5f3ff,#ecfeff)}.lv-chip{display:inline-flex;background:#ede9fe;color:#6d28d9;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}.lv-primary,.lv-ghost,.lv-question button,.lv-tabs a,#lv-dashboard button,.lv-char-grid button{border-radius:14px;border:1px solid #ddd;padding:9px 12px;cursor:pointer;font-weight:700}.lv-primary{background:#7c3aed;color:white;border-color:#7c3aed}.lv-ghost{background:white;color:#334155}.lv-switcher{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}.lv-switcher label{font-weight:700;color:#334155}.lv-switcher select{margin-left:6px;border:1px solid #ddd;border-radius:12px;padding:7px 10px;background:white}.lv-grid{display:grid;gap:14px}.lv-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.lv-list{display:grid;gap:14px}.lv-word b{font-size:22px;display:block}.lv-word span{color:#7c3aed}.lv-example{color:#475569;background:#f8fafc;border-radius:12px;padding:10px}.lv-tip{color:#0369a1;background:#ecfeff;border-radius:12px;padding:10px}.lv-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.lv-tabs a{background:white;color:#334155;text-decoration:none}.lv-tabs a.active{background:#7c3aed;color:white}.lv-flow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.lv-flow span{background:#f1f5f9;border-radius:999px;padding:8px 12px;font-weight:700}.lv-question div{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.lv-question button.ok{background:#dcfce7;border-color:#22c55e}.lv-question button.bad{background:#fee2e2;border-color:#ef4444}.lv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.lv-bili{width:100%;height:100%;min-height:320px;border:0}.lv-video-note{font-size:13px;color:#64748b}.lv-module-head h1{font-size:34px;margin:8px 0}.lv-spell-layout{display:grid;grid-template-columns:1fr 260px;gap:18px}.lv-canvas-wrap{width:320px;height:320px;max-width:100%;background:#f8fafc;border:1px solid #dbeafe;border-radius:18px;overflow:hidden}.lv-canvas-wrap canvas{width:100%;height:100%;touch-action:none}.lv-char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.lv-char-grid button.active{background:#7c3aed;color:white}#lv-dashboard{position:fixed;right:18px;bottom:18px;z-index:99997}#lv-dashboard-toggle{background:#7c3aed;color:white;border:0;box-shadow:0 10px 30px rgba(124,58,237,.35)}#lv-dashboard-panel{display:none;width:260px;background:white;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 20px 60px rgba(15,23,42,.18)}#lv-dashboard.open #lv-dashboard-panel{display:block}#${toastId}{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;background:#111827;color:white;border-radius:999px;padding:11px 16px;opacity:0;transition:.2s;max-width:calc(100vw - 32px)}#${toastId}.show{opacity:1}#${modalId}{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:99998;display:none;place-items:center;padding:20px}#${modalId}.show{display:grid}.lv-modal-card{background:white;border-radius:22px;max-width:620px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:hidden}.lv-modal-head{display:flex;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid #e2e8f0}.lv-modal-body{padding:20px;line-height:1.8}.lv-modal-head button{border:0;background:#7c3aed;color:white;border-radius:999px;padding:8px 14px;cursor:pointer}
       @media(max-width:760px){.lv-hero{display:block}.lv-grid.two,.lv-spell-layout{grid-template-columns:1fr}.lv-module-head h1{font-size:28px}.lv-tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px}.lv-tabs a{white-space:nowrap}.lv-canvas-wrap{width:280px;height:280px}.lv-bili{min-height:220px}#lv-dashboard{right:10px;bottom:10px}#lv-dashboard-panel{width:calc(100vw - 32px)}}`;
     document.head.appendChild(st);
   }
