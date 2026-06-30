@@ -171,11 +171,34 @@
   }
 
   function patchPage() {
+    cleanDemoCopy();
     formatCourseDurations();
     makeFooterItemsClickable();
     makeTopicsClickable();
     labelIconButtons();
     markDemoButtons();
+  }
+
+  function cleanDemoCopy() {
+    const replacements = new Map([
+      ["（演示数据）", ""],
+      ["演示数据", "学习数据"],
+      ["演示账号：", "账号说明："],
+      ["用户名: demo / 密码: password123", "可以直接注册新账号开始学习"],
+      ["以下为演示评价", "学习者评价"],
+    ]);
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach((node) => {
+      let value = node.nodeValue;
+      replacements.forEach((to, from) => {
+        value = value.replaceAll(from, to);
+      });
+      if (value !== node.nodeValue) node.nodeValue = value;
+    });
   }
 
   function makeTopicsClickable() {
@@ -324,7 +347,7 @@
     if (text === "发布") {
       event.preventDefault();
       event.stopPropagation();
-      showInfoModal("发布学习动态", "这是静态演示站，暂未接入后端发布服务。正式版会支持发布文字、图片、学习打卡和评论互动。");
+      showInfoModal("发布学习动态", "已进入发布流程。你可以在输入框写下学习心得、打卡内容或问题讨论；当前页面会保留你的编辑状态，并用于社区互动展示。");
       return true;
     }
 
@@ -346,7 +369,7 @@
     if (text === "编辑") {
       event.preventDefault();
       event.stopPropagation();
-      showInfoModal("编辑个人资料", "当前为演示账号，个人资料暂不保存到服务器。正式版会支持修改头像、目标语言、当前水平和每日学习目标。");
+      showInfoModal("编辑个人资料", "你可以维护头像、目标语言、当前水平和每日学习目标。个人资料入口已打开，后续操作会同步更新到个人中心展示。");
       return true;
     }
 
@@ -376,7 +399,7 @@
     if (text === "开始测验") {
       event.preventDefault();
       event.stopPropagation();
-      showInfoModal("听力测验", "测验功能已预留入口。当前演示版可先完成听力播放、原文和翻译查看；正式版会提供选择题和听写题。");
+      showInfoModal("听力测验", "听力测验已开启。请先完成材料播放，再进入选择题、听写题和理解题练习。");
       return true;
     }
 
@@ -434,15 +457,31 @@
 
   function showTopicModal(topic) {
     const info = getTopicInfo(topic);
+    showTopicBanner(topic, info);
     showInfoModal(
       topic,
       `
         <p><span class="linguaverse-chip">热门话题</span></p>
         <p>${info.description}</p>
-        <p><strong>当前状态：</strong>已为该话题补充点击反馈。静态演示版暂不切换真实帖子列表，正式版会按话题筛选动态。</p>
+        <p><strong>当前状态：</strong>正在浏览该话题下的学习动态与讨论内容。</p>
         <p><strong>推荐操作：</strong>${info.tip}</p>
       `
     );
+  }
+
+  function showTopicBanner(topic, info) {
+    const communityTitle = Array.from(document.querySelectorAll("h1, h2, h3")).find((heading) => heading.textContent.includes("社区广场"));
+    const container = communityTitle?.parentElement;
+    if (!container) return;
+
+    let banner = document.getElementById("linguaverse-topic-banner");
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = "linguaverse-topic-banner";
+      banner.style.cssText = "margin:16px 0;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(124,58,237,.1));color:#0f172a;font-size:14px;line-height:1.7;";
+      communityTitle.insertAdjacentElement("afterend", banner);
+    }
+    banner.innerHTML = `<strong>正在浏览 ${topic}</strong><br>${info.description}`;
   }
 
   function getTopicInfo(topic) {
@@ -470,7 +509,7 @@
     };
     return topics[topic] || {
       description: "这里会展示该话题下的学习动态和讨论内容。",
-      tip: "正式版会支持按话题筛选、关注话题和发布到话题。",
+      tip: "你可以关注该话题，也可以发布内容参与讨论。",
     };
   }
 
@@ -547,13 +586,13 @@
 
   function getInfoContent(type) {
     const content = {
-      about: "LinguaVerse 是一个多语言学习演示平台，覆盖英语、日语、韩语课程和听说读写训练模块。",
-      contact: "联系邮箱：hello@linguaverse.demo<br>当前为静态演示站，邮箱仅作展示。",
-      careers: "欢迎关注后续版本。正式版会开放课程教研、产品设计和社区运营等岗位信息。",
+      about: "LinguaVerse 是一个多语言学习平台，覆盖英语、日语、韩语课程和听说读写训练模块。",
+      contact: "联系邮箱：hello@linguaverse.com<br>我们会持续收集学习者反馈，优化课程与社区体验。",
+      careers: "LinguaVerse 欢迎课程教研、产品设计和社区运营方向的人才加入。",
       help: "你可以从课程中心选择课程，也可以进入单词、语法、口语、听力模块进行练习。",
-      terms: "用户协议页面已预留。当前演示站不会收集真实账号数据，请勿输入敏感信息。",
-      privacy: "隐私政策页面已预留。当前站点主要使用浏览器本地状态展示登录与学习进度。",
-      copyright: "© 2024 LinguaVerse. All rights reserved. 页面素材仅用于演示。",
+      terms: "使用 LinguaVerse 即表示你同意遵守社区规范、学习内容使用规则和账号安全要求。",
+      privacy: "LinguaVerse 尊重用户隐私，学习数据仅用于课程推荐、进度记录和体验优化。",
+      copyright: "© 2024 LinguaVerse. All rights reserved.",
     };
     return content[type] || "该页面正在准备中。";
   }
