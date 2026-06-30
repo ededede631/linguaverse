@@ -152,6 +152,7 @@
       let v = n.nodeValue.replaceAll("静态演示版", "正式学习版").replaceAll("演示数据", "学习数据").replaceAll("Demo", "学习版").replaceAll("demo", "学习版");
       v = v.replaceAll("趣味互动学习模块", "阶段化学习工具").replaceAll("（以下为演示评价）", "学习者反馈").replaceAll("和百万小伙伴一起学习", "和学习伙伴一起交流");
       v = v.replaceAll("配合艾宾浩斯复习曲线，效率提升好多。", "配合生词本和错题复盘，复习更方便。");
+      v = v.replaceAll("1.2万+", "系统化").replaceAll("8千+", "系统化").replaceAll("6千+", "系统化").replaceAll("学习者", "学习路径");
       if (v !== n.nodeValue) n.nodeValue = v;
     });
   }
@@ -168,6 +169,7 @@
     Array.from(document.querySelectorAll("section,div")).forEach(el => {
       const t = el.innerText || "";
       if (t.includes("3万+") && t.includes("满意度") && t.length < 500) el.style.display = "none";
+      if (t.includes("今日学习目标") && t.includes("累计单词") && t.length < 500) el.style.display = "none";
     });
     if (!document.getElementById("lv-position-panel")) {
       root.insertAdjacentHTML("afterbegin", `<section id="lv-position-panel" class="lv-panel lv-hero"><div><span class="lv-chip">能力补强</span><h2>已从展示页升级为轻量学习工具</h2><p>新增本地学习记录、生词本、错题复盘、打卡、章节闭环、触屏手写、移动端优化、离线缓存、隐私与版权说明。账号云同步、AI发音评分、客服、ICP备案和正版内容库仍需要后端与正式运营资质。</p></div><button class="lv-primary" data-lv-open="roadmap">查看升级边界</button></section>`);
