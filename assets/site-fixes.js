@@ -133,6 +133,16 @@
         font-size: 12px;
         font-weight: 600;
       }
+      .linguaverse-topic-link {
+        cursor: pointer;
+        border-radius: 14px;
+        transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+      }
+      .linguaverse-topic-link:hover {
+        background: rgba(14, 165, 233, .08);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 22px rgba(14, 165, 233, .12);
+      }
     `;
     document.head.appendChild(style);
   }
@@ -163,8 +173,20 @@
   function patchPage() {
     formatCourseDurations();
     makeFooterItemsClickable();
+    makeTopicsClickable();
     labelIconButtons();
     markDemoButtons();
+  }
+
+  function makeTopicsClickable() {
+    document.querySelectorAll("a").forEach((anchor) => {
+      const text = anchor.textContent.trim().replace(/\s+/g, " ");
+      const topic = extractTopic(text);
+      if (!topic || anchor.getAttribute(fixedAttr) === "topic-link") return;
+      anchor.setAttribute(fixedAttr, "topic-link");
+      anchor.classList.add("linguaverse-topic-link");
+      anchor.setAttribute("aria-label", `查看话题 ${topic}`);
+    });
   }
 
   function formatCourseDurations() {
@@ -372,6 +394,14 @@
   function fixAnchorNavigation(anchor, event) {
     const href = anchor.getAttribute("href") || "";
     const text = anchor.textContent.trim().replace(/\s+/g, " ");
+    const topic = extractTopic(text);
+
+    if (topic) {
+      event.preventDefault();
+      event.stopPropagation();
+      showTopicModal(topic);
+      return;
+    }
 
     if (href.endsWith("#/grammar")) {
       event.preventDefault();
@@ -392,6 +422,53 @@
     if (["设置", "我的动态", "我的成就"].includes(text)) {
       showToast(`已进入「${text}」相关页面。`);
     }
+  }
+
+  function extractTopic(text) {
+    const match = text.match(/#([\u4e00-\u9fa5A-Za-z0-9_-]+)/);
+    return match ? `#${match[1]}` : "";
+  }
+
+  function showTopicModal(topic) {
+    const info = getTopicInfo(topic);
+    showInfoModal(
+      topic,
+      `
+        <p><span class="linguaverse-chip">热门话题</span></p>
+        <p>${info.description}</p>
+        <p><strong>当前状态：</strong>已为该话题补充点击反馈。静态演示版暂不切换真实帖子列表，正式版会按话题筛选动态。</p>
+        <p><strong>推荐操作：</strong>${info.tip}</p>
+      `
+    );
+  }
+
+  function getTopicInfo(topic) {
+    const topics = {
+      "#每日打卡": {
+        description: "这里会汇总用户每天的学习打卡、连续学习记录和阶段性成就。",
+        tip: "可以从学习中心查看今日目标，也可以在社区发布学习动态。",
+      },
+      "#英语学习": {
+        description: "这里会聚合英语课程、单词记忆、语法练习和口语跟读相关动态。",
+        tip: "建议先进入课程中心选择英语课程，再配合单词和语法模块练习。",
+      },
+      "#日语入门": {
+        description: "这里适合日语零基础学习者交流五十音、常用词和基础句型。",
+        tip: "可以从日语零基础课程开始，再进入听力和口语模块巩固。",
+      },
+      "#韩语学习": {
+        description: "这里会聚合韩语字母、发音规则、日常会话和进阶表达相关内容。",
+        tip: "建议先掌握韩语字母和收音规则，再学习中级会话课程。",
+      },
+      "#学习方法": {
+        description: "这里会沉淀记忆方法、复习节奏、听说读写训练经验等学习技巧。",
+        tip: "可以结合学习中心的目标进度，建立固定学习节奏。",
+      },
+    };
+    return topics[topic] || {
+      description: "这里会展示该话题下的学习动态和讨论内容。",
+      tip: "正式版会支持按话题筛选、关注话题和发布到话题。",
+    };
   }
 
   function speakCurrentPracticeText() {
