@@ -326,13 +326,244 @@
 
   function getMatchedDomesticVideo(title) {
     const text = `${title} ${document.body.innerText}`.replace(/\s+/g, " ");
+    const t = text.toLowerCase();
+
+    // ========== 英语零基础入门 ==========
     if (/英文字母|26个字母|字母与发音|发音基础/.test(text)) {
-      return {
-        platform: "bilibili",
-        bvid: "BV11F411X7d7",
-        title: "零基础英语英文26个字母入门自学教程，正确发音读法，3分钟学会",
-      };
+      return { platform: "bilibili", bvid: "BV11F411X7d7", title: "零基础英语英文26个字母入门自学教程，正确发音读法，3分钟学会" };
     }
+    if (/基础单词|日常用语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1kC4VeNEHk", title: "【全140集】新概念英语第一册零基础入门 字母发音 最适合孩子" };
+    }
+    if (/数字与时间|数词|时间表达/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/颜色与形状|颜色.*形状/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1kC4VeNEHk", title: "【全140集】新概念英语第一册零基础入门 字母发音 最适合孩子" };
+    }
+    if (/家庭成员称呼|家庭成员/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1kC4VeNEHk", title: "【全140集】新概念英语第一册零基础入门 字母发音 最适合孩子" };
+    }
+    if (/基础句型|简单句型/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/be动词|Be动词/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/一般现在时|现在时/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/冠词|a\/an|the/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/介词|in on at/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/问答句型|疑问句|问句/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1kC4VeNEHk", title: "【全140集】新概念英语第一册零基础入门 字母发音 最适合孩子" };
+    }
+    if (/日常对话|日常会话/.test(text) && /英语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1kC4VeNEHk", title: "【全140集】新概念英语第一册零基础入门 字母发音 最适合孩子" };
+    }
+
+    // ========== 英语中级进阶 ==========
+    if (/一般过去时|过去时/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/一般将来时|将来时/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/进行时|进行态/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/比较级|最高级/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/被动语态|被动式/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/条件句|If用法|if用法/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/定语从句/.test(text)) {
+      return { platform: "bilibili", bvid: "BV14ejy61EzW", title: "【初中英语语法】2026版本 B站最好的初中语法课(高清视频+全套讲义)" };
+    }
+    if (/名词性从句|主语从句|宾语从句|表语从句/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/状语从句/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/非谓语动词|不定式|动名词|分词/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/间接引语|直接引语|转述/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/写作技巧|中级写作/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+
+    // ========== 英语高级精通 ==========
+    if (/虚拟语气/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/倒装|倒装结构/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/强调句|强调结构/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/独立主格/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/复杂定语从句|复杂.*定语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/高级非谓语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/学术写作|论文写作/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/商务英语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/演讲|辩论/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/英美文化|文化差异/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/文学|作品赏析/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+    if (/翻译技巧|高级翻译/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1srj26UE2w", title: "2027高中全学段英语 | 李辉英语语法系统精讲 全265集 适合语法基础薄弱" };
+    }
+
+    // ========== 日语零基础入门 ==========
+    if (/五十音图|日语概览|五十音/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/平假名/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/片假名/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/基础词汇|日常问候|日语.*问候/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/日语.*数字|日语.*时间/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/日语.*家庭成员|日语.*称呼/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/助词|は.*が|を|に.*で|へ/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/日语.*句型|日语.*结构/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/日语.*形容词/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/日语.*对话|日语.*会话/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+
+    // ========== 日语中级进阶 ==========
+    if (/て形|动词.*て/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+    if (/た形|动词.*た/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+    if (/可能态|可能形/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+    if (/日语.*比较|日语.*愿望|日语.*变化/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+    if (/接续助词|原因理由|条件表达|と.*ば|たら|なら/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+    if (/餐厅|购物|旅行|场景对话/.test(text) && /日语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "【高考考研考级 日语 基础课】新标准日本语教材 中级 上册 课程全集（更新完)" };
+    }
+
+    // ========== 日语高级精通 ==========
+    if (/被动句|使役句|被动使役/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1KK41167mH", title: "新标日高级课程全集 kaka老师 日语考研 能力考N1课程" };
+    }
+    if (/敬语|尊敬语|谦让语|郑重语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1KK41167mH", title: "新标日高级课程全集 kaka老师 日语考研 能力考N1课程" };
+    }
+    if (/复合动词|商务日语|日本企业文化|正式场合|学术日语|日语.*翻译/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1KK41167mH", title: "新标日高级课程全集 kaka老师 日语考研 能力考N1课程" };
+    }
+
+    // ========== 韩语零基础入门 ==========
+    if (/韩语.*概览|韩语.*字母|韩语.*结构/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*元音|韩语.*辅音|韩语.*发音|韩语.*字母/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/收音|韩语.*收音/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*问候|韩语.*词汇/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*数字|韩语.*时间/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*助词|은.*는|이.*가/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*句型|韩语.*结构/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*形容词|韩语.*动词/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*对话|韩语.*会话/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+
+    // ========== 韩语中级进阶 ==========
+    if (/韩语.*过去|韩语.*未来|韩语.*进行|韩语.*比较|韩语.*能力|韩语.*愿望|韩语.*变化/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*连接词|韩语.*原因|韩语.*理由|韩语.*条件/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*餐厅|韩语.*购物|韩语.*旅行|韩语.*场景/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+
+    // ========== 韩语高级精通 ==========
+    if (/韩语.*被动|韩语.*使役|韩语.*敬语|韩语.*商务|韩语.*高级语法|韩语.*实战/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+    if (/韩语.*进阶|韩语.*听力|韩语.*复习|韩语.*测试/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+
+    // 兜底：根据页面整体语言判断
+    if (/英语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1YQj76JE3Z", title: "【全105集】价值2K的--零基础语法课程，真正的零基础从各种词性开始讲起" };
+    }
+    if (/日语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "【全400集】（允许白嫖）198小时讲完的日语入门学习教程！全程干货无废话，从0基础小白到日语n1大神看这套就够了" };
+    }
+    if (/韩语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "【全368集】这绝对是B站最全最细的韩语全套教程，2025最新版" };
+    }
+
     return null;
   }
 
