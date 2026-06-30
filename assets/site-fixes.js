@@ -247,6 +247,7 @@
   function patchPage() {
     cleanDemoCopy();
     formatCourseDurations();
+    patchHomeAndCourseFilters();
     patchChapterContentExpansion();
     patchDomesticVideoPlayers();
     patchLanguageLearningModules();
@@ -327,8 +328,22 @@
   }
 
   function getMatchedDomesticVideo(title) {
-    const text = `${title} ${document.body.innerText}`.replace(/\s+/g, " ");
+    const text = `${title} ${document.title}`.replace(/\s+/g, " ");
     const t = text.toLowerCase();
+
+    if (/日语/.test(text)) {
+      if (/中级|て形|た形|可能态|比较|愿望|条件|餐厅|购物|旅行/.test(text)) {
+        return { platform: "bilibili", bvid: "BV1Yq4y1B7Mx", title: "新标准日本语中级课程：日语会话与语法系统讲解" };
+      }
+      if (/高级|被动|使役|敬语|商务|企业文化|学术|翻译/.test(text)) {
+        return { platform: "bilibili", bvid: "BV1KK41167mH", title: "新标日高级课程：N1与商务日语综合讲解" };
+      }
+      return { platform: "bilibili", bvid: "BV1Yi4y147FG", title: "日语零基础入门：五十音、假名、词汇与基础语法" };
+    }
+
+    if (/韩语/.test(text)) {
+      return { platform: "bilibili", bvid: "BV12PoCYEE5n", title: "韩语全套教程：发音、语法、会话与进阶表达" };
+    }
 
     // ========== 英语零基础入门 ==========
     if (/英文字母|26个字母|字母与发音|发音基础/.test(text)) {
@@ -733,6 +748,26 @@
 
         const text = (target.textContent || target.getAttribute("aria-label") || "").trim().replace(/\s+/g, " ");
         const hash = location.hash || "#/";
+        const speakText = target.getAttribute("data-linguaverse-speak");
+        if (speakText) {
+          event.preventDefault();
+          event.stopPropagation();
+          speakTextWithVoice(speakText, target.getAttribute("data-linguaverse-lang") || "");
+          return;
+        }
+        if (target.getAttribute("data-linguaverse-clear-filter")) {
+          event.preventDefault();
+          event.stopPropagation();
+          try {
+            localStorage.removeItem("linguaverseCourseLanguageFilter");
+          } catch (_) {}
+          document.querySelectorAll("[style]").forEach((node) => {
+            if (node.style.display === "none") node.style.display = "";
+          });
+          document.getElementById("linguaverse-course-filter-banner")?.remove();
+          showToast("已显示全部课程。");
+          return;
+        }
 
         if (target.tagName === "A") {
           fixAnchorNavigation(target, event);
@@ -829,6 +864,33 @@
     const href = anchor.getAttribute("href") || "";
     const text = anchor.textContent.trim().replace(/\s+/g, " ");
     const topic = extractTopic(text);
+    const languageEntry = anchor.getAttribute("data-linguaverse-language-entry") || getLanguageFromText(text);
+
+    if (languageEntry && href.includes("#/courses") && ["#/", "", "#"].includes(location.hash || "#/")) {
+      event.preventDefault();
+      event.stopPropagation();
+      try {
+        localStorage.setItem("linguaverseCourseLanguageFilter", languageEntry);
+      } catch (_) {}
+      location.hash = "#/courses";
+      showToast(`已筛选${languageEntry}课程。`);
+      setTimeout(patchPage, 180);
+      return;
+    }
+
+    if (anchor.getAttribute("data-linguaverse-clear-filter")) {
+      event.preventDefault();
+      event.stopPropagation();
+      try {
+        localStorage.removeItem("linguaverseCourseLanguageFilter");
+      } catch (_) {}
+      document.querySelectorAll("[style]").forEach((node) => {
+        if (node.style.display === "none") node.style.display = "";
+      });
+      document.getElementById("linguaverse-course-filter-banner")?.remove();
+      showToast("已显示全部课程。");
+      return;
+    }
 
     if (topic) {
       event.preventDefault();
@@ -978,6 +1040,68 @@
     heading?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function patchHomeAndCourseFilters() {
+    patchHomeLearningModules();
+    patchCourseLanguageFilter();
+  }
+
+  function patchHomeLearningModules() {
+    if (!["#/", "", "#"].includes(location.hash || "#/")) return;
+    Array.from(document.querySelectorAll("h1, h2, h3")).forEach((heading) => {
+      if (!heading.textContent.includes("四大互动学习模块")) return;
+      const section = heading.closest("section") || heading.parentElement?.parentElement;
+      if (section) section.style.display = "none";
+    });
+    Array.from(document.querySelectorAll("a")).forEach((anchor) => {
+      const text = anchor.textContent.replace(/\s+/g, " ");
+      const language = getLanguageFromText(text);
+      const href = anchor.getAttribute("href") || "";
+      if (language && href.includes("#/courses")) {
+        anchor.setAttribute("data-linguaverse-language-entry", language);
+      }
+    });
+  }
+
+  function patchCourseLanguageFilter() {
+    if (!/^#\/courses\/?$/.test(location.hash || "")) return;
+    let filter = "";
+    try {
+      filter = localStorage.getItem("linguaverseCourseLanguageFilter") || "";
+    } catch (_) {}
+    if (!filter) return;
+
+    const root = Array.from(document.querySelectorAll(".container")).find((item) => (item.innerText || "").includes("全部课程")) || document.body;
+    if (!document.getElementById("linguaverse-course-filter-banner")) {
+      const title = Array.from(root.querySelectorAll("h1, h2")).find((item) => item.textContent.includes("课程"));
+      title?.insertAdjacentHTML(
+        "afterend",
+        `<div id="linguaverse-course-filter-banner" class="mb-6 rounded-2xl bg-purple-50 border border-purple-100 p-4 text-purple-800 font-semibold">
+          当前已筛选：${filter}课程
+          <button class="ml-3 px-3 py-1 rounded-full bg-white border border-purple-200 text-sm" data-linguaverse-clear-filter="1">查看全部</button>
+        </div>`
+      );
+    }
+
+    Array.from(document.querySelectorAll("a, article, .rounded-2xl, .rounded-3xl")).forEach((card) => {
+      const text = card.innerText || "";
+      if (!/(英语|日语|韩语).*(入门|进阶|高级|精通)|🇬🇧|🇯🇵|🇰🇷/.test(text)) return;
+      const cardLanguage = getLanguageFromText(text);
+      if (!cardLanguage) return;
+      if (cardLanguage !== filter && text.length < 900) {
+        card.style.display = "none";
+      } else if (cardLanguage === filter) {
+        card.style.display = "";
+      }
+    });
+  }
+
+  function getLanguageFromText(text) {
+    if (/英语|🇬🇧|🇺🇸/.test(text)) return "英语";
+    if (/日语|🇯🇵/.test(text)) return "日语";
+    if (/韩语|🇰🇷/.test(text)) return "韩语";
+    return "";
+  }
+
   function patchChapterContentExpansion() {
     if (!/#\/courses\/\d+\/chapter\/\d+/.test(location.hash || "")) return;
     const chapterContainer = Array.from(document.querySelectorAll(".container")).find((item) => {
@@ -987,46 +1111,60 @@
     if (!chapterContainer) return;
 
     const counts = patchChapterStatCards();
-    const key = `${location.hash}-${counts.knowledge}-${counts.vocabulary}-${counts.exercises}-x10-v1`;
+    const key = `${location.hash}-${counts.knowledge}-${counts.vocabulary}-${counts.exercises}-moderate-v2`;
     if (chapterContainer.getAttribute("data-linguaverse-chapter-expanded") === key) return;
     chapterContainer.setAttribute("data-linguaverse-chapter-expanded", key);
 
     const contentArea = Array.from(chapterContainer.querySelectorAll(".space-y-6")).find((item) => (item.innerText || "").includes("学习内容")) || chapterContainer;
-    if (!contentArea.querySelector("#linguaverse-chapter-expansion")) {
-      contentArea.insertAdjacentHTML("beforeend", getChapterExpansionHtml(getChapterExpansionContext(), counts));
+    contentArea.querySelector("#linguaverse-chapter-expansion")?.remove();
+    contentArea.querySelector("#linguaverse-chapter-integrated")?.remove();
+    contentArea.querySelector("#linguaverse-extra-exercises")?.remove();
+
+    const cards = Array.from(contentArea.children);
+    const learningCard = cards.find((item) => (item.innerText || "").includes("学习内容"));
+    const exerciseCard = cards.find((item) => (item.innerText || "").includes("课后练习"));
+    if (learningCard) {
+      learningCard.insertAdjacentHTML("beforeend", getChapterIntegratedContentHtml(getChapterExpansionContext(), counts));
+    }
+    if (exerciseCard) {
+      exerciseCard.insertAdjacentHTML("beforeend", getChapterIntegratedExercisesHtml(getChapterExpansionContext(), counts));
     }
   }
 
   function patchChapterStatCards() {
-    const counts = { knowledge: 40, vocabulary: 80, exercises: 50 };
+    const targets = { knowledge: 12, vocabulary: 20, exercises: 15 };
+    const counts = { ...targets, baseKnowledge: 4, baseVocabulary: 6, baseExercises: 5 };
     document.querySelectorAll("p, span, h3").forEach((node) => {
       const text = node.textContent.trim();
       const parentText = node.parentElement?.textContent || "";
 
       if (/^\d+\s*个$/.test(text) && parentText.includes("知识点")) {
-        counts.knowledge = expandCountNode(node, "个");
+        counts.baseKnowledge = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 4);
+        counts.knowledge = setCountNode(node, targets.knowledge, "个");
       }
       if (/^\d+\s*个$/.test(text) && parentText.includes("重点词汇")) {
-        counts.vocabulary = expandCountNode(node, "个");
+        counts.baseVocabulary = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 6);
+        counts.vocabulary = setCountNode(node, targets.vocabulary, "个");
       }
       if (/^\d+\s*道$/.test(text) && parentText.includes("练习题")) {
-        counts.exercises = expandCountNode(node, "道");
+        counts.baseExercises = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/\d+/)?.[0] || 5);
+        counts.exercises = setCountNode(node, targets.exercises, "道");
       }
       if (/共\s*\d+\s*道/.test(text)) {
-        const raw = Number(text.match(/共\s*(\d+)\s*道/)?.[1] || 5);
-        const value = node.getAttribute("data-linguaverse-expanded-count") ? raw : raw * 10;
-        node.setAttribute("data-linguaverse-expanded-count", String(value));
-        node.textContent = text.replace(/共\s*\d+\s*道/g, `共 ${value} 道`);
-        counts.exercises = value;
+        const raw = Number(node.getAttribute("data-linguaverse-original-count") || text.match(/共\s*(\d+)\s*道/)?.[1] || 5);
+        node.setAttribute("data-linguaverse-original-count", String(raw));
+        node.textContent = text.replace(/共\s*\d+\s*道/g, `共 ${targets.exercises} 道`);
+        counts.baseExercises = raw;
+        counts.exercises = targets.exercises;
       }
     });
     return counts;
   }
 
-  function expandCountNode(node, unit) {
-    const raw = Number(node.textContent.match(/\d+/)?.[0] || 0);
-    const value = node.getAttribute("data-linguaverse-expanded-count") ? raw : raw * 10;
-    node.setAttribute("data-linguaverse-expanded-count", String(value));
+  function setCountNode(node, value, unit) {
+    if (!node.getAttribute("data-linguaverse-original-count")) {
+      node.setAttribute("data-linguaverse-original-count", String(Number(node.textContent.match(/\d+/)?.[0] || value)));
+    }
     node.textContent = `${value} ${unit}`;
     return value;
   }
@@ -1039,64 +1177,55 @@
     return { language, level, chapterTitle: heading.replace(/^第\s*\d+\s*章[:：]\s*/, "").trim() || "课程章节" };
   }
 
-  function getChapterExpansionHtml(context, counts) {
-    const knowledge = buildChapterKnowledge(context, counts.knowledge);
-    const vocabulary = buildChapterVocabulary(context, counts.vocabulary);
-    const exercises = buildChapterExercises(context, counts.exercises);
+  function getChapterIntegratedContentHtml(context, counts) {
+    const knowledge = buildChapterKnowledge(context, Math.max(0, counts.knowledge - counts.baseKnowledge));
+    const vocabulary = buildChapterVocabulary(context, Math.max(0, counts.vocabulary - counts.baseVocabulary));
     return `
-      <section id="linguaverse-chapter-expansion" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <div class="mb-6">
-          <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-semibold">扩展课程内容 · 已翻十倍</span>
-          <h3 class="text-xl font-bold text-slate-900 mt-3">章节扩展学习包</h3>
-          <p class="text-slate-600 mt-2">本章节已扩展为 ${counts.knowledge} 个知识点、${counts.vocabulary} 个重点词汇、${counts.exercises} 道练习题。</p>
-        </div>
-        <div class="grid md:grid-cols-3 gap-4 mb-8">
-          <div class="rounded-2xl bg-blue-50 p-4 text-center"><div class="text-3xl font-bold text-blue-700">${counts.knowledge}</div><div class="text-sm text-slate-600">知识点</div></div>
-          <div class="rounded-2xl bg-green-50 p-4 text-center"><div class="text-3xl font-bold text-green-700">${counts.vocabulary}</div><div class="text-sm text-slate-600">重点词汇</div></div>
-          <div class="rounded-2xl bg-amber-50 p-4 text-center"><div class="text-3xl font-bold text-amber-700">${counts.exercises}</div><div class="text-sm text-slate-600">练习题</div></div>
-        </div>
-        <div class="space-y-8">
-          <div>
-            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展知识点（${counts.knowledge} 个）</h4>
-            <div class="grid md:grid-cols-2 gap-3">
+      <div id="linguaverse-chapter-integrated" class="mt-6 space-y-6">
+        <div>
+          <h4 class="text-base font-bold text-slate-900 mb-3">补充知识点</h4>
+          <div class="grid md:grid-cols-2 gap-3">
               ${knowledge.map((item, index) => `
                 <div class="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
-                  <div class="text-sm font-semibold text-blue-700 mb-1">知识点 ${index + 1}</div>
+                  <div class="text-sm font-semibold text-blue-700 mb-1">补充知识点 ${index + 1}</div>
                   <div class="font-bold text-slate-900">${escapeHtml(item.title)}</div>
                   <div class="text-sm text-slate-600 mt-1">${escapeHtml(item.detail)}</div>
                 </div>
               `).join("")}
-            </div>
           </div>
-          <div>
-            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展重点词汇（${counts.vocabulary} 个）</h4>
-            <div class="grid md:grid-cols-2 gap-3">
+        </div>
+        <div>
+          <h4 class="text-base font-bold text-slate-900 mb-3">补充重点词汇</h4>
+          <div class="grid md:grid-cols-2 gap-3">
               ${vocabulary.map((item, index) => `
                 <div class="rounded-2xl border border-green-100 bg-green-50/40 p-4">
-                  <div class="text-sm font-semibold text-green-700 mb-1">词汇 ${index + 1}</div>
+                  <div class="text-sm font-semibold text-green-700 mb-1">补充词汇 ${index + 1}</div>
                   <div class="font-bold text-slate-900">${escapeHtml(item.word)}</div>
                   <div class="text-sm text-purple-700 mt-1">${escapeHtml(item.pronunciation)}</div>
                   <div class="text-sm text-slate-600 mt-1">${escapeHtml(item.meaning)} · ${escapeHtml(item.example)}</div>
                 </div>
               `).join("")}
-            </div>
-          </div>
-          <div>
-            <h4 class="text-lg font-bold text-slate-900 mb-4">扩展练习题（${counts.exercises} 道）</h4>
-            <div class="space-y-3">
-              ${exercises.map((item, index) => `
-                <div class="rounded-2xl border border-amber-100 bg-amber-50/40 p-4">
-                  <div class="font-bold text-slate-900 mb-2">${index + 1}. ${escapeHtml(item.question)}</div>
-                  <div class="grid sm:grid-cols-2 gap-2 text-sm">
-                    ${item.options.map((option, optionIndex) => `<div class="rounded-xl bg-white border border-amber-100 px-3 py-2">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}</div>`).join("")}
-                  </div>
-                  <div class="text-sm text-slate-500 mt-2">参考答案：${escapeHtml(item.answer)}</div>
-                </div>
-              `).join("")}
-            </div>
           </div>
         </div>
-      </section>
+      </div>
+    `;
+  }
+
+  function getChapterIntegratedExercisesHtml(context, counts) {
+    const exercises = buildChapterExercises(context, Math.max(0, counts.exercises - counts.baseExercises));
+    return `
+      <div id="linguaverse-extra-exercises" class="mt-6 space-y-3">
+        <h4 class="text-base font-bold text-slate-900">补充练习</h4>
+        ${exercises.map((item, index) => `
+          <div class="rounded-2xl border border-amber-100 bg-amber-50/40 p-4">
+            <div class="font-bold text-slate-900 mb-2">补充 ${index + 1}. ${escapeHtml(item.question)}</div>
+            <div class="grid sm:grid-cols-2 gap-2 text-sm">
+              ${item.options.map((option, optionIndex) => `<div class="rounded-xl bg-white border border-amber-100 px-3 py-2">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}</div>`).join("")}
+            </div>
+            <div class="text-sm text-slate-500 mt-2">参考答案：${escapeHtml(item.answer)}</div>
+          </div>
+        `).join("")}
+      </div>
     `;
   }
 
@@ -1245,6 +1374,11 @@
             <div class="text-purple-700 font-semibold mb-3">${escapeHtml(item.pronunciation)}</div>
             <div class="text-slate-700 mb-2">${escapeHtml(item.meaning)}</div>
             <div class="text-sm text-slate-500">${escapeHtml(item.example)}</div>
+            <button
+              class="mt-4 rounded-2xl bg-purple-600 text-white px-4 py-2 text-sm font-semibold"
+              data-linguaverse-speak="${escapeHtml(item.word)}"
+              data-linguaverse-lang="${escapeHtml(data.language || "")}"
+            >人声朗读</button>
           </div>`
           )
           .join("")}
@@ -1294,7 +1428,7 @@
             <h2 class="text-2xl font-bold text-slate-900 mb-3">${escapeHtml(item.text)}</h2>
             <p class="text-slate-600 mb-5">${escapeHtml(item.translation)}</p>
             <div class="grid sm:grid-cols-3 gap-3">
-              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">播放原音</button>
+              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold" data-linguaverse-speak="${escapeHtml(item.text)}" data-linguaverse-lang="${escapeHtml(data.language || "")}">播放原音</button>
               <button class="rounded-2xl bg-slate-900 text-white px-4 py-3 font-semibold">开始跟读</button>
               <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
             </div>
@@ -1320,7 +1454,7 @@
             <p class="text-slate-700 leading-8 mb-5">${escapeHtml(item.script)}</p>
             <div class="rounded-2xl bg-slate-50 p-4 mb-5 text-slate-600">${escapeHtml(item.translation)}</div>
             <div class="grid sm:grid-cols-3 gap-3">
-              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold">点击播放语音朗读</button>
+              <button class="rounded-2xl bg-purple-600 text-white px-4 py-3 font-semibold" data-linguaverse-speak="${escapeHtml(item.script)}" data-linguaverse-lang="${escapeHtml(data.language || "")}">点击播放语音朗读</button>
               <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">开始测验</button>
               <button class="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold">标记完成</button>
             </div>
@@ -1576,8 +1710,11 @@
     };
 
     const source = common[language] || common.英语;
-    const words = source.words.map(([word, pronunciation, meaning, example]) => ({ word, pronunciation, meaning, example }));
-    const grammarItems = source.grammar.map(([title, explain, example, translation, question, options]) => ({
+    const offset = level === "高级" ? 24 : level === "中级" ? 12 : 0;
+    const rotate = (list) => list.slice(offset % list.length).concat(list.slice(0, offset % list.length));
+    const rotateShort = (list) => list.slice((level === "高级" ? 6 : level === "中级" ? 3 : 0) % list.length).concat(list.slice(0, (level === "高级" ? 6 : level === "中级" ? 3 : 0) % list.length));
+    const words = rotate(source.words).map(([word, pronunciation, meaning, example]) => ({ word, pronunciation, meaning, example }));
+    const grammarItems = rotateShort(source.grammar).map(([title, explain, example, translation, question, options]) => ({
       title: `${level}${title}`,
       explain,
       example,
@@ -1585,9 +1722,11 @@
       question,
       options,
     }));
-    const speakingItems = source.speaking.map(([text, translation, tip]) => ({ text, translation, tip }));
-    const listeningItems = source.listening.map(([title, script, translation]) => ({ title, script, translation }));
+    const speakingItems = rotateShort(source.speaking).map(([text, translation, tip]) => ({ text, translation, tip }));
+    const listeningItems = rotateShort(source.listening).map(([title, script, translation]) => ({ title, script, translation }));
     return {
+      language,
+      level,
       words,
       grammar: grammarItems[0],
       grammarItems,
@@ -1690,9 +1829,25 @@
       return;
     }
 
+    speakTextWithVoice(text, "");
+  }
+
+  function speakTextWithVoice(text, language) {
+    const supported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    if (!supported) {
+      showToast("当前浏览器不支持语音朗读。");
+      return;
+    }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = /[A-Za-z]/.test(text) ? "en-US" : "zh-CN";
+    utterance.lang =
+      language === "日语" || /[ぁ-んァ-ン]/.test(text)
+        ? "ja-JP"
+        : language === "韩语" || /[가-힣]/.test(text)
+        ? "ko-KR"
+        : /[A-Za-z]/.test(text)
+        ? "en-US"
+        : "zh-CN";
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
     showToast("正在播放语音朗读。");
