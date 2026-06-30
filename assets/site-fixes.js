@@ -6,6 +6,7 @@
   const fixedAttr = "data-linguaverse-fixed";
 
   blockViteClientRequests();
+  blockYoutubeIframes();
   injectStyles();
   installGlobalHandlers();
   observePageChanges();
@@ -39,6 +40,36 @@
       },
       { once: true }
     );
+  }
+
+  function blockYoutubeIframes() {
+    const isYoutube = (value) => /youtube\.com\/embed|youtu\.be|youtube-nocookie\.com/i.test(String(value || ""));
+
+    const originalSetAttribute = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function (name, value) {
+      if (this.tagName === "IFRAME" && String(name).toLowerCase() === "src" && isYoutube(value)) {
+        originalSetAttribute.call(this, "data-linguaverse-youtube-src", value);
+        return originalSetAttribute.call(this, "src", "about:blank");
+      }
+      return originalSetAttribute.call(this, name, value);
+    };
+
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, "src");
+    if (descriptor?.set && descriptor?.get) {
+      Object.defineProperty(HTMLIFrameElement.prototype, "src", {
+        configurable: true,
+        enumerable: descriptor.enumerable,
+        get: descriptor.get,
+        set(value) {
+          if (isYoutube(value)) {
+            originalSetAttribute.call(this, "data-linguaverse-youtube-src", value);
+            descriptor.set.call(this, "about:blank");
+            return;
+          }
+          descriptor.set.call(this, value);
+        },
+      });
+    }
   }
 
   function injectStyles() {
@@ -143,6 +174,60 @@
         transform: translateY(-1px);
         box-shadow: 0 8px 22px rgba(14, 165, 233, .12);
       }
+      .linguaverse-domestic-video {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 24px;
+        text-align: center;
+        color: #fff;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(56, 189, 248, .38), transparent 32%),
+          radial-gradient(circle at 80% 20%, rgba(244, 114, 182, .32), transparent 32%),
+          linear-gradient(135deg, #0f172a 0%, #312e81 52%, #7c2d12 100%);
+      }
+      .linguaverse-domestic-video h4 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.35;
+      }
+      .linguaverse-domestic-video p {
+        margin: 0;
+        max-width: 560px;
+        color: rgba(255, 255, 255, .82);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .linguaverse-domestic-video-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+      .linguaverse-domestic-video-actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 128px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        color: #111827;
+        background: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .22);
+      }
+      .linguaverse-domestic-video-actions a:last-child {
+        color: #fff;
+        background: rgba(255, 255, 255, .16);
+        border: 1px solid rgba(255, 255, 255, .28);
+      }
     `;
     document.head.appendChild(style);
   }
@@ -173,10 +258,76 @@
   function patchPage() {
     cleanDemoCopy();
     formatCourseDurations();
+    patchDomesticVideoPlayers();
     makeFooterItemsClickable();
     makeTopicsClickable();
     labelIconButtons();
     markDemoButtons();
+  }
+
+  function patchDomesticVideoPlayers() {
+    document.querySelectorAll("iframe").forEach((iframe) => {
+      const src = iframe.getAttribute("data-linguaverse-youtube-src") || iframe.getAttribute("src") || "";
+      if (!/youtube\.com\/embed|youtu\.be|youtube-nocookie\.com/i.test(src)) return;
+      const wrapper = iframe.parentElement;
+      if (!wrapper || wrapper.querySelector(".linguaverse-domestic-video")) return;
+      iframe.remove();
+      wrapper.appendChild(createDomesticVideoPanel(getCurrentVideoTitle()));
+    });
+
+    document.querySelectorAll('[trae-inspector-file-path*="VideoLesson"]').forEach((node) => {
+      if (node.querySelector?.(".linguaverse-domestic-video")) return;
+      const iframe = node.querySelector?.("iframe");
+      if (iframe) return;
+      const text = node.textContent || "";
+      if (!text.includes("视频讲解") && !text.includes("暂无视频")) return;
+      const videoBox = node.querySelector?.(".relative.w-full") || node.querySelector?.('[style*="56.25"]');
+      if (videoBox && !videoBox.querySelector(".linguaverse-domestic-video")) {
+        videoBox.innerHTML = "";
+        videoBox.appendChild(createDomesticVideoPanel(getCurrentVideoTitle()));
+      }
+    });
+  }
+
+  function getCurrentVideoTitle() {
+    const heading =
+      Array.from(document.querySelectorAll("h1, h2, h3, h4"))
+        .map((item) => item.textContent.trim().replace(/\s+/g, " "))
+        .find((text) => text.includes("视频讲解")) ||
+      document.title ||
+      "语言学习视频讲解";
+    return heading.replace(/\s*-\s*视频讲解/g, "").replace(/^视频讲解\s*/, "").trim() || "语言学习视频讲解";
+  }
+
+  function createDomesticVideoPanel(title) {
+    const panel = document.createElement("div");
+    panel.className = "linguaverse-domestic-video";
+    const keyword = normalizeVideoKeyword(title);
+    const bilibiliUrl = `https://search.bilibili.com/all?keyword=${encodeURIComponent(keyword)}`;
+    const douyinUrl = `https://www.douyin.com/search/${encodeURIComponent(keyword)}`;
+    panel.innerHTML = `
+      <h4>B站 / 抖音视频讲解</h4>
+      <p>${escapeHtml(title)} 的 YouTube 播放源已替换为国内平台入口。点击下方按钮可在 B站或抖音观看对应课程讲解。</p>
+      <div class="linguaverse-domestic-video-actions">
+        <a href="${bilibiliUrl}" target="_blank" rel="noopener noreferrer">在B站观看</a>
+        <a href="${douyinUrl}" target="_blank" rel="noopener noreferrer">在抖音搜索</a>
+      </div>
+    `;
+    return panel;
+  }
+
+  function normalizeVideoKeyword(title) {
+    const cleaned = title.replace(/[·\-|]/g, " ").replace(/\s+/g, " ").trim();
+    return `${cleaned} 语言学习 视频讲解`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
   }
 
   function cleanDemoCopy() {
