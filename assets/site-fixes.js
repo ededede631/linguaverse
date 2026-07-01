@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260702d";
+  const VERSION = "20260702e";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -178,17 +178,77 @@
   }
 
   function ctx() {
-    const text = `${location.hash} ${document.body.innerText || ""}`;
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}"); } catch (_) {}
     const hash = location.hash || "";
     const isLearnRoute = /#\/learn\//.test(hash);
-    const signal = isLearnRoute ? `${saved.language || ""} ${saved.level || ""} ${hash}` : text;
-    const language = /韩语|韩文|🇰🇷/.test(signal) ? "韩语" : /日语|日本|🇯🇵/.test(signal) ? "日语" : /英语|English|🇬🇧|🇺🇸/.test(signal) ? "英语" : saved.language || "英语";
-    const level = /高级|精通|N1|商务/.test(signal) ? "高级" : /中级|进阶|N2|N3/.test(signal) ? "中级" : saved.level || "初级";
-    const courseTitle = Array.from(document.querySelectorAll("h1,h2")).map(x => x.textContent.trim()).find(x => /英语|日语|韩语|第\s*\d+\s*章/.test(x)) || `${language}${level}课程`;
+    const isChapterRoute = /#\/courses\/\d+\/chapter\/\d+/.test(hash);
+    const isCourseRoute = /#\/courses\/?/.test(hash);
+
+    // 1. 优先从 h1/h2 标题中检测（标题最准确）
+    const headings = Array.from(document.querySelectorAll("h1,h2,h3")).map(x => x.textContent.trim()).filter(x => x.length > 0 && x.length < 80);
+    const headingText = headings.join(" | ");
+
+    // 2. 统计各语言在标题中的命中次数
+    let langFromHeading = "";
+    const headingScores = { 英语: 0, 日语: 0, 韩语: 0 };
+    if (/英语|English|🇬🇧|🇺🇸/.test(headingText)) headingScores.英语 += 3;
+    if (/日语|日本|🇯🇵|平假名|片假名|五十音|漢字/.test(headingText)) headingScores.日语 += 3;
+    if (/韩语|韩文|한글|🇰🇷|收音|韩文字母/.test(headingText)) headingScores.韩语 += 3;
+    const maxHeadingScore = Math.max(...Object.values(headingScores));
+    if (maxHeadingScore > 0) {
+      langFromHeading = Object.keys(headingScores).find(k => headingScores[k] === maxHeadingScore) || "";
+    }
+
+    // 3. 学习模块路由：优先用 saved context
+    let language = "";
+    if (isLearnRoute) {
+      language = saved.language || "英语";
+    }
+    // 4. 章节路由：优先用标题，其次用 saved
+    else if (isChapterRoute) {
+      language = langFromHeading || saved.language || "英语";
+    }
+    // 5. 课程列表页：从筛选或标题判断
+    else if (isCourseRoute) {
+      const filterLang = localStorage.getItem(FILTER_KEY) || "";
+      language = filterLang || langFromHeading || saved.language || "英语";
+    }
+    // 6. 其他页面：综合判断
+    else {
+      // 全文本检测，但用计数而非简单匹配
+      const fullText = `${headingText} ${document.body.innerText || ""}`;
+      const scores = { 英语: 0, 日语: 0, 韩语: 0 };
+      // 用更明确的关键词来计数
+      const enKeywords = ["英语", "English", "单词", "语法", "口语", "听力", "拼写"];
+      const jpKeywords = ["日语", "日本", "平假名", "片假名", "五十音", "です", "ます", "漢字", "仮名"];
+      const krKeywords = ["韩语", "韩文", "한글", "收音", "韩文字母", "습니다", "ㅇㅁㄴㄷㄹ"];
+      enKeywords.forEach(k => { if (fullText.includes(k)) scores.英语++; });
+      jpKeywords.forEach(k => { if (fullText.includes(k)) scores.日语++; });
+      krKeywords.forEach(k => { if (fullText.includes(k)) scores.韩语++; });
+      // 标题命中权重更高
+      scores[langFromHeading] = (scores[langFromHeading] || 0) + 5;
+      const maxScore = Math.max(...Object.values(scores));
+      if (maxScore > 0) {
+        language = Object.keys(scores).find(k => scores[k] === maxScore) || saved.language || "英语";
+      } else {
+        language = saved.language || "英语";
+      }
+    }
+
+    // 级别检测
+    let level = saved.level || "初级";
+    const levelText = `${headingText} ${hash}`;
+    if (/高级|精通|N1|商务/.test(levelText)) level = "高级";
+    else if (/中级|进阶|N2|N3/.test(levelText)) level = "中级";
+
+    const courseTitle = headings.find(x => /英语|日语|韩语|第\s*\d+\s*章/.test(x)) || `${language}${level}课程`;
     const c = { language, level, courseTitle };
-    try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(c)); } catch (_) {}
+
+    // 只在有明确依据时才更新 saved context，避免误判覆盖
+    if (langFromHeading || isLearnRoute || isChapterRoute) {
+      try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(c)); } catch (_) {}
+    }
     return c;
   }
 
@@ -293,6 +353,17 @@
     root.dataset.lvChapter = VERSION;
     const knowledge = buildKnowledge(c, root.innerText || "");
     fixCounts(root, knowledge.length, d.words.length, d.grammar.length);
+
+    // 修复原始页面课文内容可能的排版问题
+    const textEls = root.querySelectorAll("p,div,span");
+    textEls.forEach(el => {
+      if (el.children.length === 0 && el.textContent.length > 50) {
+        el.style.whiteSpace = "normal";
+        el.style.wordBreak = "break-word";
+        el.style.lineHeight = "1.9";
+      }
+    });
+
     root.insertAdjacentHTML("beforeend", `<div id="lv-learning-loop" class="lv-panel"><h3>完整学习闭环</h3><div class="lv-flow"><span>预习</span><span>学习</span><span>练习</span><span>测试</span><span>复习</span></div><div class="lv-grid two"><div><h4>知识点（${knowledge.length}个）</h4>${knowledge.map(x => `<p><b>${esc(x[0])}</b>：${esc(x[1])}</p>`).join("")}</div><div><h4>重点词汇（${d.words.length}个）</h4>${d.words.map(w => wordRow(w, c.language)).join("")}</div></div><h4>练习题（${d.grammar.length}道）</h4>${d.grammar.map((g, i) => question(g, i)).join("")}<div class="lv-actions"><button class="lv-primary" data-lv-complete="chapter">标记本章完成</button><button class="lv-ghost" data-lv-open="review">打开复盘</button></div></div>`);
   }
 
@@ -704,7 +775,12 @@
     st.id = "lv-styles";
     st.textContent = `
       html{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans CN","WenQuanYi Micro Hei",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans CN","WenQuanYi Micro Hei",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.lv-word b,.lv-char-grid button,select,button,input{font-family:inherit}
-      html{scroll-behavior:smooth}body{overflow-x:hidden}img,video,iframe{max-width:100%}.container{padding-left:16px!important;padding-right:16px!important}
+      html{scroll-behavior:smooth}body{overflow-x:hidden;line-height:1.8;word-break:break-word;word-wrap:break-word}img,video,iframe{max-width:100%}.container{padding-left:16px!important;padding-right:16px!important}
+      p,span,div,li{line-height:1.8;word-break:break-word}h1,h2,h3,h4,h5,h6{line-height:1.5}
+      /* 修复章节页课文内容排版 */
+      .lv-chapter-content p,.lv-chapter-content div,.lv-chapter-content span{white-space:normal!important;word-break:break-word!important;line-height:1.9!important}
+      /* 修复原始页面可能的文字挤压 */
+      main p, main div, section p, section div{white-space:normal;word-break:break-word}
       .trae-browser-inspect-overlay,.trae-browser-inspect-comment-card-container,.trae-browser-inspect-drop-indicator{display:none!important;pointer-events:none!important;opacity:0!important}.lv-panel,.lv-card{border:1px solid rgba(124,58,237,.14);background:#fff;border-radius:22px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.06);margin:16px 0}.lv-hero{display:flex;justify-content:space-between;gap:18px;align-items:center;background:linear-gradient(135deg,#f5f3ff,#ecfeff)}.lv-chip{display:inline-flex;background:#ede9fe;color:#6d28d9;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}.lv-primary,.lv-ghost,.lv-question button,.lv-tabs a,#lv-dashboard button,.lv-char-grid button{border-radius:14px;border:1px solid #ddd;padding:9px 12px;cursor:pointer;font-weight:700}.lv-primary{background:#7c3aed;color:white;border-color:#7c3aed}.lv-ghost{background:white;color:#334155}.lv-switcher{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}.lv-switcher label{font-weight:700;color:#334155}.lv-switcher select{margin-left:6px;border:1px solid #ddd;border-radius:12px;padding:7px 10px;background:white}.lv-grid{display:grid;gap:14px}.lv-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.lv-list{display:grid;gap:14px}.lv-word b{font-size:22px;display:block}.lv-word span{color:#7c3aed}.lv-example{color:#475569;background:#f8fafc;border-radius:12px;padding:10px}.lv-tip{color:#0369a1;background:#ecfeff;border-radius:12px;padding:10px}.lv-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.lv-tabs a{background:white;color:#334155;text-decoration:none}.lv-tabs a.active{background:#7c3aed;color:white}.lv-flow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.lv-flow span{background:#f1f5f9;border-radius:999px;padding:8px 12px;font-weight:700}.lv-question div{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.lv-question button.ok{background:#dcfce7;border-color:#22c55e}.lv-question button.bad{background:#fee2e2;border-color:#ef4444}.lv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.lv-bili{width:100%;height:100%;min-height:320px;border:0}.lv-video-note{font-size:13px;color:#64748b}.lv-module-head h1{font-size:34px;margin:8px 0}.lv-spell-layout{display:grid;grid-template-columns:1fr 260px;gap:18px}.lv-canvas-wrap{width:320px;height:320px;max-width:100%;background:#f8fafc;border:1px solid #dbeafe;border-radius:18px;overflow:hidden}.lv-canvas-wrap canvas{width:100%;height:100%;touch-action:none}.lv-char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.lv-char-grid button.active{background:#7c3aed;color:white}#lv-dashboard{position:fixed;right:18px;bottom:18px;z-index:99997}#lv-dashboard-toggle{background:#7c3aed;color:white;border:0;box-shadow:0 10px 30px rgba(124,58,237,.35)}#lv-dashboard-panel{display:none;width:260px;background:white;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 20px 60px rgba(15,23,42,.18)}#lv-dashboard.open #lv-dashboard-panel{display:block}#${toastId}{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;background:#111827;color:white;border-radius:999px;padding:11px 16px;opacity:0;transition:.2s;max-width:calc(100vw - 32px)}#${toastId}.show{opacity:1}#${modalId}{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:99998;display:none;place-items:center;padding:20px}#${modalId}.show{display:grid}.lv-modal-card{background:white;border-radius:22px;max-width:620px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:hidden}.lv-modal-head{display:flex;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid #e2e8f0}.lv-modal-body{padding:20px;line-height:1.8}.lv-modal-head button{border:0;background:#7c3aed;color:white;border-radius:999px;padding:8px 14px;cursor:pointer}
       @media(max-width:760px){.lv-hero{display:block}.lv-grid.two,.lv-spell-layout{grid-template-columns:1fr}.lv-module-head h1{font-size:28px}.lv-tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px}.lv-tabs a{white-space:nowrap}.lv-canvas-wrap{width:280px;height:280px}.lv-bili{min-height:220px}#lv-dashboard{right:10px;bottom:10px}#lv-dashboard-panel{width:calc(100vw - 32px)}}`;
     document.head.appendChild(st);
