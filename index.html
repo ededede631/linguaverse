@@ -31,6 +31,21 @@
     </style>
     <script>
       (function(){
+        if('serviceWorker' in navigator){
+          navigator.serviceWorker.register('/linguaverse/sw.js').then(function(reg){
+            reg.addEventListener('updatefound',function(){
+              var newW=reg.installing;
+              newW.addEventListener('statechange',function(){
+                if(newW.state==='installed'&&navigator.serviceWorker.controller){
+                  newW.postMessage({type:'SKIP_WAITING'});
+                }
+              });
+            });
+            navigator.serviceWorker.addEventListener('controllerchange',function(){
+              window.location.reload();
+            });
+          });
+        }
         var t=setTimeout(function(){
           var fb=document.getElementById('lv-fallback');
           var txt=document.getElementById('lv-load-text');
@@ -48,7 +63,7 @@
         });
       })();
     </script>
-    <script defer src="/linguaverse/assets/site-fixes.js?v=20260702q"></script>
+    <script defer src="/linguaverse/assets/site-fixes.js?v=20260702r"></script>
     <script type="module" crossorigin src="/linguaverse/assets/index-2OLDfEAz.js"></script>
     <link rel="stylesheet" crossorigin href="/linguaverse/assets/index-Crjrm-fJ.css">
     <noscript>
