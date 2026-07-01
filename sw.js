@@ -1,4 +1,4 @@
-const CACHE_NAME = "linguaverse-static-cache-20260702l";
+const CACHE_NAME = "linguaverse-static-cache-20260702m";
 const CORE_ASSETS = [
   "/linguaverse/",
   "/linguaverse/index.html",
