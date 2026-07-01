@@ -1,4 +1,4 @@
-const CACHE_NAME = "linguaverse-static-cache-20260702q";
+const CACHE_NAME = "linguaverse-static-cache-20260702v";
 const CORE_ASSETS = [
   "/linguaverse/",
   "/linguaverse/index.html",
@@ -13,7 +13,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(CORE_ASSETS).catch(() => {}))
-      .then(() => self.skipWaiting())
   );
 });
 
