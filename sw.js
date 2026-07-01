@@ -1,4 +1,4 @@
-const CACHE_NAME = "linguaverse-static-cache-20260702v";
+const CACHE_NAME = "linguaverse-static-cache-20260702w";
 const CORE_ASSETS = [
   "/linguaverse/",
   "/linguaverse/index.html",
@@ -45,17 +45,14 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      const network = fetch(request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
-          }
-          return response;
-        })
-        .catch(() => cached || caches.match("/linguaverse/index.html"));
-      return cached || network;
-    })
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
