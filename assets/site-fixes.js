@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702k";
+  const VERSION = "20260702l";
 
 
 
@@ -567,6 +567,39 @@
     }
   }
 };
+
+
+  function ctx() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}");
+      if (saved.language) return saved;
+    } catch (e) {}
+    // 根据 URL 路径推断
+    const hash = location.hash || "";
+    let language = "英语", level = "初级", courseTitle = "英语零基础入门";
+    if (hash.includes("courses/4") || hash.includes("courses/5") || hash.includes("courses/6")) {
+      language = "日语";
+      if (hash.includes("courses/4")) { level = "初级"; courseTitle = "日语零基础入门"; }
+      else if (hash.includes("courses/5")) { level = "中级"; courseTitle = "日语中级进阶"; }
+      else { level = "高级"; courseTitle = "日语高级精通"; }
+    } else if (hash.includes("courses/7") || hash.includes("courses/8") || hash.includes("courses/9")) {
+      language = "韩语";
+      if (hash.includes("courses/7")) { level = "初级"; courseTitle = "韩语零基础入门"; }
+      else if (hash.includes("courses/8")) { level = "中级"; courseTitle = "韩语中级进阶"; }
+      else { level = "高级"; courseTitle = "韩语高级精通"; }
+    } else {
+      if (hash.includes("courses/2")) { level = "中级"; courseTitle = "英语中级进阶"; }
+      else if (hash.includes("courses/3")) { level = "高级"; courseTitle = "英语高级精通"; }
+    }
+    return { language, level, courseTitle };
+  }
+
+  function pack(c) {
+    if (!c) c = ctx();
+    const lang = packs[c.language];
+    if (!lang) return packs["英语"]["初级"];
+    return lang[c.level] || lang["初级"] || {};
+  }
 
   function patchChapter() {
     if (!/#\/courses\/\d+\/chapter\/\d+/.test(location.hash)) return;
@@ -3370,6 +3403,41 @@
   function esc(v) { return String(v ?? "").replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[s])); }
 
 
+
+
+  // ========== 初始化入口 ==========
+
+  function patchAll() {
+    bindButtons();
+    patchFooter();
+    patchVideos();
+    patchChapter();
+    patchLearnModule();
+    patchDashboard();
+  }
+
+  ready(function() {
+    injectStyles();
+    registerSW();
+    patchAll();
+
+    // 监听 hash 变化（SPA 路由）
+    window.addEventListener("hashchange", function() {
+      setTimeout(patchAll, 150);
+    });
+
+    // 轮询确保动态渲染的内容也能被修补
+    let tries = 0;
+    const timer = setInterval(function() {
+      tries++;
+      patchAll();
+      if (tries >= 15) clearInterval(timer);
+    }, 600);
+
+    // 首次渲染完成后的额外检查
+    setTimeout(patchAll, 800);
+    setTimeout(patchAll, 2000);
+  });
 
 })();
 
