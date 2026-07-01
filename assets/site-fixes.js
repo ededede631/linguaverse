@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702r";
+  const VERSION = "20260702s";
 
 
 
@@ -25,6 +25,10 @@
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
 
 
+
+  const SCORE_KEY = "linguaverse_user_score";
+
+  const GUIDE_KEY = "linguaverse_guide_shown";
 
   const toastId = "linguaverse-toast";
 
