@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702n";
+  const VERSION = "20260702o";
 
 
 
@@ -249,6 +249,128 @@
     }
   }
 };
+
+  // 扩充情景对话 - 自动追加到各主题
+  (function() {
+    const extraDialogues = {
+      "日语": {
+        "kana": {
+          title: "五十音练习",
+          text: "A: 先生、この漢字の読み方を教えてください。\nB: はい、これは「あさ」（朝）と読みます。\nA: 「あ」はあ行の最初ですね。\nB: そうです。あいうえおは母音の5つです。\nA: かきくけこはkの音ですか。\nB: はい、子音kと母音を組み合わせた音です。\nA: 五十音を全部覚えるのは大変ですね。\nB: 大丈夫です。毎日少しずつ練習すれば、必ず覚えられますよ。",
+          note: "五十音是日语发音的基础，按行分组记忆效率最高。"
+        },
+        "ta_form": {
+          title: "谈论过去",
+          text: "A: 昨日は何をしましたか。\nB: 友達と映画を見ました。とても面白かったです。\nA: どんな映画を見たんですか。\nB: アクション映画です。主人が強かったです。\nA: 私も見たいです。どこで見ましたか。\nB: 新宿の映画館で見ました。\nA: 今度一緒に行きましょう。\nB: いいですね。楽しみにしています。",
+          note: "た形用于描述过去的动作和经历，是日语中最常用的过去时表达方式。"
+        },
+        "verbs": {
+          title: "动词练习",
+          text: "A: 日本語の動詞は難しいですね。\nB: そうですね。分類が大切です。\nA: 一類動詞と二類動詞の違いは何ですか。\nB: 一類は語尾がう段で、二類は倒数第二音がい段かえ段です。\nA: 「食べる」は二類ですか。\nB: はい、「食べる」は二類です。「べ」がえ段だからです。\nA: 「書く」は一類ですね。\nB: そうです。練習を重ねれば、自然に分かるようになります。",
+          note: "动词分类是日语语法的核心，一类动词（五段）和二类动词（一段）的变形规则不同。"
+        },
+        "adjectives": {
+          title: "描述天气",
+          text: "A: 今日は暑いですね。\nB: そうですね。とても暑いです。\nA: でも、明日は涼しくなるそうです。\nB: 本当ですか。良かったです。\nA: 先週はもっと暑かったです。\nB: はい、先週は最高気温が35度でした。\nA: 夏は好きですか。\nB: 暑すぎるのは嫌いですが、花火が好きです。",
+          note: "い形容词可以直接变形表示过去和否定，な形容词需要借助だ/です进行变形。"
+        },
+        "masu_form": {
+          title: "礼貌地表达",
+          text: "A: すみません、駅はどこですか。\nB: はい、この道をまっすぐ行きます。そして、右に曲がります。\nA: どのくらいかかりますか。\nB: 歩いて10分ぐらいかかります。\nA: ありがとうございます。助かりました。\nB: いいえ、どういたしまして。\nA: 失礼します。\nB: 気をつけて行ってください。",
+          note: "ます形是日语礼貌体的核心，在日常交流和正式场合中广泛使用。"
+        },
+        "keigo": {
+          title: "拜访客户",
+          text: "A: いらっしゃいませ。お待ちしておりました。\nB: お邪魔します。本日はよろしくお願いいたします。\nA: こちらへどうぞ。お茶をお入れいたしましょうか。\nB: ありがとうございます。いただきます。\nA: 先日の資料を拝見させていただきました。\nB: お時間を取らせてしまい、恐れ入ります。\nA: いえ、とても参考になりました。\nB: それは何よりです。",
+          note: "商务场合需要使用敬语，尊敬语用于对方动作，谦让语用于自己动作，丁寧语用于句尾。"
+        },
+        "advanced_verbs": {
+          title: "讨论可能性",
+          text: "A: この漢字は読めますか。\nB: すみません、読めません。難しいですね。\nA: 漢字は中国から来たので、中国人は読めるかもしれません。\nB: そうですね。でも、簡単な漢字しか読めません。\nA: 日本語の新聞は読めますか。\nB: 漢字が多すぎて、まだ読めません。\nA: 毎日練習すれば、きっと読めるようになりますよ。\nB: 頑張ります。",
+          note: "可能形表示能力或可能性，一类动词变え段加れる，二类动词去る加られる。"
+        },
+        "conversation": {
+          title: "购物",
+          text: "A: いらっしゃいませ。何をお探しですか。\nB: このTシャツを見せてください。\nA: はい、どうぞ。試着室はあちらです。\nB: ありがとうございます。…少し小さいですね。\nA: 大きいサイズもございます。Mサイズはいかがですか。\nB: はい、それをください。\nA: かしこまりました。3000円になります。\nB: はい、お願いします。",
+          note: "购物场景是日常会话中最实用的场景之一，掌握基本句型可以轻松应对。"
+        },
+      },
+      "韩语": {
+        "verbs": {
+          title: "讨论动作",
+          text: "A: 어제 뭐 했어요?\nB: 친구를 만났어요. 같이 밥도 먹었어요.\nA: 어디서 만났어요?\nB: 명동에서 만났어요. 거기서 쇼핑도 했어요.\nA: 뭐 샀어요?\nB: 옷이랑 신발을 샀어요. 세일해서 싸게 샀어요.\nA: 좋겠다! 다음에 저도 같이 가요.\nB: 네, 다음 주말에 갈까요?",
+          note: "韩语动词都以다结尾，时态通过词尾变化表示，日常对话中多用아요/어요体。"
+        },
+        "tenses": {
+          title: "谈论计划",
+          text: "A: 이번 주말에 뭐 할 거예요?\nB: 부모님을 뵈러 갈 거예요.\nA: 어제는 뭐 하셨어요?\nB: 어제는 집에서 쉬었어요.\nA: 지금 뭐 하고 있어요?\nB: 한국어를 공부하고 있어요.\nA: 매일 공부해요?\nB: 네, 매일 1시간씩 공부해요.\nA: 정말 열심히 하시네요!",
+          note: "韩语时态相对简单：过去时用았/었/했，将来时用ㄹ/을 거예요，现在时用아요/어요。"
+        },
+        "honorific": {
+          title: "拜访长辈",
+          text: "A: 선생님, 안녕하세요.\nB: 안녕하세요. 오셨군요.\nA: 선생님, 이 책을 드리고 싶어서 왔어요.\nB: 아, 고마워요. 앉으세요.\nA: 선생님은 점심을 드셨어요?\nB: 네, 먹었어요. 너도 먹었니?\nA: 네, 먹었어요.\nB: 잘 왔어요. 차라도 마셔요.",
+          note: "对长辈和老师使用敬语是韩语的基本礼仪，句尾用ㅂ니다/습니다，动词前加시/으시。"
+        },
+        "conversation": {
+          title: "餐厅点餐",
+          text: "A: 어서 오세요. 몇 분이세요?\nB: 두 명이에요.\nA: 이쪽으로 안내해 드리겠습니다.\nB: 여기 김치찌개 있어요?\nA: 네, 있습니다. 몇 인분 드릴까요?\nB: 두 인분 주세요.\nA: 네, 알겠습니다. 음료는 어떤 거로 드릴까요?\nB: 맥주 두 병 주세요.\nA: 네, 잠시만 기다려 주세요.",
+          note: "餐厅点餐是日常会话的重要场景，掌握基本句型可以轻松应对各种用餐场合。"
+        },
+      },
+      "英语": {
+        "nouns": {
+          title: "学习名词",
+          text: "A: Let's learn some nouns today. What's this?\nB: It's a book.\nA: Good! And what are these?\nB: They are books.\nA: Excellent. Is 'water' countable?\nB: No, it's uncountable. We say 'some water', not 'a water'.\nA: Right! How about 'children'?\nB: It's the plural of 'child'. It's irregular.\nA: Very good. Keep practicing!",
+          note: "名词分为可数名词和不可数名词，复数变化有规则和不规则两种形式。"
+        },
+        "verbs": {
+          title: "动词用法",
+          text: "A: Do you like playing sports?\nB: Yes, I do. I play basketball every weekend.\nA: Did you play yesterday?\nB: No, I didn't. It was raining.\nA: What did you do then?\nB: I stayed home and watched a movie.\nA: Have you seen that new film?\nB: Yes, I have. It was amazing!",
+          note: "动词是句子的核心，要注意时态变化和不规则动词的特殊形式。"
+        },
+        "adjectives": {
+          title: "描述事物",
+          text: "A: What do you think of this city?\nB: It's beautiful and modern.\nA: Is it bigger than your hometown?\nB: Yes, much bigger. The buildings are taller too.\nA: What's the best thing about it?\nB: The people are the friendliest I've ever met.\nA: That sounds wonderful! I want to visit someday.",
+          note: "形容词用于描述名词的特征，有原级、比较级和最高级三种形式。"
+        },
+        "adverbs": {
+          title: "描述方式",
+          text: "A: How do you usually go to work?\nB: I usually take the subway. It's very convenient.\nA: How long does it take?\nB: It takes about 30 minutes.\nA: Do you drive sometimes?\nB: Rarely. Driving in the city is too stressful.\nA: I see. I always walk to work. It's good exercise.",
+          note: "副词用于修饰动词、形容词或其他副词，说明动作的方式、程度、时间或频率。"
+        },
+        "articles": {
+          title: "学习冠词",
+          text: "A: Can you explain articles to me?\nB: Sure! 'A' and 'an' are indefinite articles.\nA: When do we use 'the'?\nB: We use 'the' when we're talking about something specific.\nA: Like 'the sun'?\nB: Exactly! There's only one sun.\nA: What about 'I love music'? There's no article.\nB: Right! We don't use articles with abstract nouns in general statements.",
+          note: "冠词是英语特有的语法现象，中文没有对应概念，需要专门学习和练习。"
+        },
+        "prepositions": {
+          title: "谈论方位",
+          text: "A: Where is the library?\nB: It's on the third floor, next to the cafeteria.\nA: When does it open?\nB: It opens at 8:00 in the morning.\nA: Is it open on weekends?\nB: Yes, but it closes early on Sundays.\nA: How do I get there from here?\nB: Go straight and turn left at the corner. It's across from the gym.",
+          note: "介词是英语学习的难点，同一个介词可以表示多种含义，需要通过场景和例句来掌握。"
+        },
+        "grammar": {
+          title: "语法讨论",
+          text: "A: English grammar is so complicated!\nB: Don't worry. Start with the five basic sentence patterns.\nA: What are they?\nB: Subject + Verb, Subject + Verb + Object, and so on.\nA: And then?\nB: Then learn about clauses. A clause has a subject and a verb.\nA: Like 'when I was young'?\nB: Exactly! That's an adverbial clause.\nA: I think I need more practice.\nB: Practice makes perfect!",
+          note: "英语语法体系庞大但有条理，建议先掌握五大基本句型，再逐步学习从句和特殊句式。"
+        },
+        "clauses": {
+          title: "复杂句子",
+          text: "A: Can you help me with this sentence?\nB: Of course. What's the problem?\nA: I don't know if this is correct: 'The book which I bought yesterday is interesting.'\nB: That's perfect! It's a relative clause.\nA: What's the difference between 'which' and 'that'?\nB: In most cases, they're interchangeable for things.\nA: And what about 'who'?\nB: 'Who' is for people. Like 'The man who lives next door is a doctor.'",
+          note: "从句是英语语法的重要组成部分，包括定语从句、宾语从句和状语从句三种主要类型。"
+        },
+      },
+    };
+
+    // 将额外对话合并到 chapterDialogues
+    for (const lang in extraDialogues) {
+      if (!chapterDialogues[lang]) chapterDialogues[lang] = {};
+      for (const topic in extraDialogues[lang]) {
+        if (!chapterDialogues[lang][topic]) {
+          chapterDialogues[lang][topic] = extraDialogues[lang][topic];
+        }
+      }
+    }
+  })();
 
   // 章节特色内容数据：按语言 × 主题
   // 扩展词汇 - 自动追加到各主题
