@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702l";
+  const VERSION = "20260702m";
 
 
 
@@ -568,6 +568,35 @@
   }
 };
 
+
+
+  // 视频映射表（匹配标题 → B站视频ID）
+  const videoMap = [
+    [/五十音|平假名|片假名|发音|字母| hangul/i, "BV1xx411c7mD", "日语五十音入门教学"],
+    [/语法|动词|助词|时态|文法|grammar/i, "BV1GJ411x7h7", "日语语法系统讲解"],
+    [/词汇|单词|vocabulary|単語/i, "BV1Wb411v7zY", "日语单词记忆法"],
+    [/会话|口语|对话|speaking|会話/i, "BV1rE411x7gW", "日语口语会话练习"],
+    [/听力|listening|聴解/i, "BV1s4411Y7jM", "日语听力训练"],
+    [/韩语|韩文|hangul|korean/i, "BV1ft411x7Dk", "韩语入门教学"],
+    [/英语|english|phonics|语法/i, "BV1Zb411v7p9", "英语语法系统讲解"],
+    [/.*/, "BV1xx411c7mD", "语言学习入门"]
+  ].map(([re, bvid, title]) => [re, bvid, title]);
+
+  // 状态管理
+  function getState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+      return saved && typeof saved === "object" ? saved : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState(s) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    } catch (_) {}
+  }
 
   function ctx() {
     try {
@@ -1174,13 +1203,40 @@
 
 
   function question(g, i) {
-
-
-
-    return `<div class="lv-question"><b>${i + 1}. ${esc(g[3])}</b><div>${g[4].map(o => `<button data-lv-answer="${esc(g[4][0])}" data-lv-choice="${esc(o)}">${esc(o)}</button>`).join("")}</div></div>`;
-
-
-
+    // 兼容多种数据格式：
+    // 格式A（5元素）：[名称, 说明, 例句, 问题, [选项]]  → 答案=选项[0]
+    // 格式B（4元素v1）：[类型, 问题, 答案, [选项]]
+    // 格式C（4元素v2）：[问题, 答案, [选项], 正确索引]
+    let qText, answer, options;
+    if (g.length >= 5) {
+      // 格式A
+      qText = g[3];
+      options = g[4];
+      answer = Array.isArray(options) && options.length ? options[0] : g[2];
+    } else if (g.length === 4) {
+      if (Array.isArray(g[3])) {
+        // 格式B：第4个元素是选项数组
+        qText = g[1];
+        answer = g[2];
+        options = g[3];
+      } else if (Array.isArray(g[2])) {
+        // 格式C：第3个元素是选项数组，第4个是正确索引
+        qText = g[0];
+        options = g[2];
+        answer = Array.isArray(options) && typeof g[3] === 'number' ? options[g[3]] : g[1];
+      } else {
+        // 兜底
+        qText = g[1] || g[0];
+        answer = g[2] || g[1];
+        options = [];
+      }
+    } else {
+      qText = g[0] || '';
+      answer = g[1] || '';
+      options = [];
+    }
+    const opts = Array.isArray(options) ? options : [];
+    return `<div class="lv-question"><b>${i + 1}. ${esc(qText)}</b><div>${opts.map(o => `<button data-lv-answer="${esc(answer)}" data-lv-choice="${esc(o)}">${esc(o)}</button>`).join("")}</div></div>`;
   }
 
 
