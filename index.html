@@ -3,14 +3,99 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/linguaverse/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LinguaVerse 语言学习平台" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="LinguaVerse 语言学习平台 - 英语 / 日语 / 韩语，分级课程、单词记忆、语法练习、口语跟读、听力训练、拼写手写" />
+    <meta name="keywords" content="英语学习,日语学习,韩语学习,五十音,单词记忆,语法练习,听力训练,口语跟读,拼写练习,语言学习" />
+    <meta name="theme-color" content="#7c3aed" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>LinguaVerse - 语言学习</title>
-    <script defer src="/linguaverse/assets/site-fixes.js?v=20260702a"></script>
+    <style>
+      html,body{margin:0;padding:0;font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans CN","WenQuanYi Micro Hei",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+      #lv-loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,#f5f3ff,#ecfeff);z-index:99998;text-align:center;padding:20px}
+      #lv-loading h1{margin:0;font-size:28px;color:#4c1d95}
+      #lv-loading p{margin:0;color:#475569;max-width:520px;line-height:1.8}
+      #lv-loading .bar{width:220px;height:6px;background:#e2e8f0;border-radius:999px;overflow:hidden}
+      #lv-loading .bar span{display:block;height:100%;width:30%;background:#7c3aed;border-radius:999px;animation:lvLoad 1.2s ease-in-out infinite}
+      @keyframes lvLoad{0%{margin-left:-30%}100%{margin-left:100%}}
+      #lv-loading.hidden{display:none}
+      #lv-fallback{display:none}
+      #lv-fallback.show{display:block;max-width:620px;background:white;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(15,23,42,.12);text-align:left;margin-top:8px}
+      #lv-fallback h2{margin:0 0 12px;font-size:20px;color:#b91c1c}
+      #lv-fallback ul{margin:8px 0;padding-left:20px;line-height:2}
+      #lv-fallback a{color:#7c3aed;text-decoration:none}
+      .lv-btn{display:inline-block;padding:8px 16px;border-radius:12px;background:#7c3aed;color:white;text-decoration:none;font-weight:700;margin-top:8px}
+      .lv-btn.ghost{background:white;color:#334155;border:1px solid #ddd}
+    </style>
+    <script>
+      (function(){
+        var t=setTimeout(function(){
+          var fb=document.getElementById('lv-fallback');
+          var txt=document.getElementById('lv-load-text');
+          if(fb&&!document.getElementById('root').children.length){
+            fb.classList.add('show');
+            if(txt)txt.textContent='页面加载时间较长，可能是网络或缓存问题，请尝试以下方案：';
+          }
+        },8000);
+        window.addEventListener('load',function(){
+          clearTimeout(t);
+          setTimeout(function(){
+            var l=document.getElementById('lv-loading');
+            if(l)l.classList.add('hidden');
+          },300);
+        });
+      })();
+    </script>
+    <script defer src="/linguaverse/assets/site-fixes.js?v=20260702b"></script>
     <script type="module" crossorigin src="/linguaverse/assets/index-2OLDfEAz.js"></script>
     <link rel="stylesheet" crossorigin href="/linguaverse/assets/index-Crjrm-fJ.css">
+    <noscript>
+      <style>
+        .noscript-wrap{max-width:720px;margin:40px auto;padding:24px;background:white;border-radius:18px;box-shadow:0 20px 60px rgba(15,23,42,.1);line-height:1.9;color:#0f172a}
+        .noscript-wrap h1{color:#4c1d95}
+        .noscript-wrap a{color:#7c3aed}
+      </style>
+      <div class="noscript-wrap">
+        <h1>LinguaVerse 语言学习平台</h1>
+        <p><b>当前浏览器未启用 JavaScript，无法使用完整学习功能。</b></p>
+        <p>本站是纯前端静态站点，所有学习数据保存在你的浏览器本地，不上传服务器。</p>
+        <h3>支持的功能</h3>
+        <ul>
+          <li>英语 / 日语 / 韩语 三种语言</li>
+          <li>初级 / 中级 / 高级 三个阶段</li>
+          <li>单词记忆、语法练习、口语跟读、听力训练、拼写手写</li>
+          <li>本地学习记录、生词本、错题复盘、每日打卡</li>
+          <li>离线缓存（需先访问过一次）</li>
+        </ul>
+        <h3>如何启用</h3>
+        <ol>
+          <li>在浏览器设置中启用 JavaScript</li>
+          <li>刷新页面即可正常使用</li>
+          <li>如仍无法加载，请尝试按 <code>Ctrl + Shift + R</code> 强制刷新</li>
+        </ol>
+        <p><a class="lv-btn" href="/linguaverse/#/courses">返回首页</a></p>
+      </div>
+    </noscript>
   </head>
   <body>
+    <div id="lv-loading">
+      <h1>LinguaVerse</h1>
+      <p id="lv-load-text">正在加载语言学习平台，请稍候…</p>
+      <div class="bar"><span></span></div>
+      <div id="lv-fallback">
+        <h2>页面加载较慢？</h2>
+        <ul>
+          <li>按 <code>Ctrl + Shift + R</code> 强制刷新，清理缓存</li>
+          <li>检查网络是否能正常访问 GitHub Pages</li>
+          <li>关闭广告拦截、代理或 VPN 后重试</li>
+          <li>确认访问地址：<code>https://ededede631.github.io/linguaverse/</code></li>
+          <li>尝试使用 Chrome / Edge / Firefox 最新版本</li>
+        </ul>
+        <p><a class="lv-btn" href="/linguaverse/">重新加载</a> &nbsp; <a class="lv-btn ghost" href="/linguaverse/#/courses">进入课程中心</a></p>
+      </div>
+    </div>
     <div id="root"></div>
   </body>
 </html>
