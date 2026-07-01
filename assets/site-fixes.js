@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "20260702a";
+  const VERSION = "20260702b";
   const STORE_KEY = "linguaverse_learning_state_v2";
   const CONTEXT_KEY = "linguaverseCourseContext";
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
@@ -462,6 +462,30 @@
     if (!m) { m = document.createElement("div"); m.id = modalId; m.onclick = e => { if (e.target === m) m.classList.remove("show"); }; document.body.appendChild(m); }
     m.innerHTML = `<div class="lv-modal-card"><div class="lv-modal-head"><h3>${esc(title)}</h3><button id="lv-modal-close">关闭</button></div><div class="lv-modal-body">${html}</div></div>`;
     m.classList.add("show"); document.getElementById("lv-modal-close").onclick = () => m.classList.remove("show");
+  }
+
+  function renderFallback() {
+    const root = document.getElementById("root");
+    if (!root || root.children.length) return;
+    document.getElementById("lv-loading")?.classList.add("hidden");
+    const fb = document.getElementById("lv-fallback");
+    if (fb) { fb.classList.add("show"); return; }
+    root.innerHTML = `
+      <div style="max-width:560px;margin:60px auto;padding:24px;background:white;border-radius:18px;box-shadow:0 20px 60px rgba(15,23,42,.1);text-align:center;line-height:1.9">
+        <h2 style="color:#b91c1c;margin:0 0 8px">页面加载失败</h2>
+        <p style="color:#475569;margin:8px 0">React 主包未能成功渲染，可能是网络、缓存或浏览器兼容问题。</p>
+        <div style="text-align:left;background:#f8fafc;border-radius:12px;padding:14px;margin:16px 0">
+          <b style="color:#0f172a">请尝试：</b>
+          <ol style="margin:8px 0 0 20px;padding:0">
+            <li>按 <code>Ctrl + Shift + R</code> 强制刷新</li>
+            <li>清理浏览器缓存和 Cookie</li>
+            <li>关闭广告拦截、代理或 VPN 后重试</li>
+            <li>确认地址为 <code>https://ededede631.github.io/linguaverse/</code></li>
+            <li>使用 Chrome / Edge / Firefox 最新版本</li>
+          </ol>
+        </div>
+        <p style="margin:0"><a class="lv-primary" style="display:inline-block;padding:10px 20px;border-radius:12px;background:#7c3aed;color:white;text-decoration:none;font-weight:700" href="/linguaverse/">重新加载</a></p>
+      </div>`;
   }
 
   function ready(fn) { document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", fn, { once: true }) : fn(); }
