@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702t";
+  const VERSION = "20260702u";
 
 
 
@@ -29,6 +29,21 @@
   const SCORE_KEY = "linguaverse_user_score";
 
   const GUIDE_KEY = "linguaverse_guide_shown";
+
+  const badges = [
+    { id: "first_word", name: "初识词汇", desc: "完成第一次单词学习", cond: (s) => Object.keys(s.progress || {}).length > 0 },
+    { id: "word_50", name: "词汇达人", desc: "累计学习50个单词", cond: (s) => (s.vocab || []).length >= 50 },
+    { id: "word_200", name: "词汇大师", desc: "累计学习200个单词", cond: (s) => (s.vocab || []).length >= 200 },
+    { id: "grammar_10", name: "语法新手", desc: "完成10道语法题", cond: (s) => (s.correct || 0) >= 10 },
+    { id: "grammar_50", name: "语法能手", desc: "完成50道语法题", cond: (s) => (s.correct || 0) >= 50 },
+    { id: "streak_3", name: "连续三天", desc: "连续学习3天", cond: (s) => (s.streak || 0) >= 3 },
+    { id: "streak_7", name: "坚持一周", desc: "连续学习7天", cond: (s) => (s.streak || 0) >= 7 },
+    { id: "streak_30", name: "月度达人", desc: "连续学习30天", cond: (s) => (s.streak || 0) >= 30 },
+    { id: "listening_10", name: "听力入门", desc: "完成10次听力练习", cond: (s) => (s.listeningDone || 0) >= 10 },
+    { id: "score_100", name: "百分学子", desc: "累计获得100积分", cond: (s) => (s.score || 0) >= 100 },
+    { id: "score_500", name: "学习先锋", desc: "累计获得500积分", cond: (s) => (s.score || 0) >= 500 },
+    { id: "all_lang", name: "多语学习者", desc: "学习过三种语言", cond: (s) => { const p = s.progress || {}; const langs = new Set(Object.keys(p).map(k => k.split('-')[0])); return langs.size >= 3; } },
+  ];
 
   const toastId = "linguaverse-toast";
 
