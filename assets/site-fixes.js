@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702p";
+  const VERSION = "20260702q";
 
 
 
@@ -1867,9 +1867,8 @@
 
     el.dataset[key] = "1";
 
-
-
-    el.addEventListener("click", fn);
+    const events = el.tagName === "SELECT" ? ["change", "click"] : ["click"];
+    events.forEach(evt => el.addEventListener(evt, fn));
 
 
 
