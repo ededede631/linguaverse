@@ -607,7 +607,12 @@
     // 找到章节主容器
     const allRoots = Array.from(document.querySelectorAll(".container,main,section"));
     let root = allRoots.find(x => /学习内容|课后练习|知识点|课文|词汇|语法/.test(x.innerText || ""));
-    if (!root) root = document.querySelector("main") || document.body;
+    if (!root) {
+      // 尝试找更通用的内容容器
+      root = allRoots.find(x => /第\s*\d+\s*章|本章学习|章节/.test(x.innerText || ""));
+    }
+    // 如果还是没找到合适的容器（可能 React 还没渲染完），跳过本次，等下次轮询
+    if (!root || root === document.body) return;
     if (root.dataset.lvChapter === VERSION) return;
     root.dataset.lvChapter = VERSION;
 
