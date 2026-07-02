@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703i";
+  const VERSION = "20260703j";
 
 
 
@@ -3758,7 +3758,7 @@
           .egg-sparkle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}\
         </style>\
         <div class="egg-video">\
-          <video muted autoplay playsinline preload="auto" style="width:100%;display:block;border-radius:17px;background:#000">\
+          <video autoplay playsinline preload="auto" style="width:100%;display:block;border-radius:17px;background:#000">\
             <source src="/linguaverse/easter-egg.mp4" type="video/mp4">\
             你的浏览器不支持视频播放\
           </video>\
@@ -3784,16 +3784,11 @@
     setTimeout(function() {
       var video = document.querySelector('.egg-video video');
       if (!video) return;
-      video.muted = true;
       video.playsInline = true;
-      var playPromise = video.play();
-      if (playPromise && playPromise.catch) {
-        playPromise.catch(function() {
-          video.muted = true;
-          video.currentTime = 0;
-          video.play().catch(function() {});
-        });
-      }
+      video.play().catch(function() {
+        video.currentTime = 0;
+        video.play().catch(function() {});
+      });
       // 视频开始播放后，延迟1秒弹出"你被骗了"
       function showText() {
         setTimeout(function() {
@@ -3807,21 +3802,8 @@
         showText();
       } else {
         video.addEventListener('playing', showText, { once: true });
-        // 兜底：3秒后无论如何都显示
         setTimeout(showText, 3000);
       }
-      // 用户第一次触摸屏幕时取消静音
-      var unmuted = false;
-      function tryUnmute() {
-        if (unmuted) return;
-        unmuted = true;
-        video.muted = false;
-        video.play().catch(function() {});
-        document.removeEventListener('touchstart', tryUnmute);
-        document.removeEventListener('click', tryUnmute);
-      }
-      document.addEventListener('touchstart', tryUnmute, { once: false });
-      document.addEventListener('click', tryUnmute, { once: false });
     }, 300);
   }
 
