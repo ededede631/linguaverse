@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703e";
+  const VERSION = "20260703f";
 
 
 
@@ -3776,6 +3776,18 @@
       star.style.animation = 'eggSparkle ' + (2 + Math.random() * 3) + 's ' + (Math.random() * 2) + 's ease-in-out infinite';
       container.appendChild(star);
     }
+    // 强制自动播放视频（绕过浏览器自动播放策略）
+    setTimeout(function() {
+      var video = document.querySelector('.egg-video video');
+      if (video) {
+        video.muted = false;
+        video.play().catch(function() {
+          // 静音播放作为后备
+          video.muted = true;
+          video.play().catch(function() {});
+        });
+      }
+    }, 500);
   }
 
   ready(function() {
