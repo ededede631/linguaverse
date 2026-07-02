@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703a";
+  const VERSION = "20260703b";
 
 
 
@@ -882,20 +882,10 @@
 
       <div class="lv-flow">
         <span>📖 预习</span>
-        <span>🎬 学习</span>
-        <span>📝 练习</span>
+        <span>📝 学习</span>
+        <span>✏️ 练习</span>
         <span>✅ 测试</span>
         <span>🔄 复习</span>
-      </div>
-
-      <div class="lv-panel">
-        <h3>🎬 视频讲解</h3>
-        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;background:#000">
-          <iframe style="position:absolute;top:0;left:0;width:100%;height:100%"
-            src="https://player.bilibili.com/player.html?bvid=${video.bvid}&autoplay=0&page=1&high_quality=1"
-            allowfullscreen scrolling="no" title="${esc(video.title)}"></iframe>
-        </div>
-        <p class="lv-video-note" style="margin-top:8px">视频来源：B 站公开课程 - ${esc(video.title)}</p>
       </div>
 
       <div class="lv-grid two">
