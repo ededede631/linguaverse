@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703d";
+  const VERSION = "20260703e";
 
 
 
@@ -3747,14 +3747,14 @@
           @keyframes eggPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.3);opacity:.8}}\
           @keyframes eggFadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}\
           @keyframes eggSparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}\
-          .egg-title{animation:eggFadeIn .8s ease both;font-size:clamp(28px,5vw,48px);font-weight:800;background:linear-gradient(135deg,#ff6b9d,#c44dff,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;text-align:center}\
-          .egg-sub{animation:eggFadeIn .8s .2s ease both;font-size:clamp(14px,2.5vw,20px);opacity:.7;margin-bottom:30px;text-align:center}\
+          .egg-title{animation:eggFadeIn .8s ease both;font-size:clamp(28px,5vw,48px);font-weight:900;color:#ff2222;margin-bottom:12px;text-align:center}\
+          .egg-sub{animation:eggFadeIn .8s .2s ease both;font-size:clamp(14px,2.5vw,20px);color:#ff4444;font-weight:700;margin-bottom:30px;text-align:center}\
           .egg-video{animation:eggFadeIn .8s .4s ease both;width:min(90vw,640px);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid rgba(255,255,255,.15)}\
           .egg-video video{width:100%;display:block;border-radius:17px}\
           .egg-footer{animation:eggFadeIn .8s .6s ease both;margin-top:24px;font-size:14px;opacity:.4;text-align:center}\
           .egg-sparkle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}\
         </style>\
-        <div class="egg-title">🌟 欢迎来到李桐宇的专属空间 🌟</div>\
+        <div class="egg-title">你被骗了</div>\
         <div class="egg-sub">这是一个只属于你的秘密彩蛋页面</div>\
         <div class="egg-video">\
           <video controls autoplay preload="metadata" playsinline>\
