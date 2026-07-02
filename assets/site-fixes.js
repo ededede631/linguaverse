@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702y";
+  const VERSION = "20260702z";
 
 
 
@@ -3647,38 +3647,62 @@
 
   function patchHomepage() {
     // 无论什么路由，只要页面上存在"四大互动学习模块"就移除（React 可能随时重渲染）
-    const h2s = Array.from(document.querySelectorAll('h2'));
-    const target = h2s.find(h => h.textContent.includes('四大互动'));
+    var h2s = Array.from(document.querySelectorAll('h2'));
+    var target = h2s.find(function(h) { return h.textContent.includes('四大互动'); });
     if (!target) return;
-    const section = target.closest('section');
+    var section = target.closest('section');
     if (section) {
-      section.dataset.lvRemoved = "1";
       section.remove();
     } else {
-      let el = target.nextElementSibling;
-      const toRemove = [target];
-      let count = 0;
+      var el = target.nextElementSibling;
+      var toRemove = [target];
+      var count = 0;
       while (el && count < 8) {
         toRemove.push(el);
         el = el.nextElementSibling;
         count++;
       }
-      toRemove.forEach(e => e.remove());
+      toRemove.forEach(function(e) { e.remove(); });
     }
   }
 
   function patchDuration() {
     // 查找所有包含小数小时的 span（格式如 "7.333333333333333 小时"）
-    document.querySelectorAll('span').forEach(span => {
-      const t = span.textContent.trim();
-      const m = t.match(/(\d+\.\d+)\s*小时/);
+    document.querySelectorAll('span').forEach(function(span) {
+      var t = span.textContent.trim();
+      var m = t.match(/(\d+\.\d+)\s*小时/);
       if (m) {
-        const total = parseFloat(m[1]);
-        const h = Math.floor(total);
-        const min = Math.round((total - h) * 60);
-        span.textContent = span.textContent.replace(m[0], h > 0 ? `${h}小时${min}分钟` : `${min}分钟`);
+        var total = parseFloat(m[1]);
+        var h = Math.floor(total);
+        var min = Math.round((total - h) * 60);
+        var replacement = h > 0 ? h + '小时' + min + '分钟' : min + '分钟';
+        span.textContent = span.textContent.replace(m[0], replacement);
       }
     });
+  }
+
+  // MutationObserver 持续监控，防止 React 重渲染覆盖补丁
+  var lvObserver = null;
+  function startObserver() {
+    if (lvObserver) return;
+    lvObserver = new MutationObserver(function(mutations) {
+      var needHomepage = false;
+      var needDuration = false;
+      for (var i = 0; i < mutations.length; i++) {
+        var added = mutations[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (node.nodeType === 1) {
+            var text = node.textContent || '';
+            if (text.includes('四大互动')) needHomepage = true;
+            if (/\d+\.\d{5,}\s*小时/.test(text)) needDuration = true;
+          }
+        }
+      }
+      if (needHomepage) patchHomepage();
+      if (needDuration) patchDuration();
+    });
+    lvObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   function patchAll() {
@@ -3695,6 +3719,7 @@
   ready(function() {
     injectStyles();
     registerSW();
+    startObserver();
     patchAll();
 
     // 监听 hash 变化（SPA 路由）
