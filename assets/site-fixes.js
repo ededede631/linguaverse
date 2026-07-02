@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702z";
+  const VERSION = "20260703a";
 
 
 
@@ -740,28 +740,35 @@
   }
 
   function ctx() {
+    // 根据 URL 路径推断（课程/章节页面优先使用 URL）
+    const hash = location.hash || "";
+    var urlLanguage = null, urlLevel = null, urlTitle = null;
+    if (/courses\/\d/.test(hash)) {
+      if (hash.includes("courses/4") || hash.includes("courses/5") || hash.includes("courses/6")) {
+        urlLanguage = "日语";
+        if (hash.includes("courses/4")) { urlLevel = "初级"; urlTitle = "日语零基础入门"; }
+        else if (hash.includes("courses/5")) { urlLevel = "中级"; urlTitle = "日语中级进阶"; }
+        else { urlLevel = "高级"; urlTitle = "日语高级精通"; }
+      } else if (hash.includes("courses/7") || hash.includes("courses/8") || hash.includes("courses/9")) {
+        urlLanguage = "韩语";
+        if (hash.includes("courses/7")) { urlLevel = "初级"; urlTitle = "韩语零基础入门"; }
+        else if (hash.includes("courses/8")) { urlLevel = "中级"; urlTitle = "韩语中级进阶"; }
+        else { urlLevel = "高级"; urlTitle = "韩语高级精通"; }
+      } else {
+        urlLanguage = "英语";
+        if (hash.includes("courses/2")) { urlLevel = "中级"; urlTitle = "英语中级进阶"; }
+        else if (hash.includes("courses/3")) { urlLevel = "高级"; urlTitle = "英语高级精通"; }
+        else { urlLevel = "初级"; urlTitle = "英语零基础入门"; }
+      }
+      // URL 推断结果直接返回，不使用 localStorage 缓存
+      if (urlLanguage) return { language: urlLanguage, level: urlLevel, courseTitle: urlTitle };
+    }
+    // 非 URL 课程页面时，从 localStorage 读取
     try {
-      const saved = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}");
+      var saved = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}");
       if (saved.language) return saved;
     } catch (e) {}
-    // 根据 URL 路径推断
-    const hash = location.hash || "";
-    let language = "英语", level = "初级", courseTitle = "英语零基础入门";
-    if (hash.includes("courses/4") || hash.includes("courses/5") || hash.includes("courses/6")) {
-      language = "日语";
-      if (hash.includes("courses/4")) { level = "初级"; courseTitle = "日语零基础入门"; }
-      else if (hash.includes("courses/5")) { level = "中级"; courseTitle = "日语中级进阶"; }
-      else { level = "高级"; courseTitle = "日语高级精通"; }
-    } else if (hash.includes("courses/7") || hash.includes("courses/8") || hash.includes("courses/9")) {
-      language = "韩语";
-      if (hash.includes("courses/7")) { level = "初级"; courseTitle = "韩语零基础入门"; }
-      else if (hash.includes("courses/8")) { level = "中级"; courseTitle = "韩语中级进阶"; }
-      else { level = "高级"; courseTitle = "韩语高级精通"; }
-    } else {
-      if (hash.includes("courses/2")) { level = "中级"; courseTitle = "英语中级进阶"; }
-      else if (hash.includes("courses/3")) { level = "高级"; courseTitle = "英语高级精通"; }
-    }
-    return { language, level, courseTitle };
+    return { language: "英语", level: "初级", courseTitle: "英语零基础入门" };
   }
 
   function pack(c) {
@@ -802,9 +809,13 @@
   function getChapterTitle() {
     const headings = Array.from(document.querySelectorAll("h1,h2,h3"));
     const chapterHeading = headings.find(h => /第\s*\d+\s*章|动词|名词|形容词|助词|语法|发音|词汇|会话|听力|阅读|写作|五十音|平假名|片假名|敬语|时态|句型/.test(h.textContent));
-    if (chapterHeading) return chapterHeading.textContent.trim();
+    if (chapterHeading) {
+      var t = chapterHeading.textContent.trim();
+      // 移除开头的"第X章"前缀，避免重复
+      return t.replace(/^第\s*\d+\s*章[：:\s]*/, "");
+    }
     const pageTitle = document.title || "";
-    if (pageTitle) return pageTitle;
+    if (pageTitle) return pageTitle.split(" - ")[0].replace(/^第\s*\d+\s*章[：:\s]*/, "");
     return "本章学习";
   }
 
@@ -3685,9 +3696,12 @@
   var lvObserver = null;
   function startObserver() {
     if (lvObserver) return;
+    var debounceTimer = null;
     lvObserver = new MutationObserver(function(mutations) {
       var needHomepage = false;
       var needDuration = false;
+      var needChapter = false;
+      var needVideos = false;
       for (var i = 0; i < mutations.length; i++) {
         var added = mutations[i].addedNodes;
         for (var j = 0; j < added.length; j++) {
@@ -3696,11 +3710,21 @@
             var text = node.textContent || '';
             if (text.includes('四大互动')) needHomepage = true;
             if (/\d+\.\d{5,}\s*小时/.test(text)) needDuration = true;
+            if (/学习内容|课后练习|知识点|课文|词汇|语法/.test(text) && /第\s*\d+\s*章/.test(text)) needChapter = true;
+            if (node.querySelector && node.querySelector('iframe[src*="youtube"]')) needVideos = true;
           }
         }
       }
       if (needHomepage) patchHomepage();
       if (needDuration) patchDuration();
+      // 使用防抖避免频繁触发
+      if (needChapter || needVideos) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+          if (needChapter) patchChapter();
+          if (needVideos) patchVideos();
+        }, 300);
+      }
     });
     lvObserver.observe(document.body, { childList: true, subtree: true });
   }
