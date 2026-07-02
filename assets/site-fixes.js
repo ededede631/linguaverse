@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702x";
+  const VERSION = "20260702y";
 
 
 
@@ -3646,15 +3646,15 @@
   // ========== 初始化入口 ==========
 
   function patchHomepage() {
-    if (!/#\/?$/.test(location.hash) && location.hash !== "" && location.hash !== "#/") return;
+    // 无论什么路由，只要页面上存在"四大互动学习模块"就移除（React 可能随时重渲染）
     const h2s = Array.from(document.querySelectorAll('h2'));
     const target = h2s.find(h => h.textContent.includes('四大互动'));
     if (!target) return;
     const section = target.closest('section');
     if (section) {
+      section.dataset.lvRemoved = "1";
       section.remove();
     } else {
-      // 如果找不到section，尝试移除h2及其后面的4个链接卡片
       let el = target.nextElementSibling;
       const toRemove = [target];
       let count = 0;
@@ -3668,13 +3668,15 @@
   }
 
   function patchDuration() {
+    // 查找所有包含小数小时的 span（格式如 "7.333333333333333 小时"）
     document.querySelectorAll('span').forEach(span => {
       const t = span.textContent.trim();
-      const m = t.match(/^(\d+\.\d+)\s*小时$/);
+      const m = t.match(/(\d+\.\d+)\s*小时/);
       if (m) {
-        const h = Math.floor(parseFloat(m[1]));
-        const min = Math.round((parseFloat(m[1]) - h) * 60);
-        span.textContent = h > 0 ? `${h}小时${min}分钟` : `${min}分钟`;
+        const total = parseFloat(m[1]);
+        const h = Math.floor(total);
+        const min = Math.round((total - h) * 60);
+        span.textContent = span.textContent.replace(m[0], h > 0 ? `${h}小时${min}分钟` : `${min}分钟`);
       }
     });
   }
