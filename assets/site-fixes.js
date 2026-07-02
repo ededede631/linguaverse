@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260702w";
+  const VERSION = "20260702x";
 
 
 
@@ -24,7 +24,8 @@
 
   const FILTER_KEY = "linguaverseCourseLanguageFilter";
 
-
+  const SCORE_KEY = "linguaverse_user_score";
+  const GUIDE_KEY = "linguaverse_guide_shown";
 
   const toastId = "linguaverse-toast";
 
@@ -932,6 +933,33 @@
       </div>
 
       ${extras}
+
+      <div class="lv-panel" style="margin-top:20px;background:linear-gradient(135deg,#ede9fe,#e0e7ff)">
+        <h3>🎯 配套学习模块</h3>
+        <p style="color:#475569;margin-bottom:12px">学完本章后，通过以下专项训练巩固所学内容：</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <a href="#/learn/vocabulary" style="display:block;padding:14px;background:white;border-radius:12px;text-decoration:none;color:#1e293b;transition:transform .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:24px;margin-bottom:6px">📖</div>
+            <div style="font-weight:700">单词记忆</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">智能卡片记忆法，高效掌握${esc(c.language)}词汇</div>
+          </a>
+          <a href="#/learn/grammar" style="display:block;padding:14px;background:white;border-radius:12px;text-decoration:none;color:#1e293b;transition:transform .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:24px;margin-bottom:6px">✏️</div>
+            <div style="font-weight:700">语法练习</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">系统${esc(c.language)}语法训练，夯实基础</div>
+          </a>
+          <a href="#/learn/speaking" style="display:block;padding:14px;background:white;border-radius:12px;text-decoration:none;color:#1e293b;transition:transform .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:24px;margin-bottom:6px">🎤</div>
+            <div style="font-weight:700">口语跟读</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">${esc(c.language)}发音评分，说地道${esc(c.language)}</div>
+          </a>
+          <a href="#/learn/listening" style="display:block;padding:14px;background:white;border-radius:12px;text-decoration:none;color:#1e293b;transition:transform .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:24px;margin-bottom:6px">🎧</div>
+            <div style="font-weight:700">听力训练</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">${esc(c.language)}听力素材，提升听力水平</div>
+          </a>
+        </div>
+      </div>
 
       <div class="lv-panel" style="margin-top:20px;background:linear-gradient(135deg,#f0fdf4,#ecfeff)">
         <h3>📋 本章总结</h3>
@@ -2919,6 +2947,21 @@
 
 
 
+  const badges = [
+  { id: "first_lesson", name: "初学乍练", desc: "完成第一个章节", icon: "🎯", cond: s => Object.keys(s.progress || {}).length >= 1 },
+  { id: "five_lessons", name: "小有所成", desc: "完成5个章节", icon: "📚", cond: s => Object.keys(s.progress || {}).length >= 5 },
+  { id: "ten_lessons", name: "学富五车", desc: "完成10个章节", icon: "🎓", cond: s => Object.keys(s.progress || {}).length >= 10 },
+  { id: "vocab_50", name: "词汇达人", desc: "掌握50个生词", icon: "📖", cond: s => (s.vocab || []).length >= 50 },
+  { id: "vocab_200", name: "词汇大师", desc: "掌握200个生词", icon: "🏆", cond: s => (s.vocab || []).length >= 200 },
+  { id: "streak_3", name: "三日连学", desc: "连续学习3天", icon: "🔥", cond: s => (s.checkins || []).length >= 3 },
+  { id: "streak_7", name: "坚持一周", desc: "连续学习7天", icon: "⭐", cond: s => (s.checkins || []).length >= 7 },
+  { id: "streak_30", name: "月度坚持", desc: "连续学习30天", icon: "🌟", cond: s => (s.checkins || []).length >= 30 },
+  { id: "quiz_10", name: "练习达人", desc: "完成10道练习", icon: "✏️", cond: s => (s.quiz || []).length >= 10 },
+  { id: "quiz_50", name: "刷题高手", desc: "完成50道练习", icon: "💡", cond: s => (s.quiz || []).length >= 50 },
+  { id: "perfect_10", name: "全对达人", desc: "连续10题正确", icon: "💯", cond: s => { const q = s.quiz || []; let c = 0; for (let i = q.length - 1; i >= 0; i--) { if (q[i].ok) c++; else break; } return c >= 10; } },
+  { id: "all_lang", name: "多语探索", desc: "学过三种语言", icon: "🌍", cond: s => { const p = s.progress || {}; const langs = new Set(Object.keys(p).map(k => k.split("_")[0])); return langs.size >= 3; } }
+];
+
   function checkBadges() {
 
 
@@ -3602,12 +3645,48 @@
 
   // ========== 初始化入口 ==========
 
+  function patchHomepage() {
+    if (!/#\/?$/.test(location.hash) && location.hash !== "" && location.hash !== "#/") return;
+    const h2s = Array.from(document.querySelectorAll('h2'));
+    const target = h2s.find(h => h.textContent.includes('四大互动'));
+    if (!target) return;
+    const section = target.closest('section');
+    if (section) {
+      section.remove();
+    } else {
+      // 如果找不到section，尝试移除h2及其后面的4个链接卡片
+      let el = target.nextElementSibling;
+      const toRemove = [target];
+      let count = 0;
+      while (el && count < 8) {
+        toRemove.push(el);
+        el = el.nextElementSibling;
+        count++;
+      }
+      toRemove.forEach(e => e.remove());
+    }
+  }
+
+  function patchDuration() {
+    document.querySelectorAll('span').forEach(span => {
+      const t = span.textContent.trim();
+      const m = t.match(/^(\d+\.\d+)\s*小时$/);
+      if (m) {
+        const h = Math.floor(parseFloat(m[1]));
+        const min = Math.round((parseFloat(m[1]) - h) * 60);
+        span.textContent = h > 0 ? `${h}小时${min}分钟` : `${min}分钟`;
+      }
+    });
+  }
+
   function patchAll() {
     bindButtons();
     patchFooter();
     patchVideos();
     patchChapter();
     patchLearnModule();
+    patchHomepage();
+    patchDuration();
     patchDashboard();
   }
 
