@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703h";
+  const VERSION = "20260703i";
 
 
 
@@ -3747,21 +3747,24 @@
           @keyframes eggPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.3);opacity:.8}}\
           @keyframes eggFadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}\
           @keyframes eggSparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}\
-          .egg-title{animation:eggFadeIn .8s ease both;font-size:clamp(28px,5vw,48px);font-weight:900;color:#ff2222;margin-bottom:12px;text-align:center}\
-          .egg-sub{animation:eggFadeIn .8s .2s ease both;font-size:clamp(14px,2.5vw,20px);color:#ff4444;font-weight:700;margin-bottom:30px;text-align:center}\
-          .egg-video{animation:eggFadeIn .8s .4s ease both;width:min(90vw,640px);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid rgba(255,255,255,.15)}\
+          @keyframes eggSlamIn{0%{opacity:0;transform:scale(3) rotate(-5deg)}60%{opacity:1;transform:scale(.9) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0)}}\
+          .egg-title{font-size:clamp(36px,8vw,64px);font-weight:900;color:#ff2222;margin-bottom:12px;text-align:center;opacity:0}\
+          .egg-sub{font-size:clamp(14px,2.5vw,20px);color:#ff4444;font-weight:700;margin-bottom:30px;text-align:center;opacity:0}\
+          .egg-title.show{animation:eggSlamIn .6s cubic-bezier(.17,.67,.35,1.4) both}\
+          .egg-sub.show{animation:eggFadeIn .8s .3s ease both}\
+          .egg-video{width:min(90vw,640px);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid rgba(255,255,255,.15)}\
           .egg-video video{width:100%;display:block;border-radius:17px}\
-          .egg-footer{animation:eggFadeIn .8s .6s ease both;margin-top:24px;font-size:14px;opacity:.4;text-align:center}\
+          .egg-footer{animation:eggFadeIn .8s 1.5s ease both;margin-top:24px;font-size:14px;opacity:.4;text-align:center}\
           .egg-sparkle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}\
         </style>\
-        <div class="egg-title">你被骗了</div>\
-        <div class="egg-sub">这是一个只属于你的秘密彩蛋页面</div>\
         <div class="egg-video">\
           <video muted autoplay playsinline preload="auto" style="width:100%;display:block;border-radius:17px;background:#000">\
             <source src="/linguaverse/easter-egg.mp4" type="video/mp4">\
             你的浏览器不支持视频播放\
           </video>\
         </div>\
+        <div class="egg-title">你被骗了</div>\
+        <div class="egg-sub">这是一个只属于你的秘密彩蛋页面</div>\
         <div class="egg-footer">LinguaVerse · 用心打造的语言学习平台</div>\
       </div>';
     // 添加闪烁星星效果
@@ -3777,21 +3780,35 @@
       star.style.animation = 'eggSparkle ' + (2 + Math.random() * 3) + 's ' + (Math.random() * 2) + 's ease-in-out infinite';
       container.appendChild(star);
     }
-    // 强制自动播放视频（绕过浏览器自动播放策略）
+    // 强制自动播放，视频播放后延迟显示"你被骗了"
     setTimeout(function() {
       var video = document.querySelector('.egg-video video');
       if (!video) return;
-      // 移动端必须先静音才能自动播放
       video.muted = true;
       video.playsInline = true;
       var playPromise = video.play();
       if (playPromise && playPromise.catch) {
         playPromise.catch(function() {
-          // 再次尝试
           video.muted = true;
           video.currentTime = 0;
           video.play().catch(function() {});
         });
+      }
+      // 视频开始播放后，延迟1秒弹出"你被骗了"
+      function showText() {
+        setTimeout(function() {
+          var title = document.querySelector('.egg-title');
+          var sub = document.querySelector('.egg-sub');
+          if (title) title.classList.add('show');
+          if (sub) sub.classList.add('show');
+        }, 1000);
+      }
+      if (!video.paused && !video.ended) {
+        showText();
+      } else {
+        video.addEventListener('playing', showText, { once: true });
+        // 兜底：3秒后无论如何都显示
+        setTimeout(showText, 3000);
       }
       // 用户第一次触摸屏幕时取消静音
       var unmuted = false;
