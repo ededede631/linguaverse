@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703g";
+  const VERSION = "20260703h";
 
 
 
@@ -3765,7 +3765,8 @@
         <div class="egg-footer">LinguaVerse · 用心打造的语言学习平台</div>\
       </div>';
     // 添加闪烁星星效果
-    var container = document.body.firstChild;
+    var container = document.body.firstElementChild || document.body.children[0];
+    if (!container) return;
     for (var i = 0; i < 30; i++) {
       var star = document.createElement('div');
       star.className = 'egg-sparkle';
