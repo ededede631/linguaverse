@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703b";
+  const VERSION = "20260703c";
 
 
 
@@ -3730,9 +3730,62 @@
     patchDashboard();
   }
 
+  // 彩蛋页面：李桐宇专属
+  function showEasterEgg() {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '🌟 李桐宇的专属页面 - LinguaVerse';
+    var root = document.getElementById('root');
+    if (!root) return;
+    root.innerHTML = '\
+      <div style="position:fixed;inset:0;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:sans-serif;overflow:hidden">\
+        <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">\
+          <div style="position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(255,107,157,0.3),transparent);top:-50px;left:-50px;animation:float 6s ease-in-out infinite"></div>\
+          <div style="position:absolute;width:200px;height:200px;background:radial-gradient(circle,rgba(78,205,196,0.3),transparent);bottom:-30px;right:-30px;animation:float 8s ease-in-out infinite reverse"></div>\
+          <div style="position:absolute;width:250px;height:250px;background:radial-gradient(circle,rgba(255,217,61,0.2),transparent);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 4s ease-in-out infinite"></div>\
+        </div>\
+        <style>\
+          @keyframes float { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-20px) rotate(5deg)} }\
+          @keyframes pulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.5} 50%{transform:translate(-50%,-50%) scale(1.3);opacity:0.8} }\
+          @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }\
+          @keyframes sparkle { 0%,100%{opacity:0;transform:scale(0)} 50%{opacity:1;transform:scale(1)} }\
+          @keyframes typing { from{width:0} to{width:100% } }\
+          .egg-title{animation:fadeInUp 0.8s ease both;font-size:clamp(28px,5vw,48px);font-weight:800;background:linear-gradient(135deg,#ff6b9d,#c44dff,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}\
+          .egg-sub{animation:fadeInUp 0.8s 0.2s ease both;font-size:clamp(14px,2.5vw,20px);opacity:0.7;margin-bottom:30px}\
+          .egg-video{animation:fadeInUp 0.8s 0.4s ease both;width:min(90vw,640px);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:3px solid rgba(255,255,255,0.15)}\
+          .egg-video video{width:100%;display:block;border-radius:17px}\
+          .egg-footer{animation:fadeInUp 0.8s 0.6s ease both;margin-top:24px;font-size:14px;opacity:0.4}\
+          .sparkle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}\
+        </style>\
+        <div class="egg-title">🌟 欢迎来到李桐宇的专属空间 🌟</div>\
+        <div class="egg-sub">这是一个只属于你的秘密彩蛋页面</div>\
+        <div class="egg-video">\
+          <video controls autoplay preload="metadata" playsinline>\
+            <source src="/linguaverse/easter-egg.mp4" type="video/mp4">\
+            你的浏览器不支持视频播放\
+          </video>\
+        </div>\
+        <div class="egg-footer">LinguaVerse · 用心打造的语言学习平台</div>\
+      </div>';
+    // 添加闪烁星星效果
+    var container = root.querySelector('div');
+    for (var i = 0; i < 30; i++) {
+      var star = document.createElement('div');
+      star.className = 'sparkle';
+      star.style.cssText = 'left:' + (Math.random() * 100) + '%;top:' + (Math.random() * 100) + '%;background:' + ['#ff6b9d','#c44dff','#4ecdc4','#ffd93d','#fff'][Math.floor(Math.random() * 5)] + ';animation:sparkle ' + (2 + Math.random() * 3) + 's ' + (Math.random() * 2) + 's ease-in-out infinite;';
+      container.appendChild(star);
+    }
+  }
+
   ready(function() {
     injectStyles();
     registerSW();
+
+    // 彩蛋：URL 中包含"李桐宇"时显示专属彩蛋页面
+    if (location.href.includes('李桐宇') || decodeURIComponent(location.pathname).includes('李桐宇')) {
+      showEasterEgg();
+      return;
+    }
+
     startObserver();
     patchAll();
 
