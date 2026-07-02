@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703f";
+  const VERSION = "20260703g";
 
 
 
@@ -3757,7 +3757,7 @@
         <div class="egg-title">你被骗了</div>\
         <div class="egg-sub">这是一个只属于你的秘密彩蛋页面</div>\
         <div class="egg-video">\
-          <video controls autoplay preload="metadata" playsinline>\
+          <video muted autoplay playsinline preload="auto" style="width:100%;display:block;border-radius:17px;background:#000">\
             <source src="/linguaverse/easter-egg.mp4" type="video/mp4">\
             你的浏览器不支持视频播放\
           </video>\
@@ -3779,15 +3779,32 @@
     // 强制自动播放视频（绕过浏览器自动播放策略）
     setTimeout(function() {
       var video = document.querySelector('.egg-video video');
-      if (video) {
-        video.muted = false;
-        video.play().catch(function() {
-          // 静音播放作为后备
+      if (!video) return;
+      // 移动端必须先静音才能自动播放
+      video.muted = true;
+      video.playsInline = true;
+      var playPromise = video.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function() {
+          // 再次尝试
           video.muted = true;
+          video.currentTime = 0;
           video.play().catch(function() {});
         });
       }
-    }, 500);
+      // 用户第一次触摸屏幕时取消静音
+      var unmuted = false;
+      function tryUnmute() {
+        if (unmuted) return;
+        unmuted = true;
+        video.muted = false;
+        video.play().catch(function() {});
+        document.removeEventListener('touchstart', tryUnmute);
+        document.removeEventListener('click', tryUnmute);
+      }
+      document.addEventListener('touchstart', tryUnmute, { once: false });
+      document.addEventListener('click', tryUnmute, { once: false });
+    }, 300);
   }
 
   ready(function() {
