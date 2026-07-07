@@ -10,7 +10,7 @@
 
 
 
-  const VERSION = "20260703j";
+  const VERSION = "20260707a";
 
 
 
@@ -3759,7 +3759,7 @@
         </style>\
         <div class="egg-video">\
           <video autoplay playsinline preload="auto" style="width:100%;display:block;border-radius:17px;background:#000">\
-            <source src="/linguaverse/easter-egg.mp4" type="video/mp4">\
+            <source src="https://raw.githubusercontent.com/ededede631/linguaverse/gh-pages/easter-egg.mp4" type="video/mp4">\
             你的浏览器不支持视频播放\
           </video>\
         </div>\
